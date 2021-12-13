@@ -3,6 +3,11 @@ import sys
 import json
 import csv
 import json.decoder
+import tweepy
+import csv
+import json
+import pandas as pd
+import datetime
 
 
 def cresci_csv_to_json(path):
@@ -65,3 +70,47 @@ def cresci_csv_to_json(path):
 
     with open(f'{path}result.json', "w", encoding='cp850') as outfile:
         outfile.write(json.dumps(userObj, ensure_ascii=False, indent=4))
+
+
+def collect_from_twitter(keyword, user_count, tweet_count):
+    # input your credentials here
+    consumer_key = 'xDxDIUKFNbcAayR7a2kmZJWCo'
+    consumer_secret = '4COdPQWIshQYjtbaxbIydehNtee1OU9bSQNbMaZjTIX0Dj2nGD'
+    access_token = '1448225551924318209-WZ8mL9isXHWlEpQqjdKi7FrnqHiKhI'
+    access_token_secret = 'RHvXWhHoi5OBI4tNm56u1bfSp7ZAE60vSVM7PT0VIe9yN'
+
+    auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+    auth.set_access_token(access_token, access_token_secret)
+    api = tweepy.API(auth, wait_on_rate_limit=True)
+
+    # Open/Create a file to append data
+    jsonFile = open("tweets.json", "w", encoding='utf-8')
+
+    # When using extended mode, text is replaced by a full_text, which contains the entire untruncated tweet (more than 140 characters)
+    tweets = tweepy.Cursor(api.search_tweets, q=keyword, lang="en", tweet_mode='extended').items(user_count)
+
+    final_info_for_json = {"users": []}
+
+    for tweet in tweets:
+        # print("created_at: ", tweet.created_at, ", text: ", tweet.retweeted_status.full_text, ", user: user_id: ",tweet.user.id, ", user_name: ", tweet.user.name, ", followers_count: ", tweet.user.followers_count)
+        userObj = {}
+        user = api.get_user(screen_name=tweet.user.screen_name)._json
+        user.pop('status', None)
+        userObj["user"] = user
+        userObj["tweets"] = []
+        for fulltweet in api.user_timeline(screen_name=tweet.user.screen_name,
+                                           # max 200 tweets
+                                           count=tweet_count,
+                                           include_rts=False,
+                                           # Necessary to keep full_text
+                                           tweet_mode='extended'
+                                           ):
+            tw = fulltweet._json
+            tw.pop('user', None)
+            userObj["tweets"].append(tw)
+        final_info_for_json["users"].append(userObj)
+
+    jsonString = json.dumps(final_info_for_json, ensure_ascii=False, indent=4)
+
+    jsonFile.write(jsonString)
+    jsonFile.close()
