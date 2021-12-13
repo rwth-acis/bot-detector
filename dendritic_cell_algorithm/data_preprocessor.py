@@ -11,6 +11,14 @@ import datetime
 
 
 def cresci_csv_to_json(path):
+    """Three json files sre created from two csv files
+
+    Parameters
+    ----------
+    path : str
+        path to the directory where csv files are located
+
+    """
     # csv.field_size_limit(2147483647)
     csvfileusers = open(f'{path}users.csv', 'r', encoding="cp850")
     csvfiletweets = open(f'{path}tweets.csv', 'r', encoding="cp850")
@@ -73,11 +81,25 @@ def cresci_csv_to_json(path):
 
 
 def collect_from_twitter(keyword, user_count, tweet_count):
+    """Generates json file that includes users and their tweets
+
+    Parameters
+    ----------
+    keyword : str
+    keyword used to search for users
+
+    user_count : int
+    required number of users
+
+    tweet_count : int
+    required number of tweets from users
+    """
+
     # input your credentials here
-    consumer_key = 'xDxDIUKFNbcAayR7a2kmZJWCo'
-    consumer_secret = '4COdPQWIshQYjtbaxbIydehNtee1OU9bSQNbMaZjTIX0Dj2nGD'
-    access_token = '1448225551924318209-WZ8mL9isXHWlEpQqjdKi7FrnqHiKhI'
-    access_token_secret = 'RHvXWhHoi5OBI4tNm56u1bfSp7ZAE60vSVM7PT0VIe9yN'
+    consumer_key = ''
+    consumer_secret = ''
+    access_token = ''
+    access_token_secret = ''
 
     auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
     auth.set_access_token(access_token, access_token_secret)
