@@ -1,0 +1,42 @@
+body{
+background-color:#2A88AD;
+}
+
+#div-main-table{
+    width: 85%;
+    min-width: 800px;
+    max-width: 1400px;
+    margin: auto;
+    margin-top: 20px;
+    background-color: #F8F8F8;
+    padding: 20px;
+    border-radius: 10px;
+    	-webkit-border-radius:10px;
+    	-moz-border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.13);
+    	-moz-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.13);
+    	-webkit-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.13);
+}
+
+
+
+table.dataTable tbody tr.even{
+    background-color: #f1f1f1;
+}
+
+table.dataTable th, table.dataTable td{
+  font: Arial, Helvetica, sans-serif;
+  font-size: 14px;
+}
+label{
+    font: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+}
+#map{
+    width:70%;
+    margin: auto;
+    margin-top:30px;
+    margin-bottom: 30px;
+}
+
+
