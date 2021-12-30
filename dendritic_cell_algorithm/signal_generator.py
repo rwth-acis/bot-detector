@@ -93,28 +93,37 @@ class Signals:
         self.increase_safe_signal(1 - int(default_profile))
         self.increase_safe_signal(1 - int(default_profile_image))
         self.increase_safe_signal(int(verified))
+        if len(tweets) > 1:
+            avg_tweet_similarity = average_tweet_similarity(tweets)  # nltk.edit_distance()
+            self.increase_pamp(determine_signal_strength(avg_tweet_similarity, ">", 0.3, 0.05))
+            self.increase_safe_signal(determine_signal_strength(avg_tweet_similarity, "<", 0.3, 0.1))
+        else:
+            avg_tweet_similarity = None
 
-        avg_tweet_similarity = average_tweet_similarity(tweets)  # nltk.edit_distance()
-        self.increase_pamp(determine_signal_strength(avg_tweet_similarity, ">", 0.3, 0.05))
-        self.increase_safe_signal(determine_signal_strength(avg_tweet_similarity, "<", 0.3, 0.1))
+        if len(tweets) > 5:
+            time_entropy = tweeting_time_entropy(tweets)  # scipy.stats.entropy()
+            self.increase_pamp(determine_signal_strength(time_entropy, "<", 2, 0.05))
+            self.increase_safe_signal(determine_signal_strength(time_entropy, ">", 2.7, 0.1))
+        else:
+            time_entropy = None
 
-        time_entropy = tweeting_time_entropy(tweets)  # scipy.stats.entropy()
-        self.increase_pamp(determine_signal_strength(time_entropy, "<", 2, 0.05))
-        self.increase_safe_signal(determine_signal_strength(time_entropy, ">", 2.7, 0.1))
+        if len(tweets) > 5:
+            retweet_tweet_ratio, url_tweet_ratio, hashtag_tweet_ratio, average_favorite_count, average_retweet_count, is_sensitive_count = calculate_tweet_parameters(
+                tweets)
+            self.increase_danger_signal(determine_signal_strength(retweet_tweet_ratio, ">", 0.7, 0.1))
+            self.increase_safe_signal(determine_signal_strength(retweet_tweet_ratio, "<", 0.3, 0.2))
+            self.increase_danger_signal(determine_signal_strength(url_tweet_ratio, ">", 0.7, 0.1))
+            self.increase_safe_signal(determine_signal_strength(url_tweet_ratio, "<", 0.3, 0.2))
+            self.increase_danger_signal(determine_signal_strength(hashtag_tweet_ratio, ">=", 3, 0.5))
+            self.increase_safe_signal(determine_signal_strength(hashtag_tweet_ratio, "<=", 0.5, 0.2))
+            self.increase_danger_signal(determine_signal_strength(average_retweet_count, "<=", 0.1, 0.05))
+            self.increase_safe_signal(determine_signal_strength(average_retweet_count, ">=", 5, 10))
+            self.increase_danger_signal(determine_signal_strength(average_favorite_count, "<=", 0.1, 0.05))
+            self.increase_safe_signal(determine_signal_strength(average_favorite_count, ">=", 10, 20))
+            self.increase_pamp(is_sensitive_count)
 
-        retweet_tweet_ratio, url_tweet_ratio, hashtag_tweet_ratio, average_favorite_count, average_retweet_count, is_sensitive_count = calculate_tweet_parameters(
-            tweets)
-        self.increase_danger_signal(determine_signal_strength(retweet_tweet_ratio, ">", 0.7, 0.1))
-        self.increase_safe_signal(determine_signal_strength(retweet_tweet_ratio, "<", 0.3, 0.2))
-        self.increase_danger_signal(determine_signal_strength(url_tweet_ratio, ">", 0.7, 0.1))
-        self.increase_safe_signal(determine_signal_strength(url_tweet_ratio, "<", 0.3, 0.2))
-        self.increase_danger_signal(determine_signal_strength(hashtag_tweet_ratio, ">=", 3, 0.5))
-        self.increase_safe_signal(determine_signal_strength(hashtag_tweet_ratio, "<=", 0.5, 0.2))
-        self.increase_danger_signal(determine_signal_strength(average_retweet_count, "<=", 0.1, 0.05))
-        self.increase_safe_signal(determine_signal_strength(average_retweet_count, ">=", 5, 10))
-        self.increase_danger_signal(determine_signal_strength(average_favorite_count, "<=", 0.1, 0.05))
-        self.increase_safe_signal(determine_signal_strength(average_favorite_count, ">=", 10, 20))
-        self.increase_pamp(is_sensitive_count)
+        else:
+            retweet_tweet_ratio, url_tweet_ratio, hashtag_tweet_ratio, average_favorite_count, average_retweet_count, is_sensitive_count = None, None, None, None, None, None
 
         name_screen_name_similarity = similarity(name, screen_name)
         self.increase_danger_signal(determine_signal_strength(name_screen_name_similarity, ">=", 0.9, 0.05))
@@ -124,14 +133,17 @@ class Signals:
 
         identifies_itself_as_bot = contains_bot_info(description)
         self.increase_safe_signal(50 * int(identifies_itself_as_bot))
-
-        followers_friends_ratio = followers_count / friends_count
-        self.increase_safe_signal(min(determine_signal_strength(followers_friends_ratio, ">=", 5, 5), 5))
-
+        if friends_count > 0:
+            followers_friends_ratio = followers_count / friends_count
+            self.increase_safe_signal(min(determine_signal_strength(followers_friends_ratio, ">=", 5, 5), 5))
+        else:
+            followers_friends_ratio = None
         user_age = (datetime.now() - datetime.strptime(created_at.replace(" +0000", ""), '%c')).days
-        friends_growth_rate = friends_count / user_age
-        self.increase_danger_signal(min(determine_signal_strength(friends_growth_rate, ">=", 10, 20), 10))
-
+        if user_age > 0:
+            friends_growth_rate = friends_count / user_age
+            self.increase_danger_signal(min(determine_signal_strength(friends_growth_rate, ">=", 10, 20), 10))
+        else:
+            friends_growth_rate = None
         self.update_cms()
         self.update_mDC()
         self.update_smDC()
@@ -158,6 +170,8 @@ class Signals:
 def average_tweet_similarity(tweets):
     avg_tweet_similarity = 0
     count = len(tweets) * (len(tweets) - 1) / 2
+    if count == 0:
+        return 0
     tweets_with_replaced_urls = replace_urls(copy.deepcopy(tweets))
     tweets_with_replaced_users = replace_user_mentions(copy.deepcopy(tweets))
     tweets_with_replaced_all = replace_user_mentions(copy.deepcopy(tweets_with_replaced_urls))
@@ -213,7 +227,7 @@ def tweeting_time_entropy(tweets):
     for tweet in tweets:
         created_at.append(
             datetime.strptime(tweet["created_at"].replace(" +0000", ""), '%c'))  # Mon Dec 13 04:16:58 +0000 2021
-    res = scipy.stats.entropy(calculate_probability(created_at, 30), base=2)
+        res = scipy.stats.entropy(calculate_probability(created_at, 30), base=2)
     print(f"entropy: {res}")
     return res
 
@@ -274,8 +288,9 @@ def calculate_tweet_parameters(tweets):
         hashtag_count += len(tweet["entities"]["hashtags"])
         favorite_count += tweet["favorite_count"]
         retweet_count += tweet["retweet_count"]
-        if tweet["possibly_sensitive"]:
-            is_sensitive_count += 1
+        if "possibly_sensitive" in tweet:
+            if tweet["possibly_sensitive"]:
+                is_sensitive_count += 1
 
     return retweet_count / count, urls_count / count, hashtag_count / count, favorite_count / count, retweet_count / count, is_sensitive_count
 
