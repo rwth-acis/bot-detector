@@ -76,7 +76,9 @@ def result():
                         print("try to add loc")
                         col.update_one({"_id": user["_id"]},
                                        {'$set': {'coordinates': [location.latitude, location.longitude]}})
-        return render_template('result.html', users=col.find(), folium_map=Markup(folium_map._repr_html_()))
+        print(list(col.find()))
+        return render_template('result.html', users=col.find(), folium_map=Markup(folium_map._repr_html_()),
+                               users_list=str(list(col.find())))
     except Exception as e:
         # return dumps({'error': str(e)})
         print(e)

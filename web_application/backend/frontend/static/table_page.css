@@ -44,4 +44,12 @@ label{
  background-color: rgb(29, 155, 240);
 }
 
+#downloadAnchorElem{
+    display: block;
+    width: 200px;
+    margin: auto;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
 
