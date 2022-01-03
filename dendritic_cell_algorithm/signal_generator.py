@@ -110,7 +110,7 @@ class Signals:
         if len(tweets) > 5:
             retweet_tweet_ratio, url_tweet_ratio, hashtag_tweet_ratio, average_favorite_count, average_retweet_count, is_sensitive_count = calculate_tweet_parameters(
                 tweets)
-            self.increase_danger_signal(determine_signal_strength(retweet_tweet_ratio, ">", 0.7, 0.1))
+            self.increase_danger_signal(min(determine_signal_strength(retweet_tweet_ratio, ">", 0.7, 0.1), 5))
             self.increase_safe_signal(determine_signal_strength(retweet_tweet_ratio, "<", 0.3, 0.2))
             self.increase_danger_signal(determine_signal_strength(url_tweet_ratio, ">", 0.7, 0.1))
             self.increase_safe_signal(determine_signal_strength(url_tweet_ratio, "<", 0.3, 0.2))
@@ -227,7 +227,7 @@ def tweeting_time_entropy(tweets):
     for tweet in tweets:
         created_at.append(
             datetime.strptime(tweet["created_at"].replace(" +0000", ""), '%c'))  # Mon Dec 13 04:16:58 +0000 2021
-        res = scipy.stats.entropy(calculate_probability(created_at, 30), base=2)
+    res = scipy.stats.entropy(calculate_probability(created_at, 30), base=2)
     print(f"entropy: {res}")
     return res
 
@@ -238,22 +238,29 @@ def calculate_probability(created_at, measuring_interval):
     while i < len(created_at) - 1:
         intervals.append((created_at[i] - created_at[i + 1]).total_seconds() / 60)
         i += 1
-    # print(intervals)
+    print(intervals)
     max_interval = max(intervals)
     min_interval = min(intervals)
+    if max_interval == min_interval:
+        print("max=min")
+        return [1]
     start = int(math.floor(min_interval / measuring_interval) * measuring_interval)
-    # print("start")
-    # print(start)
+    print("start")
+    print(start)
     end = int(math.ceil(max_interval / measuring_interval) * measuring_interval)
-    # print("end")
-    # print(end)
+    print("end")
+    print(end)
     count = int((end - start) / measuring_interval)
-    # print("count")
-    # print(count)
+    if count == 0:
+        print("count=0")
+        return [1]
+    print("count")
+    print(count)
     probability = [0] * count
     for time in intervals:
+        print(f'probability[{int((time - start) / measuring_interval)}]')
         probability[int((time - start) / measuring_interval)] += 1
-        # print(f'probability[{int((time - start) / measuring_interval)}]')
+        print(f'OK! probability[{int((time - start) / measuring_interval)}]')
 
     print([i / len(intervals) for i in probability if i != 0])
     return [i / len(intervals) for i in probability if i != 0]
