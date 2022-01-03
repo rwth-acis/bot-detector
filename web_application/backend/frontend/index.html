@@ -1,13 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-	<head>
-		<link href='http://fonts.googleapis.com/css?family=Bitter' rel='stylesheet' type='text/css'>
-        <link rel="stylesheet" href="{{ url_for('static', filename='main_style.css') }}">
-        <script src="{{ url_for('static', filename='script.js') }}"></script>
-        <meta charset="UTF-8">
-        <title>Bot detection</title>
-    </head>
-    <body>
+{% extends "base.html" %}
+{% block title %}Form{% endblock %}
+{% block html_head %}
+
+{% endblock %}
+
+
+{% block content %}
         <div class="form-style-10">
             <h1>Detect Bots Now!<span>Enter required parameters and start searching for malicious bots!</span></h1>
             <form>
@@ -109,5 +107,4 @@
                 </div>
             </form>
         </div>
-    </body>
-</html>
+{% endblock %}

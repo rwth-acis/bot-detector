@@ -1,22 +1,21 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+{% extends "base.html" %}
+
+{% block title %}Result{% endblock %}
+
+{% block html_head %}
     <script src="https://d3js.org/d3.v7.min.js"></script>
-    <link href='http://fonts.googleapis.com/css?family=Bitter' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
     <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='main_style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='table_page.css') }}">
     <script>
-        $(document).ready(function(){
-            $('#main-table').DataTable();
-        })
+            $(document).ready(function(){
+                $('#main-table').DataTable();
+            })
     </script>
-    <meta charset="UTF-8">
-    <title>Result</title>
-</head>
-<body>
+{% endblock %}
+
+
+{% block content %}
     <div id="div-main-table">
         <table id="main-table">
             <thead>
@@ -26,8 +25,8 @@
                 <th>Tweet</th>
                 <th>Verified</th>
                 <th>Description</th>
-                <th>Statuses Count</th>
                 <th>K</th>
+                <th>Link</th>
 
 
             </tr>
@@ -41,8 +40,8 @@
                 <td>{{user["found_tweet"]["full_text"]}}</td>
                 <td>{{user["user"]["verified"]}}</td>
                 <td>{{user["user"]["description"]}}</td>
-                <td>{{user["user"]["statuses_count"]}}</td>
                 <td>{{user["signals"]["k"]}}</td>
+                <td><a href="http://127.0.0.1:5000/user/{{user['_id']}}" class="btn btn-info">Get more information</a></td>
 
             </tr>
             {% endfor %}
@@ -51,7 +50,4 @@
         </table>
     </div>
     <div id="map">{{ folium_map }}</div>
-
-
-</body>
-</html>
+{% endblock %}

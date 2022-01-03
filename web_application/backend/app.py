@@ -1,3 +1,4 @@
+import json
 from json import dumps
 
 import tweepy as tweepy
@@ -25,7 +26,7 @@ col = db["Users"]
 
 @app.route("/")
 def home():
-    return "Hello, World!"
+    return render_template("base.html")
 
 
 @app.route("/index")
@@ -106,7 +107,7 @@ def covid():
         userObj["tweets"] = []
         for fulltweet in api.user_timeline(screen_name=tweet.user.screen_name,
                                            # max 200 tweets
-                                           count=5,
+                                           count=10,
                                            include_rts=False,
                                            # Necessary to keep full_text
                                            tweet_mode='extended'
@@ -129,7 +130,47 @@ def covid():
         userObj["signals"] = new_signals.get_parameters()
 
         col.insert_one(dict(userObj))
-        # return redirect(url_for('result'))
+
+    return "OK!"
+
+
+@app.route('/delete')
+def delete():
+    users = col.find()
+    for user in users:
+        print("check!")
+        print(user["_id"])
+        if user["signals"]["k"] < 30:
+            print("delete!")
+            col.delete_one({"_id": user["_id"]})
+    return "OK!"
+
+
+@app.route('/recalculate')
+def recalculate():
+    users = col.find()
+    for user in users:
+        print("recalculate!")
+        new_signals = Signals()
+        new_signals.generate_signals(user["user"]["friends_count"], user["user"]["followers_count"],
+                                     user["user"]["verified"],
+                                     user["user"]["default_profile"],
+                                     user["user"]["default_profile_image"],
+                                     user["user"]["created_at"],
+                                     user["user"]["name"],
+                                     user["user"]["screen_name"],
+                                     user["user"]["description"],
+                                     user["tweets"])
+        col.update_one({"_id": user["_id"]},
+                       {'$set': {'signals': new_signals.get_parameters()}})
+    return "OK!"
+
+
+@app.route('/user/<id>')
+def user(id):
+    user_found = col.find_one(ObjectId(id))
+    print(user_found)
+    return render_template('user.html', tweetArr=json.dumps(user_found["tweets"]), user=user_found)
 
 
 if __name__ == "__main__":

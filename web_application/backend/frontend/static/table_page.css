@@ -3,9 +3,9 @@ background-color:#2A88AD;
 }
 
 #div-main-table{
-    width: 85%;
-    min-width: 800px;
-    max-width: 1400px;
+    width: 80%;
+    min-width: 900px;
+    max-width: 1500px;
     margin: auto;
     margin-top: 20px;
     background-color: #F8F8F8;
@@ -37,6 +37,11 @@ label{
     margin: auto;
     margin-top:30px;
     margin-bottom: 30px;
+}
+
+#div-main-table .btn, .btn-info{
+ margin: 0px;
+ background-color: rgb(29, 155, 240);
 }
 
 

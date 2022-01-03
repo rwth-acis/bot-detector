@@ -1,0 +1,148 @@
+.tweet{
+  display: block;
+  font-family: "Helvetica Neue", Roboto, "Segoe UI", Calibri, sans-serif;
+  font-size: 12px;
+  line-height: 16px;
+  border-color: #eee #ddd #bbb;
+  border-radius: 5px;
+  border-style: solid;
+  border-width: 1px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  margin: auto;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding: 0 16px 16px 16px;
+  max-width: 468px;
+  padding-top: 10px;
+}
+
+.tweet p {
+  font-size: 12px;
+  font-weight: normal;
+  line-height: 20px;
+}
+
+.tweet a {
+  color: rgb(29, 155, 240);
+  font-weight: normal;
+  text-decoration: none;
+  outline: 0 none;
+}
+
+.tweet a:hover,
+.tweet-text a:focus {
+  text-decoration: underline;
+}
+
+.tweet img, video{
+    display:block;
+    width: 100%;
+    margin:auto;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+}
+
+.tweet-info-counts {
+  display: flex;
+  margin-left: 65px;
+  margin-top: 15px;
+}
+.tweet-info-counts div {
+  display: flex;
+  margin-right: 20px;
+}
+.tweet-info-counts div svg {
+  color:#657786;
+  margin-right: 10px;
+}
+
+
+
+.tweet .avator {
+  border-radius:100px;
+  width:48px;
+  margin-right: 15px;
+  margin-left: 0px;
+   float: left;
+}
+
+.tweet-header {
+
+  font-size:12px;
+  margin-bottom: 20px;
+}
+.tweet-content{
+    margin-left: 65px;
+}
+.tweet-header-info {
+  font-weight:bold;
+}
+.tweet-header-info span {
+  color:#657786;
+  font-weight:normal;
+  margin-left: 5px;
+}
+.tweet-header-info p {
+  font-weight:normal;
+  margin-top: 5px;
+
+}
+
+thead tr{
+    background-color: #2A88AD;
+}
+th, td{
+    padding: 5px;
+    text-align: center;
+    font: 13px Arial, Helvetica, sans-serif;
+
+    border: solid 2px #2A88AD;
+}
+th{
+    color: #fff;
+    border: solid 2px #fff;
+
+}
+#div-main-table{
+    width: 90%;
+    margin:auto;
+    margin-top: 20px;
+    margin-bottom: 20px;
+
+}
+
+#main-table, #signals-table{
+    margin-bottom: 20px;
+    border-spacing: 0px;
+    border: solid 3px #2A88AD;
+}
+
+.text{
+    text-align: left;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.recent-tweets{
+
+    max-width: 468px;
+    margin: auto;
+    margin-top: 20px;
+}
+
+.recent-tweets h1{
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.9);
+    padding: 20px;
+	border-radius: 10px 10px 0 0;
+	-webkit-border-radius: 10px 10px 0 0;
+	-moz-border-radius: 10px 10px 0 0;
+	color: #fff;
+	text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.12);
+	font: normal 18px 'Bitter', serif;
+	-moz-box-shadow: inset 0px 2px 2px 0px rgba(255, 255, 255, 0.17);
+	-webkit-box-shadow: inset 0px 2px 2px 0px rgba(255, 255, 255, 0.17);
+	box-shadow: inset 0px 2px 2px 0px rgba(255, 255, 255, 0.17);
+	border: 1px solid #257C9E;
+}

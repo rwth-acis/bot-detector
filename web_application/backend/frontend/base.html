@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %} - BotDetector</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='/images/favicon.png') }}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link href='http://fonts.googleapis.com/css?family=Bitter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="{{ url_for('static', filename='main_style.css') }}">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    {% block html_head %}{% endblock %}
+</head>
+<body>
+<nav>
+    <ul>
+        <img id="nav-logo" src="{{ url_for('static', filename='/images/bot.png') }}" alt="logo">
+        <li><a href="http://127.0.0.1:5000/index">Home</a></li>
+        <li><a href="http://127.0.0.1:5000/index">Form</a></li>
+        <li><a href="http://127.0.0.1:5000/result">Result</a></li>
+        <li><a href="http://127.0.0.1:5000/">About</a></li>
+    </ul>
+</nav>
+
+    {% block content %}Hello!{% endblock %}
+
+
+    <footer>
+        <img id="footer-logo" src="{{ url_for('static', filename='/images/bot.png') }}" alt="logo">
+
+        <p>&copy; 2022 Copyright: <a href="http://127.0.0.1:5000/">BotDetector</a></p>
+        <address>Aachen, Germany.</address>
+
+    </footer>
+</body>
+</html>

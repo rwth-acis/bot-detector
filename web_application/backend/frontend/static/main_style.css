@@ -1,3 +1,7 @@
+body{
+    margin: 0px;
+}
+
 span{
   font: 13px Arial, Helvetica, sans-serif;  
 }
@@ -187,3 +191,59 @@ input[type="radio"]:checked {
 
 }
 
+#footer-logo{
+    display: block;
+    width:50px;
+    margin: auto;
+    margin-bottom: 10px;
+}
+
+footer p, address{
+    color: #F8F8F8;
+    text-align: center;
+    font: 13px Arial, Helvetica, sans-serif;
+}
+
+footer p a{
+    color: #F8F8F8;
+    text-decoration: none;
+    font: 13px Arial, Helvetica, sans-serif;
+}
+
+footer{
+    background-color: rgba(0, 0, 0, 0.9);
+    padding: 20px;
+    margin: 0px;
+}
+
+li {
+    display: inline;
+    margin-left: 5%;
+
+}
+
+nav{
+    background-color: rgba(0, 0, 0, 0.9);
+    padding-top: 5px;
+
+    margin: 0px;
+}
+
+nav a{
+    color: #F8F8F8;
+  font-weight: normal;
+  text-decoration: none;
+  outline: 0 none;
+}
+
+nav a:hover{
+    color: rgb(29, 155, 240);
+  font-weight: normal;
+  text-decoration: none;
+  outline: 0 none;
+}
+
+#nav-logo{
+    height: 30px;
+    margin: 5px;
+}

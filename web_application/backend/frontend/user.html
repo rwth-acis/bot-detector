@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}User{% endblock %}
+{% block html_head %}
+<link href="https://fonts.googleapis.com/css?family=Asap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='tweets.css') }}">
+
+<script src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
+<script src="{{ url_for('static', filename='tweet_to_html.js') }}"></script>
+<script src="{{ url_for('static', filename='user.js') }}"></script>
+
+{% endblock %}
+
+
+{% block content %}
+<div id="div-main-table">
+    <table id="main-table">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Screen name</th>
+            <th>Tweet</th>
+            <th>Verified</th>
+            <th>Description</th>
+            <th>Statuses count</th>
+            <th>Average tweet similarity</th>
+            <th>Tweeting time entropy</th>
+
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr>
+            <td id="name">{{user["user"]["name"]}}</td>
+            <td id="screen-name">{{user["user"]["screen_name"]}}</td>
+            <td class="text">{{user["found_tweet"]["full_text"]}}</td>
+            <td>{{user["user"]["verified"]}}</td>
+            <td class="text">{{user["user"]["description"]}}</td>
+            <td>{{user["user"]["statuses_count"]}}</td>
+
+            <td>{{"{:.2f}".format(user["signals"]["avg_tweet_similarity"])}}</td>
+            <td>{{"{:.2f}".format(user["signals"]["time_entropy"])}}</td>
+
+
+        </tr>
+        </tbody>
+
+    </table>
+    <table id="signals-table">
+        <thead>
+        <tr>
+
+            <th>Retweet tweet ratio</th>
+            <th>URL tweet ratio</th>
+            <th>Hashtag tweet ratio</th>
+            <th>Average favorite count</th>
+            <th>Average retweet count</th>
+            <th>Number of malicious URLs</th>
+            <th>Name-screen name similarity</th>
+            <th>Screen name length</th>
+            <th>Identifies itself as bot</th>
+            <th>Followers friends ratio</th>
+            <th>Friends growth rate</th>
+            <th>K</th>
+
+
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr>
+
+
+            <td>{{"{:.2f}".format(user["signals"]["retweet_tweet_ratio"])}}</td>
+            <td>{{"{:.2f}".format(user["signals"]["url_tweet_ratio"])}}</td>
+            <td>{{"{:.2f}".format(user["signals"]["hashtag_tweet_ratio"])}}</td>
+            <td>{{"{:.2f}".format(user["signals"]["average_favorite_count"])}}</td>
+            <td>{{"{:.2f}".format(user["signals"]["average_retweet_count"])}}</td>
+            <td>{{"{:.2f}".format(user["signals"]["is_sensitive_count"])}}</td>
+            <td>{{"{:.2f}".format(user["signals"]["name_screen_name_similarity"])}}</td>
+            <td>{{"{:.2f}".format(user["signals"]["screen_name_length"])}}</td>
+            <td>{{"{:.2f}".format(user["signals"]["identifies_itself_as_bot"])}}</td>
+            <td>{{"{:.2f}".format(user["signals"]["followers_friends_ratio"])}}</td>
+            <td>{{"{:.2f}".format(user["signals"]["friends_growth_rate"])}}</td>
+            <td>{{user["signals"]["k"]}}</td>
+
+        </tr>
+        </tbody>
+
+    </table>
+</div>
+<div class="recent-tweets">
+    <h1>Recent Tweets:</h1>
+</div>
+<div id="tweets">
+{{tweetArr}}
+</div>
+<div id="profile-image" style="display:none;">{{user["user"]["profile_image_url_https"]}}</div>
+{% endblock %}
