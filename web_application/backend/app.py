@@ -45,14 +45,19 @@ def result():
         for user in users:
             if "coordinates" in user:
                 if user["coordinates"]:
-                    if user["signals"]["k"] > 0:
-                        folium.Marker(user["coordinates"], popup=user["user"]["name"],
+                    if user["signals"]["is_bot_probability"] >= 50:
+                        folium.Marker(user["coordinates"], popup="@"+user["user"]["screen_name"],
                                       icon=folium.Icon(color='red')).add_to(
                             folium_map)
                     else:
-                        folium.Marker(user["coordinates"], popup=user["user"]["name"],
-                                      icon=folium.Icon(color='green')).add_to(
-                            folium_map)
+                        if user["signals"]["is_bot_probability"] >= 30:
+                            folium.Marker(user["coordinates"], popup="@"+user["user"]["screen_name"],
+                                          icon=folium.Icon(color='orange')).add_to(
+                                folium_map)
+                        else:
+                            folium.Marker(user["coordinates"], popup="@"+user["user"]["screen_name"],
+                                          icon=folium.Icon(color='green')).add_to(
+                                folium_map)
             else:
                 if user["user"]["location"]:
                     try:
@@ -64,19 +69,24 @@ def result():
                     except Exception as e:
                         continue
                     if location:
-                        if user["signals"]["k"] > 0:
-                            folium.Marker([location.latitude, location.longitude], popup=user["user"]["name"],
+                        if user["signals"]["is_bot_probability"] >= 50:
+                            folium.Marker([location.latitude, location.longitude], popup="@"+user["user"]["screen_name"],
                                           icon=folium.Icon(color='red')).add_to(
                                 folium_map)
                         else:
-                            folium.Marker([location.latitude, location.longitude], popup=user["user"]["name"],
-                                          icon=folium.Icon(color='green')).add_to(
-                                folium_map)
+                            if user["signals"]["is_bot_probability"] >= 30:
+                                folium.Marker([location.latitude, location.longitude], popup="@"+user["user"]["screen_name"],
+                                              icon=folium.Icon(color='orange')).add_to(
+                                    folium_map)
+                            else:
+                                folium.Marker([location.latitude, location.longitude], popup="@"+user["user"]["screen_name"],
+                                              icon=folium.Icon(color='green')).add_to(
+                                    folium_map)
 
                         print("try to add loc")
                         col.update_one({"_id": user["_id"]},
                                        {'$set': {'coordinates': [location.latitude, location.longitude]}})
-        print(list(col.find()))
+
         return render_template('result.html', users=col.find(), folium_map=Markup(folium_map._repr_html_()),
                                users_list=str(list(col.find())))
     except Exception as e:
@@ -121,7 +131,8 @@ def covid():
         new_signals = Signals()
         # friends_count, followers_count, verified, default_profile, default_profile_image, created_at, name,
         # screen_name, description, tweets
-        new_signals.generate_signals(user["friends_count"], user["followers_count"], user["verified"],
+        new_signals.generate_signals(user["friends_count"], user["statuses_count"], user["followers_count"],
+                                     user["verified"],
                                      user["default_profile"],
                                      user["default_profile_image"], user["created_at"], user["name"],
                                      user["screen_name"],
@@ -148,13 +159,14 @@ def delete():
     return "OK!"
 
 
-@app.route('/recalculate')
+@app.route('/all/recalculate')
 def recalculate():
     users = col.find()
     for user in users:
         print("recalculate!")
         new_signals = Signals()
-        new_signals.generate_signals(user["user"]["friends_count"], user["user"]["followers_count"],
+        new_signals.generate_signals(user["user"]["friends_count"], user["user"]["statuses_count"],
+                                     user["user"]["followers_count"],
                                      user["user"]["verified"],
                                      user["user"]["default_profile"],
                                      user["user"]["default_profile_image"],
@@ -168,11 +180,34 @@ def recalculate():
     return "OK!"
 
 
+@app.route('/recalculate/<id>')
+def recalc(id):
+    user = col.find_one(ObjectId(id))
+    new_signals = Signals()
+    new_signals.generate_signals(user["user"]["friends_count"], user["user"]["statuses_count"],
+                                 user["user"]["followers_count"],
+                                 user["user"]["verified"],
+                                 user["user"]["default_profile"],
+                                 user["user"]["default_profile_image"],
+                                 user["user"]["created_at"],
+                                 user["user"]["name"],
+                                 user["user"]["screen_name"],
+                                 user["user"]["description"],
+                                 user["tweets"])
+    col.update_one({"_id": user["_id"]},
+                   {'$set': {'signals': new_signals.get_parameters()}})
+    return "OK!"
+
+
 @app.route('/user/<id>')
 def user(id):
     user_found = col.find_one(ObjectId(id))
     print(user_found)
-    return render_template('user.html', tweetArr=json.dumps(user_found["tweets"]), user=user_found)
+    if user_found:
+        return render_template('user.html', tweetArr=json.dumps(user_found["tweets"]), user=user_found,
+                               tweet=json.dumps(user_found["found_tweet"]))
+    else:
+        return render_template('404.html');
 
 
 if __name__ == "__main__":

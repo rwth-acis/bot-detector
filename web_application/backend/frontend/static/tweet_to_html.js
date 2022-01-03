@@ -21,7 +21,60 @@ function parseTweet(tweetObj) {
   //When extended_mode is enabled, the text property will be empty and the value of the html property will be set to the full_text value
   //Replace the text property because the property is used in other functions (i.e. processUrls)
   if (tweetObj.full_text) {
-    tweetObj.text = tweetObj.full_text;
+      tweetObj.text = tweetObj.full_text;
+    }
+  if (tweetObj.truncated) {
+    tweetObj.text = tweetObj.retweeted_status.full_text;
+  }
+
+  //Copying text value to a new property html. The final output will be set to this property
+  tweetObj.html = tweetObj.text;
+
+  //Process entities
+
+  if(Object.getOwnPropertyNames(entities).length) {
+    Object.keys(entities).forEach((entity) => {
+      if(entities[entity].length) {
+        processorObj = entities[entity];
+
+        //Need to check if entity is media. If so, extended_entities should be used
+        processorObj = entity === 'media' ? tweetObj.extended_entities.media : processorObj;
+
+        entityProcessors[entity](processorObj, tweetObj);
+      }
+    });
+  }
+
+  //Process Emoji's
+  //processEmoji(tweetObj);
+
+  return tweetObj;
+}
+
+function parseFoundTweets(tweets, opts) {
+  options = opts;
+  return Array.isArray(tweets) ? tweets.map(parseFoundTweet) : parseFoundTweet(tweets);
+}
+
+function parseFoundTweet(tweetObj) {
+  var entityProcessors = {
+    hashtags: processHashTags,
+    symbols: processSymbols,
+    user_mentions: processUserMentions,
+    urls: processUrls,
+    media: processFoundMedia
+  };
+
+  var entities = tweetObj.entities;
+  var processorObj;
+
+  //When extended_mode is enabled, the text property will be empty and the value of the html property will be set to the full_text value
+  //Replace the text property because the property is used in other functions (i.e. processUrls)
+  if (tweetObj.full_text) {
+      tweetObj.text = tweetObj.full_text;
+    }
+  if (tweetObj.truncated) {
+    tweetObj.text = tweetObj.retweeted_status.full_text;
   }
 
   //Copying text value to a new property html. The final output will be set to this property
@@ -50,8 +103,12 @@ function parseTweet(tweetObj) {
 
 function processHashTags(tags, tweetObj) {
   tags.forEach((tagObj) => {
-    var anchor = ('#' + tagObj.text).link('http://twitter.com/hashtag/' + tagObj.text);
-    tweetObj.html = tweetObj.html.replace('#' + tagObj.text, anchor);
+        var anchor = ('#' + tagObj.text).link('http://twitter.com/hashtag/' + tagObj.text);
+        if (tweetObj.html.search('#' + tagObj.text +" ") != -1){
+            tweetObj.html = tweetObj.html.replace('#' + tagObj.text +" ", anchor+" ");
+        } else{
+            tweetObj.html = tweetObj.html.replace('#' + tagObj.text, anchor);
+        }
   });
 }
 
@@ -103,6 +160,33 @@ function processMedia(media, tweetObj) {
         source += '<source src="'+ info.url +'" type="'+ info.content_type +'">';
       });
       var video = '<video controls poster="' + mediaObj.media_url +'">' + source + '</video>';
+      tweetObj.html = tweetObj.html.replace(mediaObj.url, video);
+    }
+  });
+}
+
+function processFoundMedia(media, tweetObj) {
+  media.forEach((mediaObj) => {
+    if(mediaObj.type === 'photo') {
+      // Use HTTPS if available
+      var src = mediaObj.media_url_https ? mediaObj.media_url_https : mediaObj.media_url;
+
+      if(options &&
+        options.photoSize &&
+        mediaObj.sizes &&
+        mediaObj.sizes[options.photoSize]) {
+        // If specified size is available, patch image src to use it
+        src = src + ':' + options.photoSize;
+      }
+
+      var image = '<a href="' + src + '">image</a>';
+      tweetObj.html = tweetObj.html.replace(mediaObj.url, image);
+    } else if(mediaObj.type === 'video') {
+      var source = '';
+      mediaObj.video_info.variants.forEach((info) => {
+        source += '<source src="'+ info.url +'" type="'+ info.content_type +'">';
+      });
+      var video = '<a href="' + mediaObj.media_url+ '">video</a>';
       tweetObj.html = tweetObj.html.replace(mediaObj.url, video);
     }
   });

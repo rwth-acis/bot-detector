@@ -12,6 +12,8 @@ import operator
 
 class Signals:
     def __init__(self):
+        self._is_bot_probability = 0
+        self._intentions_are_bad_probability = 0
         self._pamp = 0
         self._danger_signal = 0
         self._safe_signal = 0
@@ -34,6 +36,26 @@ class Signals:
     def increase_danger_signal(self, x):
         self._danger_signal += x
         print(f"Danger Signal + {x}")
+
+    def get_is_bot_probability(self):
+        return self._is_bot_probability
+
+    def increase_is_bot_probability(self, x):
+        self._is_bot_probability += x
+        print(f"Is bot probability + {x}")
+
+    def get_intentions_are_bad_probability(self):
+        return self._intentions_are_bad_probability
+
+    def increase_intentions_are_bad_probability(self, x):
+        self._intentions_are_bad_probability += x
+        print(f"Intentions are bad probability + {x}")
+
+    def recalculate_probabilities(self):
+        self._intentions_are_bad_probability = min(100, self._intentions_are_bad_probability)
+        self._is_bot_probability = min(100, self._is_bot_probability)
+        print(f"recalculate probabilities + {self._intentions_are_bad_probability}")
+        print(f"recalculate probabilities + {self._is_bot_probability}")
 
     def get_safe_signal(self):
         return self._safe_signal
@@ -78,6 +100,7 @@ class Signals:
         print(f"{key}: {value}")
 
     def generate_signals(self, friends_count,
+                         statuses_count,
                          followers_count,
                          verified,
                          default_profile,
@@ -93,37 +116,89 @@ class Signals:
         self.increase_safe_signal(1 - int(default_profile))
         self.increase_safe_signal(1 - int(default_profile_image))
         self.increase_safe_signal(int(verified))
+
+        self.increase_is_bot_probability(int(default_profile))
+        self.increase_is_bot_probability(int(default_profile_image))
+
+        self.increase_intentions_are_bad_probability(-20 * int(verified))
+
         if len(tweets) > 1:
             avg_tweet_similarity = average_tweet_similarity(tweets)  # nltk.edit_distance()
-            self.increase_pamp(determine_signal_strength(avg_tweet_similarity, ">", 0.3, 0.05))
-            self.increase_safe_signal(determine_signal_strength(avg_tweet_similarity, "<", 0.3, 0.1))
+            print("avg_tweet_similarity")
+            self.increase_pamp(
+                min(4 * determine_signal_strength(avg_tweet_similarity, ">", 0.3, 0.05), 3 * len(tweets)))
+            self.increase_safe_signal(determine_signal_strength(avg_tweet_similarity, "<", 0.3, 0.01))
+
+            self.increase_is_bot_probability(
+                2*min(4 * determine_signal_strength(avg_tweet_similarity, ">", 0.3, 0.05), 3 * len(tweets)))
+            self.increase_is_bot_probability(
+                -3 * determine_signal_strength(avg_tweet_similarity, "<", 0.3, 0.01))
+
         else:
             avg_tweet_similarity = None
 
         if len(tweets) > 5:
             time_entropy = tweeting_time_entropy(tweets)  # scipy.stats.entropy()
-            self.increase_pamp(determine_signal_strength(time_entropy, "<", 2, 0.05))
-            self.increase_safe_signal(determine_signal_strength(time_entropy, ">", 2.7, 0.1))
+            print("entropy")
+            self.increase_pamp(min(4 * determine_signal_strength(time_entropy, "<", 2, 0.1), 3 * len(tweets)))
+            self.increase_safe_signal(min(4 * determine_signal_strength(time_entropy, ">", 2.7, 0.01), 3 * len(tweets)))
+
+            self.increase_is_bot_probability(
+                2 * min(4 * determine_signal_strength(time_entropy, "<", 2, 0.1), 3 * len(tweets)))
+            self.increase_is_bot_probability(
+                -3 * min(4 * determine_signal_strength(time_entropy, ">", 2.7, 0.01), 3 * len(tweets)))
         else:
             time_entropy = None
 
-        if len(tweets) > 5:
-            retweet_tweet_ratio, url_tweet_ratio, hashtag_tweet_ratio, average_favorite_count, average_retweet_count, is_sensitive_count = calculate_tweet_parameters(
+        if len(tweets) > 3:
+            retweet_tweet_ratio, quote_tweet_ratio, url_tweet_ratio, user_mentions_tweet_ratio, hashtag_tweet_ratio, average_favorite_count, average_retweet_count, is_sensitive_count = calculate_tweet_parameters(
                 tweets)
-            self.increase_danger_signal(min(determine_signal_strength(retweet_tweet_ratio, ">", 0.7, 0.1), 5))
-            self.increase_safe_signal(determine_signal_strength(retweet_tweet_ratio, "<", 0.3, 0.2))
-            self.increase_danger_signal(determine_signal_strength(url_tweet_ratio, ">", 0.7, 0.1))
+            self.increase_danger_signal(
+                min(determine_signal_strength(max(retweet_tweet_ratio, quote_tweet_ratio), ">", 0.7, 0.01),
+                    len(tweets)))
+            self.increase_safe_signal(
+                determine_signal_strength(max(retweet_tweet_ratio, quote_tweet_ratio), "<", 0.3, 0.2))
+
+            self.increase_danger_signal(min(determine_signal_strength(url_tweet_ratio, ">", 0.7, 0.01), len(tweets)))
             self.increase_safe_signal(determine_signal_strength(url_tweet_ratio, "<", 0.3, 0.2))
-            self.increase_danger_signal(determine_signal_strength(hashtag_tweet_ratio, ">=", 3, 0.5))
+            self.increase_danger_signal(
+                min(determine_signal_strength(user_mentions_tweet_ratio, ">", 0.7, 0.01), len(tweets)))
+            self.increase_safe_signal(determine_signal_strength(user_mentions_tweet_ratio, "<", 0.3, 0.2))
+            self.increase_danger_signal(min(determine_signal_strength(hashtag_tweet_ratio, ">=", 3, 0.1), len(tweets)))
             self.increase_safe_signal(determine_signal_strength(hashtag_tweet_ratio, "<=", 0.5, 0.2))
-            self.increase_danger_signal(determine_signal_strength(average_retweet_count, "<=", 0.1, 0.05))
-            self.increase_safe_signal(determine_signal_strength(average_retweet_count, ">=", 5, 10))
-            self.increase_danger_signal(determine_signal_strength(average_favorite_count, "<=", 0.1, 0.05))
-            self.increase_safe_signal(determine_signal_strength(average_favorite_count, ">=", 10, 20))
-            self.increase_pamp(is_sensitive_count)
+            self.increase_danger_signal(
+                min(determine_signal_strength(average_retweet_count, "<=", 0.1, 0.01), len(tweets)))
+            self.increase_safe_signal(min(determine_signal_strength(average_retweet_count, ">=", 5, 10), len(tweets)))
+            self.increase_danger_signal(
+                min(determine_signal_strength(average_favorite_count, "<=", 0.1, 0.01), len(tweets)))
+            self.increase_safe_signal(min(determine_signal_strength(average_favorite_count, ">=", 10, 20), len(tweets)))
+            self.increase_pamp(5 * is_sensitive_count)
+
+            self.increase_is_bot_probability(
+                min(determine_signal_strength(max(retweet_tweet_ratio, quote_tweet_ratio), ">", 0.7, 0.01),
+                    len(tweets)))
+
+            self.increase_intentions_are_bad_probability(
+                min(determine_signal_strength(url_tweet_ratio, ">", 0.7, 0.05), len(tweets)))
+            self.increase_intentions_are_bad_probability(
+                -1*determine_signal_strength(url_tweet_ratio, "<", 0.3, 0.2))
+            self.increase_intentions_are_bad_probability(
+                min(determine_signal_strength(user_mentions_tweet_ratio, ">", 0.7, 0.05), len(tweets)))
+            self.increase_intentions_are_bad_probability(
+                min(determine_signal_strength(hashtag_tweet_ratio, ">=", 3, 0.1), len(tweets)))
+
+            self.increase_intentions_are_bad_probability(
+                min(determine_signal_strength(average_retweet_count, "<=", 0.1, 0.01), len(tweets)))
+            self.increase_intentions_are_bad_probability(
+                -1*min(determine_signal_strength(average_retweet_count, ">=", 5, 10), len(tweets)))
+            self.increase_intentions_are_bad_probability(
+                min(determine_signal_strength(average_favorite_count, "<=", 0.1, 0.01), len(tweets)))
+            self.increase_intentions_are_bad_probability(
+                -1*min(determine_signal_strength(average_favorite_count, ">=", 10, 20), len(tweets)))
+            self.increase_intentions_are_bad_probability(5 * is_sensitive_count)
 
         else:
-            retweet_tweet_ratio, url_tweet_ratio, hashtag_tweet_ratio, average_favorite_count, average_retweet_count, is_sensitive_count = None, None, None, None, None, None
+            retweet_tweet_ratio, quote_tweet_ratio, url_tweet_ratio, user_mentions_tweet_ratio, hashtag_tweet_ratio, average_favorite_count, average_retweet_count, is_sensitive_count = None, None, None, None, None, None, None, None
 
         name_screen_name_similarity = similarity(name, screen_name)
         self.increase_danger_signal(determine_signal_strength(name_screen_name_similarity, ">=", 0.9, 0.05))
@@ -133,29 +208,48 @@ class Signals:
 
         identifies_itself_as_bot = contains_bot_info(description)
         self.increase_safe_signal(50 * int(identifies_itself_as_bot))
+        self.increase_intentions_are_bad_probability(-50 * int(identifies_itself_as_bot))
         if friends_count > 0:
             followers_friends_ratio = followers_count / friends_count
-            self.increase_safe_signal(min(determine_signal_strength(followers_friends_ratio, ">=", 5, 5), 5))
+            self.increase_safe_signal(
+                min(determine_signal_strength(followers_friends_ratio, ">=", 5, 5), 5))
+            self.increase_is_bot_probability(
+                min(determine_signal_strength(followers_friends_ratio, ">=", 5, 5), 5))
         else:
             followers_friends_ratio = None
+
         user_age = (datetime.now() - datetime.strptime(created_at.replace(" +0000", ""), '%c')).days
         if user_age > 0:
             friends_growth_rate = friends_count / user_age
-            self.increase_danger_signal(min(determine_signal_strength(friends_growth_rate, ">=", 10, 20), 10))
+            statuses_growth_rate = statuses_count / user_age
+            print("friends_growth_rate")
+            self.increase_danger_signal(
+                min(4 * determine_signal_strength(friends_growth_rate, ">=", 10, 2), user_age * 3))
+            self.increase_is_bot_probability(
+                min(4 * determine_signal_strength(friends_growth_rate, ">=", 10, 2), user_age * 3))
+            print("statuses_growth_rate")
+            self.increase_danger_signal(2 * determine_signal_strength(statuses_growth_rate, ">=", 20, 5))
+            self.increase_is_bot_probability(2 * determine_signal_strength(statuses_growth_rate, ">=", 20, 5))
         else:
             friends_growth_rate = None
+            statuses_growth_rate = None
         self.update_cms()
         self.update_mDC()
         self.update_smDC()
         self.update_k()
+        self.recalculate_probabilities()
         self.update_parameters("cms", self._cms)
         self.update_parameters("mDC", self._mDC)
         self.update_parameters("smDC", self._smDC)
         self.update_parameters("k", self._k)
+        self.update_parameters("is_bot_probability", self._is_bot_probability)
+        self.update_parameters("intentions_are_bad_probability", self._intentions_are_bad_probability)
         self.update_parameters("avg_tweet_similarity", avg_tweet_similarity)
         self.update_parameters("time_entropy", time_entropy)
         self.update_parameters("retweet_tweet_ratio", retweet_tweet_ratio)
+        self.update_parameters("quote_tweet_ratio", quote_tweet_ratio)
         self.update_parameters("url_tweet_ratio", url_tweet_ratio)
+        self.update_parameters("user_mentions_tweet_ratio", user_mentions_tweet_ratio)
         self.update_parameters("hashtag_tweet_ratio", hashtag_tweet_ratio)
         self.update_parameters("average_favorite_count", average_favorite_count)
         self.update_parameters("average_retweet_count", average_retweet_count)
@@ -164,6 +258,7 @@ class Signals:
         self.update_parameters("screen_name_length", screen_name_length)
         self.update_parameters("identifies_itself_as_bot", identifies_itself_as_bot)
         self.update_parameters("followers_friends_ratio", followers_friends_ratio)
+        self.update_parameters("statuses_growth_rate", statuses_growth_rate)
         self.update_parameters("friends_growth_rate", friends_growth_rate)
 
 
@@ -227,9 +322,9 @@ def tweeting_time_entropy(tweets):
     for tweet in tweets:
         created_at.append(
             datetime.strptime(tweet["created_at"].replace(" +0000", ""), '%c'))  # Mon Dec 13 04:16:58 +0000 2021
-    res = scipy.stats.entropy(calculate_probability(created_at, 30), base=2)
+    res = scipy.stats.entropy(calculate_probability(created_at, 2), base=2)
     print(f"entropy: {res}")
-    return res
+    return float(res)
 
 
 def calculate_probability(created_at, measuring_interval):
@@ -250,7 +345,7 @@ def calculate_probability(created_at, measuring_interval):
     end = int(math.ceil(max_interval / measuring_interval) * measuring_interval)
     print("end")
     print(end)
-    count = int((end - start) / measuring_interval)
+    count = int((end - start) / measuring_interval) + 1
     if count == 0:
         print("count=0")
         return [1]
@@ -279,19 +374,27 @@ def determine_signal_strength(value, comparison_sign, threshold, interval):
     return signal
 
 
-# retweet_tweet_ratio, url_tweet_ratio, hashtag_tweet_ratio, average_favorite_count, average_retweet_count, is_sensitive_count
+# retweet_tweet_ratio, quote_tweet_ratio, url_tweet_ratio, user_mentions_count, hashtag_tweet_ratio, average_favorite_count, average_retweet_count, is_sensitive_count
 def calculate_tweet_parameters(tweets):
     count = 0
-    retweet_count = 0
+    is_retweet_count = 0
+    is_quote_count = 0
     urls_count = 0
     hashtag_count = 0
     favorite_count = 0
+    retweet_count = 0
     is_sensitive_count = 0
+    user_mentions_count = 0
     for tweet in tweets:
         count += 1
+        if "retweeted_status" in tweet:
+            if tweet["retweeted_status"]:
+                is_retweet_count += 1
+
         if tweet["is_quote_status"]:
-            retweet_count += 1
+            is_quote_count += 1
         urls_count += len(tweet["entities"]["urls"])
+        user_mentions_count += len(tweet["entities"]["user_mentions"])
         hashtag_count += len(tweet["entities"]["hashtags"])
         favorite_count += tweet["favorite_count"]
         retweet_count += tweet["retweet_count"]
@@ -299,7 +402,7 @@ def calculate_tweet_parameters(tweets):
             if tweet["possibly_sensitive"]:
                 is_sensitive_count += 1
 
-    return retweet_count / count, urls_count / count, hashtag_count / count, favorite_count / count, retweet_count / count, is_sensitive_count
+    return is_retweet_count / count, is_quote_count / count, urls_count / count, user_mentions_count / count, hashtag_count / count, favorite_count / count, retweet_count / count, is_sensitive_count
 
 
 def contains_bot_info(description):

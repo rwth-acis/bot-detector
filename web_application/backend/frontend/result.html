@@ -9,7 +9,8 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='table_page.css') }}">
     <script>
             $(document).ready(function(){
-                $('#main-table').DataTable();
+                $('#main-table').DataTable({
+                });
             });
             function load(){
                    var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent("{{users_list}}".replaceAll("&#39;", "\""));
@@ -24,15 +25,15 @@
 
 {% block content %}
     <div id="div-main-table">
-        <table id="main-table">
+        <table id="main-table" data-order='[[ 4, "result-k" ]]'>
             <thead>
             <tr>
                 <th>Name</th>
                 <th>Screen name</th>
                 <th>Tweet</th>
-                <th>Verified</th>
                 <th>Description</th>
-                <th>K</th>
+                <th>Is a bot (probability)</th>
+                <th>Intentions are bad (probability)</th>
                 <th>Link</th>
 
 
@@ -43,11 +44,47 @@
             {% for user in users %}
             <tr>
                 <td>{{user["user"]["name"]}}</td>
-                <td>{{user["user"]["screen_name"]}}</td>
-                <td>{{user["found_tweet"]["full_text"]}}</td>
-                <td>{{user["user"]["verified"]}}</td>
+                <td><a href='https://twitter.com/{{user["user"]["screen_name"]}}'>{{user["user"]["screen_name"]}}</a></td>
+                {% if user["found_tweet"]["truncated"] %}
+                <td class="text">{{user["found_tweet"]["retweeted_status"]["full_text"]}}</td>
+                {% else %}
+                <td class="text">{{user["found_tweet"]["full_text"]}}</td>
+                {% endif %}
                 <td>{{user["user"]["description"]}}</td>
-                <td>{{user["signals"]["k"]}}</td>
+
+
+                <!--<td>{{user["signals"]["k"]}}</td>-->
+
+                <!--{% if user["signals"]["k"] >= 50 %}
+                <td class="red"><div class="div-red">{{user["signals"]["k"]}}</div></td>
+                {% else %}
+                {% if user["signals"]["k"] >= 30 %}
+                <td class="orange"><div class="div-orange">{{user["signals"]["k"]}}</div></td>
+                {% else %}
+                <td class="green"><div class="div-green">{{user["signals"]["k"]}}</div></td>
+                {% endif %}
+                {% endif %}-->
+                {% if user["signals"]["is_bot_probability"] >= 50 %}
+                <td class="red"><div class="div-red">{{user["signals"]["is_bot_probability"]}}%</div></td>
+                {% else %}
+                {% if user["signals"]["is_bot_probability"] >= 30 %}
+                <td class="orange"><div class="div-orange">{{user["signals"]["is_bot_probability"]}}%</div></td>
+                {% else %}
+                <td class="green"><div class="div-green">{{user["signals"]["is_bot_probability"]}}%</div></td>
+                {% endif %}
+                {% endif %}
+
+                {% if user["signals"]["intentions_are_bad_probability"] >= 50 %}
+                <td class="red"><div class="div-red">{{user["signals"]["intentions_are_bad_probability"]}}%</div></td>
+                {% else %}
+                {% if user["signals"]["intentions_are_bad_probability"] >= 20 %}
+                <td class="orange"><div class="div-orange">{{user["signals"]["intentions_are_bad_probability"]}}%</div></td>
+                {% else %}
+                <td class="green"><div class="div-green">{{user["signals"]["intentions_are_bad_probability"]}}%</div></td>
+                {% endif %}
+                {% endif %}
+
+
                 <td><a href="http://127.0.0.1:5000/user/{{user['_id']}}" class="btn btn-info">Get more information</a></td>
 
             </tr>
@@ -58,4 +95,5 @@
     </div>
     <a id="downloadAnchorElem" class="btn btn-info" onclick="load();">Download your data</a>
     <div id="map">{{ folium_map }}</div>
+
 {% endblock %}

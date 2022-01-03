@@ -247,3 +247,11 @@ nav a:hover{
     height: 30px;
     margin: 5px;
 }
+
+#not-found{
+    min-height: 500px;
+}
+#not-found p{
+    text-align: center;
+    font-size: 16px;
+}

@@ -146,3 +146,55 @@ th{
 	box-shadow: inset 0px 2px 2px 0px rgba(255, 255, 255, 0.17);
 	border: 1px solid #257C9E;
 }
+
+.found-tweet img, video{
+    display: none;
+}
+
+.green{
+ color: green;
+ background:  rgba(102, 204, 153, 0.2);
+ text-align: center;
+}
+
+.red{
+ color: red;
+ background:  rgba(215, 44, 44, 0.2);
+ text-align: center;
+}
+
+.orange{
+ color: rgb(241, 90, 34);
+ background:  rgba(241, 90, 34, 0.2);
+ text-align: center;
+}
+
+.div-orange{
+ width: 55px;
+ height: 55px;
+ text-align: center;
+ padding-top: 18px;
+ border-radius: 100px;
+ background:  rgba(255,255,255, 0.7);
+ margin: auto;
+}
+
+.div-green{
+ width: 55px;
+  height: 55px;
+  text-align: center;
+  padding-top: 18px;
+ border-radius: 100px;
+ background:  rgba(255,255,255, 0.7);
+ margin: auto;
+}
+
+.div-red{
+ width: 55px;
+  height: 55px;
+  text-align: center;
+  padding-top: 18px;
+ border-radius: 100px;
+ background:  rgba(255,255,255, 0.7);
+ margin: auto;
+}
