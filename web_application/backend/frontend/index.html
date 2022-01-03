@@ -8,7 +8,7 @@
 {% block content %}
         <div class="form-style-10">
             <h1>Detect Bots Now!<span>Enter required parameters and start searching for malicious bots!</span></h1>
-            <form>
+            <form action='http://127.0.0.1:5000/result'>
                 <div class="section"><span>1</span>Tweets Parameters</div>
                 <div class="inner-wrap">
                     <h2>Specify the area where you want to detect the activity of malicious bots:</h2>
@@ -101,9 +101,7 @@
                 </div>
                 <div class="button-section">
                     <input type="submit" name="Sign Up" />
-                    <span class="privacy-policy">
-                        <input type="checkbox" name="field7">You agree to our Terms and Policy. 
-                    </span>
+
                 </div>
             </form>
         </div>
