@@ -9,7 +9,7 @@ import folium
 from geopy.exc import GeocoderTimedOut
 from geopy.geocoders import Nominatim
 import pymongo
-from bs4 import BeautifulSoup
+
 from flask import Markup
 from bson.objectid import ObjectId
 from werkzeug.utils import redirect
