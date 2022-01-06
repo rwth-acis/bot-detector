@@ -23,7 +23,7 @@ app = Flask(__name__, template_folder='frontend')
 
 app.static_folder = 'frontend/static'
 
-client = pymongo.MongoClient("mongodb://botapp:botAppPassword@clusterbotdetection-shard-00-00.sbd4w.mongodb.net:27017,clusterbotdetection-shard-00-01.sbd4w.mongodb.net:27017,clusterbotdetection-shard-00-02.sbd4w.mongodb.net:27017/ClusterBotDetection?ssl=true&replicaSet=atlas-13qsh8-shard-0&authSource=admin&retryWrites=true&w=majority")
+client = pymongo.MongoClient(os.environ['DATABASE_URL'])
 db = client["TwitterData"]
 col = db["Users"]
 
@@ -212,6 +212,10 @@ def user(id):
                                tweet=json.dumps(user_found["found_tweet"]))
     else:
         return render_template('404.html');
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
 
 
 if __name__ == "__main__":
