@@ -1,4 +1,5 @@
 import json
+import os
 from json import dumps
 
 import tweepy as tweepy
@@ -12,14 +13,17 @@ from bs4 import BeautifulSoup
 from flask import Markup
 from bson.objectid import ObjectId
 from werkzeug.utils import redirect
+from dotenv import load_dotenv
 
 from dendritic_cell_algorithm.signal_generator import Signals
+
+load_dotenv()
 
 app = Flask(__name__, template_folder='frontend')
 
 app.static_folder = 'frontend/static'
 
-client = pymongo.MongoClient("")
+client = pymongo.MongoClient(os.getenv('DATABASE_URL'))
 db = client["TwitterData"]
 col = db["Users"]
 
@@ -97,10 +101,10 @@ def result():
 @app.route('/covid')
 def covid():
     # input your credentials here
-    consumer_key = ''
-    consumer_secret = ''
-    access_token = ''
-    access_token_secret = ''
+    consumer_key = os.getenv('CONSUMER_KEY')
+    consumer_secret = os.getenv('CONSUMER_SECRET')
+    access_token = os.getenv('ACCESS_TOKEN')
+    access_token_secret = os.getenv('ACCESS_TOKEN_SECRET')
 
     auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
     auth.set_access_token(access_token, access_token_secret)
