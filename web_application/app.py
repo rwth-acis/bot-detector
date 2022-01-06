@@ -50,16 +50,16 @@ def result():
             if "coordinates" in user:
                 if user["coordinates"]:
                     if user["signals"]["is_bot_probability"] >= 50:
-                        folium.Marker(user["coordinates"], popup="@"+user["user"]["screen_name"],
+                        folium.Marker(user["coordinates"], popup="@" + user["user"]["screen_name"],
                                       icon=folium.Icon(color='red')).add_to(
                             folium_map)
                     else:
                         if user["signals"]["is_bot_probability"] >= 30:
-                            folium.Marker(user["coordinates"], popup="@"+user["user"]["screen_name"],
+                            folium.Marker(user["coordinates"], popup="@" + user["user"]["screen_name"],
                                           icon=folium.Icon(color='orange')).add_to(
                                 folium_map)
                         else:
-                            folium.Marker(user["coordinates"], popup="@"+user["user"]["screen_name"],
+                            folium.Marker(user["coordinates"], popup="@" + user["user"]["screen_name"],
                                           icon=folium.Icon(color='green')).add_to(
                                 folium_map)
             else:
@@ -74,16 +74,19 @@ def result():
                         continue
                     if location:
                         if user["signals"]["is_bot_probability"] >= 50:
-                            folium.Marker([location.latitude, location.longitude], popup="@"+user["user"]["screen_name"],
+                            folium.Marker([location.latitude, location.longitude],
+                                          popup="@" + user["user"]["screen_name"],
                                           icon=folium.Icon(color='red')).add_to(
                                 folium_map)
                         else:
                             if user["signals"]["is_bot_probability"] >= 30:
-                                folium.Marker([location.latitude, location.longitude], popup="@"+user["user"]["screen_name"],
+                                folium.Marker([location.latitude, location.longitude],
+                                              popup="@" + user["user"]["screen_name"],
                                               icon=folium.Icon(color='orange')).add_to(
                                     folium_map)
                             else:
-                                folium.Marker([location.latitude, location.longitude], popup="@"+user["user"]["screen_name"],
+                                folium.Marker([location.latitude, location.longitude],
+                                              popup="@" + user["user"]["screen_name"],
                                               icon=folium.Icon(color='green')).add_to(
                                     folium_map)
 
@@ -205,13 +208,17 @@ def recalc(id):
 
 @app.route('/user/<id>')
 def user(id):
-    user_found = col.find_one(ObjectId(id))
-    print(user_found)
-    if user_found:
-        return render_template('user.html', tweetArr=json.dumps(user_found["tweets"]), user=user_found,
-                               tweet=json.dumps(user_found["found_tweet"]))
-    else:
-        return render_template('404.html');
+    try:
+        user_found = col.find_one(ObjectId(id))
+        print(user_found)
+        if user_found:
+            return render_template('user.html', tweetArr=json.dumps(user_found["tweets"]), user=user_found,
+                                   tweet=json.dumps(user_found["found_tweet"]))
+        else:
+            return render_template('404.html')
+    except Exception as e:
+        return render_template('404.html')
+
 
 @app.errorhandler(404)
 def page_not_found(e):
