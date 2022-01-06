@@ -23,7 +23,7 @@ app = Flask(__name__, template_folder='frontend')
 
 app.static_folder = 'frontend/static'
 
-client = pymongo.MongoClient(os.getenv('DATABASE_URL'))
+client = pymongo.MongoClient(os.environ['DATABASE_URL'])
 db = client["TwitterData"]
 col = db["Users"]
 
@@ -101,10 +101,10 @@ def result():
 @app.route('/covid')
 def covid():
     # input your credentials here
-    consumer_key = os.getenv('CONSUMER_KEY')
-    consumer_secret = os.getenv('CONSUMER_SECRET')
-    access_token = os.getenv('ACCESS_TOKEN')
-    access_token_secret = os.getenv('ACCESS_TOKEN_SECRET')
+    consumer_key = os.environ['CONSUMER_KEY']
+    consumer_secret = os.environ['CONSUMER_SECRET']
+    access_token = os.environ['ACCESS_TOKEN']
+    access_token_secret = os.environ['ACCESS_TOKEN_SECRET']
 
     auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
     auth.set_access_token(access_token, access_token_secret)
