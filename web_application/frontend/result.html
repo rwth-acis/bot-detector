@@ -16,8 +16,7 @@
                    var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent("{{users_list}}".replaceAll("&#39;", "\""));
                     var dlAnchorElem = document.getElementById('downloadAnchorElem');
                     dlAnchorElem.setAttribute("href",     dataStr     );
-                    dlAnchorElem.setAttribute("download", "scene.json");
-                    dlAnchorElem.click();
+                    dlAnchorElem.setAttribute("download", "data.json");
             }
     </script>
 {% endblock %}
