@@ -30,12 +30,12 @@ col = db["Users"]
 
 @app.route("/")
 def home():
-    return render_template("base.html")
+    return render_template("base.html", app_url=os.environ['APP_URL'])
 
 
 @app.route("/index")
 def about():
-    return render_template("index.html")
+    return render_template("index.html", app_url=os.environ['APP_URL'])
 
 
 @app.route('/result')
@@ -95,7 +95,7 @@ def result():
                                        {'$set': {'coordinates': [location.latitude, location.longitude]}})
 
         return render_template('result.html', users=col.find(), folium_map=Markup(folium_map._repr_html_()),
-                               users_list=str(list(col.find())))
+                               users_list=str(list(col.find())), app_url=os.environ['APP_URL'])
     except Exception as e:
         # return dumps({'error': str(e)})
         print(e)
