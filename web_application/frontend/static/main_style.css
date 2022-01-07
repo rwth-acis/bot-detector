@@ -25,7 +25,7 @@ span{
 	margin-bottom: 15px;
 }
 .form-style-10 h1{
-	background: #2A88AD;
+	background: #006699;
 	padding: 20px 30px 15px 30px;
 	margin: -30px -30px 30px -30px;
 	border-radius: 10px 10px 0 0;
@@ -40,7 +40,7 @@ span{
 	border: 1px solid #257C9E;
 }
 .form-style-10 h2{
-	background: #2A88AD;
+	background: #006699;
     font: 13px Arial, Helvetica, sans-serif;
 	padding: 20px 30px 15px 30px;
 	margin: -30px -30px 30px -30px;
@@ -60,7 +60,7 @@ span{
     border-style: solid;
     padding-top: 10px;
     padding-bottom: 10px;
-    border-image: linear-gradient(to left, #F8F8F8, #2A88AD) 1 0;
+    border-image: linear-gradient(to left, #F8F8F8, #006699) 1 0;
     
  
 } 
@@ -125,11 +125,11 @@ input[type="radio"]:checked {
 
 .form-style-10 .section{
 	font: normal 20px 'Bitter', serif;
-	color: #2A88AD;
+	color: #006699;
 	margin-bottom: 5px;
 }
 .form-style-10 .section span {
-	background: #2A88AD;
+	background: #006699;
 	padding: 5px 10px 5px 10px;
 	position: absolute;
 	border-radius: 50%;
@@ -143,7 +143,7 @@ input[type="radio"]:checked {
 }
 .form-style-10 input[type="button"], 
 .form-style-10 input[type="submit"]{
-	background: #2A88AD;
+	background: #006699;
 	padding: 8px 20px 8px 20px;
 	border-radius: 5px;
 	-webkit-border-radius: 5px;
@@ -187,7 +187,7 @@ input[type="radio"]:checked {
     -webkit-box-shadow: none;
     box-shadow: none;
     border-style: solid;
-    border-image: linear-gradient(to left, #2A88AD, #F8F8F8) 1 0;
+    border-image: linear-gradient(to left, #006699, #F8F8F8) 1 0;
 
 }
 
@@ -219,6 +219,8 @@ footer{
 li {
     display: inline;
     margin-left: 5%;
+    padding-right: 5%;
+    border-right: 1px solid #bbb;
 
 }
 
@@ -243,9 +245,43 @@ nav a:hover{
   outline: 0 none;
 }
 
-#nav-logo{
-    height: 30px;
-    margin: 5px;
+#nav-logo, #footer-logo{
+    height: 35px;
+    padding: 5px;
+    margin-bottom: 5px;
+    background: #006699;  /* fallback for old browsers */
+    background: -webkit-linear-gradient(to right, #f64f59, #c471ed, #12c2e9);  /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(to right, #f64f59, #c471ed, #12c2e9); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+    border-radius: 10% 50%;
+}
+
+#footer-logo{
+    height: 50px;
+    width: 50px;
+    padding: 5px;
+    margin-top: 0px;
+    position: relative;
+    top: -5px;
+    left: 0px;
+}
+
+#div-nav-logo, #div-footer-logo{
+    background-color: rgba(0, 0, 0, 0.9);
+    border-radius: 50% 10%;
+    margin-bottom: 5px;
+    height: 50px;
+    display: inline;
+    padding: 2px;
+    border: rgb(29, 155, 240) 1px solid;
+}
+
+#div-footer-logo{
+    display: block;
+    width: 56px;
+    height: 42px;
+    padding: 0px;
+    margin: auto;
+    margin-bottom: 20px;
 }
 
 #not-found{
@@ -255,3 +291,5 @@ nav a:hover{
     text-align: center;
     font-size: 16px;
 }
+
+

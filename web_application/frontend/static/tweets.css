@@ -90,14 +90,14 @@
 }
 
 thead tr{
-    background-color: #2A88AD;
+    background-color: #006699;
 }
 th, td{
     padding: 5px;
     text-align: center;
     font: 13px Arial, Helvetica, sans-serif;
 
-    border: solid 2px #2A88AD;
+    border: solid 2px #006699;
 }
 th{
     color: #fff;
@@ -115,7 +115,7 @@ th{
 #main-table, #signals-table{
     margin-bottom: 20px;
     border-spacing: 0px;
-    border: solid 3px #2A88AD;
+    border: solid 3px #006699;
 }
 
 .text{

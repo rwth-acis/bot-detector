@@ -14,7 +14,7 @@
 <body>
 <nav>
     <ul>
-        <img id="nav-logo" src="{{ url_for('static', filename='/images/bot.png') }}" alt="logo">
+        <a href="{{app_url}}/"><div id="div-nav-logo"><img id="nav-logo" src="{{ url_for('static', filename='/images/favicon.png') }}" alt="logo"></div></a>
         <li><a href="{{app_url}}/index">Home</a></li>
         <li><a href="{{app_url}}/index">Form</a></li>
         <li><a href="{{app_url}}/result">Result</a></li>
@@ -26,7 +26,7 @@
 
 
     <footer>
-        <img id="footer-logo" src="{{ url_for('static', filename='/images/bot.png') }}" alt="logo">
+        <a href="{{app_url}}/"><div id="div-footer-logo"><img id="footer-logo" src="{{ url_for('static', filename='/images/favicon.png') }}" alt="logo"></div></a>
 
         <p>&copy; 2022 Copyright: <a href="{{app_url}}/">BotDetector</a></p>
         <address>Aachen, Germany.</address>
