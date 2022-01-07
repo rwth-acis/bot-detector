@@ -12,6 +12,7 @@
                 $('#main-table').DataTable({
                 });
             });
+
             function load(){
                    var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent("{{users_list}}".replaceAll("&#39;", "\""));
                     var dlAnchorElem = document.getElementById('downloadAnchorElem');
