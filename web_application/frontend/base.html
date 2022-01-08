@@ -14,16 +14,16 @@
 <body>
 <nav>
     <ul>
-        <a href="{{app_url}}/"><div id="div-nav-logo"><img id="nav-logo" src="{{ url_for('static', filename='/images/favicon.png') }}" alt="logo"></div></a>
+        <a id="icon" href="{{app_url}}/"><div id="div-nav-logo"><img id="nav-logo" src="{{ url_for('static', filename='/images/favicon.png') }}" alt="logo"></div></a>
         <li><a href="{{app_url}}/index">Home</a></li>
         <li><a href="{{app_url}}/index">Form</a></li>
         <li><a href="{{app_url}}/result">Result</a></li>
         <li><a href="{{app_url}}/">About</a></li>
     </ul>
 </nav>
-
+<div id="body-content">
     {% block content %}Hello!{% endblock %}
-
+</div>
 
     <footer>
         <a href="{{app_url}}/"><div id="div-footer-logo"><img id="footer-logo" src="{{ url_for('static', filename='/images/favicon.png') }}" alt="logo"></div></a>

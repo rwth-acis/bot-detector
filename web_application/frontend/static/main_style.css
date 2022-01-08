@@ -1,14 +1,17 @@
 body{
     margin: 0px;
     background: #1c92d2;  /* fallback for old browsers */
-    background: -webkit-linear-gradient(45deg, #006699, #1c92d2, #f2fcfe, #1c92d2, #006699);  /* Chrome 10-25, Safari 5.1-6 */
-    background: linear-gradient(45deg, #006699, #1c92d2, #f2fcfe, #1c92d2, #006699); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+    background: -webkit-linear-gradient(45deg, #006699, #1c92d2, #f2fcfe, #1c92d2);  /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(45deg, #006699, #1c92d2, #f2fcfe, #1c92d2); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 
 
 }
 
+#body-content{
+ min-height: 100vh;
+}
 span{
-  font: 13px Arial, Helvetica, sans-serif;  
+  font: 12px Arial, Helvetica, sans-serif;
 }
 
 .form-style-10{
@@ -218,13 +221,13 @@ input[type="radio"]:checked {
 footer p, address{
     color: #F8F8F8;
     text-align: center;
-    font: 13px Arial, Helvetica, sans-serif;
+    font: 12px Arial, Helvetica, sans-serif;
 }
 
 footer p a{
     color: #F8F8F8;
     text-decoration: none;
-    font: 13px Arial, Helvetica, sans-serif;
+    font: 12px Arial, Helvetica, sans-serif;
 }
 
 footer{
@@ -243,7 +246,7 @@ li {
 
 nav{
     background-color: #00001E;
-    padding-top: 5px;
+    padding-top: 3px;
 
     margin: 0px;
 }
@@ -253,6 +256,11 @@ nav a{
   font-weight: normal;
   text-decoration: none;
   outline: 0 none;
+  font: 12px Arial, Helvetica, sans-serif;
+}
+
+#icon{
+  font: 14px Arial, Helvetica, sans-serif;
 }
 
 nav a:hover{
@@ -263,8 +271,8 @@ nav a:hover{
 }
 
 #nav-logo, #footer-logo{
-    height: 35px;
-    padding: 5px;
+    height: 28px;
+    padding: 3px;
     margin-bottom: 5px;
     background: #006699;  /* fallback for old browsers */
     background: -webkit-linear-gradient(to right, #f64f59, #c471ed, #12c2e9);  /* Chrome 10-25, Safari 5.1-6 */

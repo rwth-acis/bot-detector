@@ -1,3 +1,7 @@
+#tweets{
+    margin-bottom: 30px;
+}
+
 .tweet{
   display: block;
   font-family: "Helvetica Neue", Roboto, "Segoe UI", Calibri, sans-serif;
@@ -14,6 +18,7 @@
   padding: 0 16px 16px 16px;
   max-width: 468px;
   padding-top: 10px;
+  background: #fff;
 }
 
 .tweet p {
@@ -97,12 +102,20 @@ th, td{
     text-align: center;
     font: 13px Arial, Helvetica, sans-serif;
 
-    border: solid 2px #006699;
+    border: solid 1px #006699;
 }
 th{
-    color: #fff;
-    border: solid 2px #fff;
+    background: #006699;
+     color: #fff;
+     font-size: 12px;
+    border-right: solid 1px #fff;
+    -moz-box-shadow: inset 0px 2px 2px 0px rgba(255, 255, 255, 0.3);
+    -webkit-box-shadow: inset 0px 2px 2px 0px rgba(255, 255, 255, 0.3);
+    box-shadow: inset 0px 2px 2px 0px rgba(255, 255, 255, 0.3);
+}
 
+th:last-child {
+    border: solid 0px #fff;
 }
 #div-main-table{
     width: 90%;
@@ -110,12 +123,14 @@ th{
     margin-top: 20px;
     margin-bottom: 20px;
 
+
 }
 
 #main-table, #signals-table{
     margin-bottom: 20px;
     border-spacing: 0px;
-    border: solid 3px #006699;
+    border: solid 1px #006699;
+    background: #fff;
 }
 
 .text{
@@ -132,19 +147,20 @@ th{
 }
 
 .recent-tweets h1{
-    text-align: center;
-    background-color: rgba(0, 0, 0, 0.9);
-    padding: 20px;
-	border-radius: 10px 10px 0 0;
-	-webkit-border-radius: 10px 10px 0 0;
-	-moz-border-radius: 10px 10px 0 0;
-	color: #fff;
-	text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.12);
-	font: normal 18px 'Bitter', serif;
-	-moz-box-shadow: inset 0px 2px 2px 0px rgba(255, 255, 255, 0.17);
-	-webkit-box-shadow: inset 0px 2px 2px 0px rgba(255, 255, 255, 0.17);
-	box-shadow: inset 0px 2px 2px 0px rgba(255, 255, 255, 0.17);
-	border: 1px solid #257C9E;
+        background: #006699;
+        text-align: center;
+    	padding: 20px 30px 15px 30px;
+    	border-radius: 10px 10px 0 0;
+    	-webkit-border-radius: 10px 10px 0 0;
+    	-moz-border-radius: 10px 10px 0 0;
+    	color: #fff;
+    	text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.12);
+    	font: normal 16px 'Bitter', serif;
+    	-moz-box-shadow: inset 0px 2px 2px 0px rgba(255, 255, 255, 0.3);
+    	-webkit-box-shadow: inset 0px 2px 2px 0px rgba(255, 255, 255, 0.3);
+    	box-shadow: inset 0px 2px 2px 0px rgba(255, 255, 255, 0.3);
+
+    	border: 1px solid rgba(0, 153, 203, 0.5);
 }
 
 .found-tweet img, video{
