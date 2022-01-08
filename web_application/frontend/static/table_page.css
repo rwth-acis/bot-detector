@@ -41,17 +41,34 @@ label{
 
 #div-main-table .btn, .btn-info{
  margin: 0px;
- background-color: rgb(29, 155, 240);
+ background: #006699;
+ color: #fff;
  font-size: 12px;
+ border: 1px solid #257C9E;
+}
+
+#div-main-table .btn:hover, .btn-info:hover{
+ background: #fff;
+ color: #006699;
 }
 
 #downloadAnchorElem{
-    color: #fff;
+   border-radius: 5px;
+   -webkit-border-radius: 5px;
+   -moz-border-radius: 5px;
+   color: #fff;
+   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.12);
+   font-size: 12px;
     display: block;
     width: 200px;
     margin: auto;
     margin-top: 20px;
     margin-bottom: 20px;
+}
+
+#downloadAnchorElem:hover{
+    background: #fff;
+        	color: #006699;
 }
 
 .green{
@@ -106,5 +123,37 @@ label{
     text-align: center;
 }
 
+.created-at{
+     text-align: center;
+     color: #007bff;
+     font-size: 10px;
+     font-weight: 600;
+     width: 130px;
+     margin-left: auto;
+     margin-right: 0;
+
+}
+
+table.dataTable tbody tr.odd .created-at{
+    background-color: #f1f1f1;
+}
+
+table.dataTable tbody tr.even .created-at{
+    background-color: #fff;
+}
+
+.text{
+    min-width: 200px;
+    word-break: break-word;
+}
+
+.description{
+    min-width: 190px;
+    word-break: break-word;
+}
+
+.user a{
+    font-weight: 600;
+}
 
 

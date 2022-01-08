@@ -20,7 +20,7 @@ $(document).ready(function(){
                    document.getElementById('tweets').appendChild(div);
                 }
 
-                $( ".text.found-tweet" ).each(function(i, obj){
+                $(".text.found-tweet").each(function(i, obj){
                         console.log("*****************");
                         console.log(obj.innerHTML);
                         var result = parseFoundTweet(JSON.parse(obj.innerHTML));
