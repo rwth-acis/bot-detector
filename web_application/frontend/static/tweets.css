@@ -94,29 +94,22 @@
 
 }
 
-thead tr{
-    background-color: #006699;
-}
 th, td{
     padding: 5px;
     text-align: center;
     font: 13px Arial, Helvetica, sans-serif;
+    border-bottom: 1px solid #cccccc;
+    border-right: 1px solid #cccccc;
 
-    border: solid 1px #006699;
 }
+
 th{
-    background: #006699;
-     color: #fff;
+    background: #fff;
+     color: #006699;
      font-size: 12px;
-    border-right: solid 1px #fff;
-    -moz-box-shadow: inset 0px 2px 2px 0px rgba(255, 255, 255, 0.3);
-    -webkit-box-shadow: inset 0px 2px 2px 0px rgba(255, 255, 255, 0.3);
-    box-shadow: inset 0px 2px 2px 0px rgba(255, 255, 255, 0.3);
+     font-weight: 600;
 }
 
-th:last-child {
-    border: solid 0px #fff;
-}
 #div-main-table{
     width: 90%;
     margin:auto;
@@ -126,11 +119,18 @@ th:last-child {
 
 }
 
-#main-table, #signals-table{
+#main-table, .signals-table{
     margin-bottom: 20px;
-    border-spacing: 0px;
     border: solid 1px #006699;
+    box-shadow: 0px 0px 3px rgba(0, 0, 6, 0.7);
+        -moz-box-shadow: 0px 0px 3px rgba(0, 0, 6, 0.7);
+        -webkit-box-shadow: 0px 0px 3px rgba(0, 0, 6, 0.7);
     background: #fff;
+    width: 100%;
+    border-radius: 10px;
+    border-spacing: 0px;
+    border-collapse: separate !important;
+    overflow: hidden;
 }
 
 .text{

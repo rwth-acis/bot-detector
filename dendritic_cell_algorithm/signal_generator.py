@@ -130,7 +130,7 @@ class Signals:
             self.increase_safe_signal(determine_signal_strength(avg_tweet_similarity, "<", 0.3, 0.01))
 
             self.increase_is_bot_probability(
-                2*min(4 * determine_signal_strength(avg_tweet_similarity, ">", 0.3, 0.05), 3 * len(tweets)))
+                2 * min(4 * determine_signal_strength(avg_tweet_similarity, ">", 0.3, 0.05), 3 * len(tweets)))
             self.increase_is_bot_probability(
                 -3 * determine_signal_strength(avg_tweet_similarity, "<", 0.3, 0.01))
 
@@ -181,7 +181,7 @@ class Signals:
             self.increase_intentions_are_bad_probability(
                 min(determine_signal_strength(url_tweet_ratio, ">", 0.7, 0.05), len(tweets)))
             self.increase_intentions_are_bad_probability(
-                -1*determine_signal_strength(url_tweet_ratio, "<", 0.3, 0.2))
+                -1 * determine_signal_strength(url_tweet_ratio, "<", 0.3, 0.2))
             self.increase_intentions_are_bad_probability(
                 min(determine_signal_strength(user_mentions_tweet_ratio, ">", 0.7, 0.05), len(tweets)))
             self.increase_intentions_are_bad_probability(
@@ -190,11 +190,11 @@ class Signals:
             self.increase_intentions_are_bad_probability(
                 min(determine_signal_strength(average_retweet_count, "<=", 0.1, 0.01), len(tweets)))
             self.increase_intentions_are_bad_probability(
-                -1*min(determine_signal_strength(average_retweet_count, ">=", 5, 10), len(tweets)))
+                -1 * min(determine_signal_strength(average_retweet_count, ">=", 5, 10), len(tweets)))
             self.increase_intentions_are_bad_probability(
                 min(determine_signal_strength(average_favorite_count, "<=", 0.1, 0.01), len(tweets)))
             self.increase_intentions_are_bad_probability(
-                -1*min(determine_signal_strength(average_favorite_count, ">=", 10, 20), len(tweets)))
+                -1 * min(determine_signal_strength(average_favorite_count, ">=", 10, 20), len(tweets)))
             self.increase_intentions_are_bad_probability(5 * is_sensitive_count)
 
         else:
@@ -299,6 +299,22 @@ def replace_urls(tweets):
                                                             tweet["entities"]["urls"][i]["expanded_url"])
             i += 1
     return tweets
+
+
+def remove_urls(tweet):
+    i = 0
+    while i < len(tweet["entities"]["urls"]):
+        tweet["full_text"] = tweet["full_text"].replace(tweet["entities"]["urls"][i]["url"], "")
+        i += 1
+    return tweet
+
+
+def remove_user_mentions(tweet):
+    i = 0
+    while i < len(tweet["entities"]["user_mentions"]):
+        tweet["full_text"] = tweet["full_text"].replace(tweet["entities"]["user_mentions"][i]["screen_name"], "")
+        i += 1
+    return tweet
 
 
 def replace_user_mentions(tweets):

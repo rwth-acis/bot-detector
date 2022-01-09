@@ -15,7 +15,8 @@ from bson.objectid import ObjectId
 from werkzeug.utils import redirect
 from dotenv import load_dotenv
 
-from dendritic_cell_algorithm.signal_generator import Signals
+from dendritic_cell_algorithm.signal_generator import Signals, remove_urls, remove_user_mentions
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 load_dotenv()
 
@@ -45,6 +46,13 @@ def result():
         folium_map = folium.Map(location=[0, 0], zoom_start=2)
 
         geo_locator = Nominatim(user_agent="findBots")
+
+        negative_count1 = 0
+        positive_count1 = 0
+        neutral_count1 = 0
+        negative_count2 = 0
+        positive_count2 = 0
+        neutral_count2 = 0
 
         for user in users:
             if "coordinates" in user:
@@ -93,9 +101,24 @@ def result():
                         print("try to add loc")
                         col.update_one({"_id": user["_id"]},
                                        {'$set': {'coordinates': [location.latitude, location.longitude]}})
+            if user["signals"]["is_bot_probability"] >= 50:
+                if user["found_tweet"]["sentiment"] == "negative":
+                    negative_count2 += 1
+                if user["found_tweet"]["sentiment"] == "positive":
+                    positive_count2 += 1
+                if user["found_tweet"]["sentiment"] == "neutral":
+                    neutral_count2 += 1
+            else:
+                if user["found_tweet"]["sentiment"] == "negative":
+                    negative_count1 += 1
+                if user["found_tweet"]["sentiment"] == "positive":
+                    positive_count1 += 1
+                if user["found_tweet"]["sentiment"] == "neutral":
+                    neutral_count1 += 1
+
 
         return render_template('result.html', users=col.find(), folium_map=Markup(folium_map._repr_html_()),
-                               users_list=str(list(col.find())), app_url=os.environ['APP_URL'])
+                               users_list=str(list(col.find())), app_url=os.environ['APP_URL'], negative_count1=negative_count1, positive_count1=positive_count1, neutral_count1=neutral_count1, negative_count2=negative_count2, positive_count2=positive_count2, neutral_count2=neutral_count2)
     except Exception as e:
         # return dumps({'error': str(e)})
         print(e)
@@ -184,6 +207,34 @@ def recalculate():
                                      user["tweets"])
         col.update_one({"_id": user["_id"]},
                        {'$set': {'signals': new_signals.get_parameters()}})
+    return "OK!"
+
+
+@app.route('/calculate-sentiment')
+def calculate_sentiment():
+    users = col.find()
+    for user in users:
+        print("sentiment!")
+        analyzer = SentimentIntensityAnalyzer()
+        tweet = remove_user_mentions(remove_urls(user["found_tweet"]))
+        sentence = tweet["full_text"]
+        sentiment = analyzer.polarity_scores(sentence)
+        print(sentence)
+        print(sentiment['compound'])
+        if sentiment['compound'] >= 0.1:
+            print("Positive")
+            col.update_one({"_id": user["_id"]},
+                           {'$set': {'found_tweet.sentiment': "positive"}})
+
+        elif sentiment['compound'] <= - 0.2:
+            print("Negative")
+            col.update_one({"_id": user["_id"]},
+                           {'$set': {'found_tweet.sentiment': "negative"}})
+
+        else:
+            print("Neutral")
+            col.update_one({"_id": user["_id"]},
+                           {'$set': {'found_tweet.sentiment': "neutral"}})
     return "OK!"
 
 

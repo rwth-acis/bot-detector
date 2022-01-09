@@ -6,6 +6,8 @@
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
     <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.anychart.com/releases/8.10.0/js/anychart-core.min.js"></script>
+    <script src="https://cdn.anychart.com/releases/8.10.0/js/anychart-pie.min.js"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='table_page.css') }}">
 
 {% endblock %}
@@ -30,8 +32,16 @@
             <tbody>
             {% for user in users %}
             <tr>
+
                 <td class="user"><a href='https://twitter.com/{{user["user"]["screen_name"]}}'>@{{user["user"]["screen_name"]}}</a> <br> ({{user["user"]["name"]}})</td>
+
+
+                {% if user["signals"]["identifies_itself_as_bot"] == True %}
+                <td class="description"><div class="identifies-itself-as-bot">identifies itself as a bot</div>{{user["user"]["description"]}}</td>
+                {% else %}
                 <td class="description">{{user["user"]["description"]}}</td>
+                {% endif %}
+
                 {% if user["found_tweet"]["truncated"] %}
                 <td class="text">{{user["found_tweet"]["retweeted_status"]["full_text"]}}</td>
                 {% else %}
@@ -82,9 +92,50 @@
     </div>
     <a id="downloadAnchorElem" class="btn btn-info" onclick="load();">Download your data</a>
     <div id="map">{{ folium_map }}</div>
+    <div id="chart-container1">
+    </div>
+    <div id="chart-container2">
+    </div>
     <script>
             $(document).ready(function(){
                 $('#main-table').DataTable();
+
+                var data = anychart.data.set([
+                  {x:'Positive', value:{{positive_count1}}, normal:  {fill: "#8ed9ff"} },
+                  {x:'Negative', value:{{negative_count1}} , normal:  {fill: "#006699"}},
+                  {x:'Neutral', value:{{neutral_count1}} , normal:  {fill: "#A8A8A8"}}
+                ]);
+                // create a pie chart with the data
+                var chart = anychart.pie(data)
+                // set the chart radius making a donut chart
+                chart.innerRadius('55%');
+                chart.title('Sentiment analysis of tweets from users who are most likely bots:')
+                chart.container('chart-container1');
+                chart.hovered().outline().width("10%");
+                chart.selected().outline().width("3");
+                chart.selected().outline().fill("#455a64");
+                chart.selected().outline().stroke(null);
+                chart.selected().outline().offset(2);
+                chart.draw();
+
+                var data = anychart.data.set([
+                  {x:'Positive', value:{{positive_count2}}, normal:  {fill: "#8ed9ff"} },
+                  {x:'Negative', value:{{negative_count2}} , normal:  {fill: "#006699"}},
+                  {x:'Neutral', value:{{neutral_count2}} , normal:  {fill: "#A8A8A8"}}
+                ]);
+                // create a pie chart with the data
+                var chart = anychart.pie(data)
+                // set the chart radius making a donut chart
+                chart.innerRadius('55%');
+                chart.title('Sentiment analysis of tweets from users who are most likely human beings:')
+                chart.container('chart-container2');
+                chart.hovered().outline().width("10%");
+                chart.selected().outline().width("3");
+                chart.selected().outline().fill("#455a64");
+                chart.selected().outline().stroke(null);
+                chart.selected().outline().offset(2);
+                chart.draw();
+
             });
 
             function load(){
