@@ -7,9 +7,63 @@ body{
 
 }
 
+
 #body-content{
- min-height: 100vh;
+ min-height: 85vh;
+
 }
+
+#big-bird{
+ width: 100%;
+ margin: 4% auto;
+ background-repeat: no-repeat;
+ height: 32vw;
+ background-size: 100%;
+ border: 1px solid white;
+
+}
+
+#big-bird h1{
+    color: #fff;
+    font: bold 40px Georgia;
+    text-shadow: 0 -1px 2px #FFF, 0 -2px 8px #1c92d2, 0 -5px 20px #1c92d2;
+    margin-left: 5%;
+    margin-top: 6%;
+    margin-bottom: 5%;
+
+}
+
+#big-bird h2{
+    color: #fff;
+    font: bold 20px Georgia;
+    text-shadow: 0 -1px 2px #FFF, 0 -2px 8px #1c92d2, 0 -5px 20px #1c92d2;
+    margin-left: 5%;
+    margin-top: 1%;
+
+}
+
+.start-btn{
+ margin-left: 5%;
+ margin-top: 2%;
+ background: #006699;
+ color: #fff;
+ font-size: 12px;
+ font-weight: 600;
+ border: 1px solid #257C9E;
+ text-align: center;
+ display: block;
+ width: 100px;
+ border-radius: 10px;
+ padding: 5px;
+ box-shadow: 0 -1px 2px #FFF, 0 -2px 8px #1c92d2;
+}
+
+.start-btn:hover{
+  background: #fff;
+  color: #006699;
+  text-decoration: none;
+}
+
 span{
   font: 12px Arial, Helvetica, sans-serif;
 }
@@ -230,10 +284,25 @@ footer p a{
     font: 12px Arial, Helvetica, sans-serif;
 }
 
+footer p a:hover{
+    color: rgb(29, 155, 240);
+    text-decoration: none;
+}
+
 footer{
     background-color: #00001E;
     padding: 20px;
     margin: 0px;
+}
+
+#email:hover{
+    text-decoration: none;
+    color: rgb(29, 155, 240);
+}
+
+ul {
+    margin-top: 0px;
+    margin-bottom: 0px;
 }
 
 li {
@@ -264,7 +333,7 @@ nav a{
 }
 
 nav a:hover{
-    color: rgb(29, 155, 240);
+  color: rgb(29, 155, 240);
   font-weight: normal;
   text-decoration: none;
   outline: 0 none;

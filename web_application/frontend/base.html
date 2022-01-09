@@ -6,6 +6,7 @@
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='/images/favicon.png') }}">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link href='https://fonts.googleapis.com/css?family=Bitter' rel='stylesheet' type='text/css'>
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='main_style.css') }}">
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
@@ -16,20 +17,30 @@
     <ul>
         <a id="icon" href="{{app_url}}/"><div id="div-nav-logo"><img id="nav-logo" src="{{ url_for('static', filename='/images/favicon.png') }}" alt="logo"></div></a>
         <li><a href="{{app_url}}/index">Home</a></li>
-        <li><a href="{{app_url}}/index">Form</a></li>
-        <li><a href="{{app_url}}/result">Result</a></li>
+        <li><a href="{{app_url}}/index">Request form</a></li>
+        <li><a href="{{app_url}}/result">Example result</a></li>
         <li><a href="{{app_url}}/">About</a></li>
     </ul>
 </nav>
 <div id="body-content">
-    {% block content %}Hello!{% endblock %}
+    {% block content %}
+
+    <div id="big-bird" style="background-image: url('{{ url_for('static', filename='images/bird-bot.png') }}');">
+        <h1>Detect Bots Now!</h1>
+        <h2>Enter required parameters</h2>
+        <h2>and start searching for malicious bots</h2>
+        <a href="{{app_url}}/index" class="start-btn">Start</a>
+    </div>
+
+    {% endblock %}
 </div>
 
     <footer>
         <a href="{{app_url}}/"><div id="div-footer-logo"><img id="footer-logo" src="{{ url_for('static', filename='/images/favicon.png') }}" alt="logo"></div></a>
 
         <p>&copy; 2022 Copyright: <a href="{{app_url}}/">BotDetector</a></p>
-        <address>Aachen, Germany.</address>
+        <address><i class="fa fa-map-marker" style="font-size:16px; color: white;"></i> &nbsp; Aachen, Germany</address>
+        <p><a id="email" href="mailto:aliaksandra.nekhviadovich@rwth-aachen.de"><i style="font-size:14px; color: white;" class="fa fa-envelope"></i> &nbsp; aliaksandra.nekhviadovich@rwth-aachen.de</a></p>
 
     </footer>
 </body>

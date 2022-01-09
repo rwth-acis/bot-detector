@@ -52,8 +52,8 @@ class Signals:
         print(f"Intentions are bad probability + {x}")
 
     def recalculate_probabilities(self):
-        self._intentions_are_bad_probability = min(100, self._intentions_are_bad_probability)
-        self._is_bot_probability = min(100, self._is_bot_probability)
+        self._intentions_are_bad_probability = max(0, min(99, self._intentions_are_bad_probability))
+        self._is_bot_probability = max(0, min(99, self._is_bot_probability))
         print(f"recalculate probabilities + {self._intentions_are_bad_probability}")
         print(f"recalculate probabilities + {self._is_bot_probability}")
 

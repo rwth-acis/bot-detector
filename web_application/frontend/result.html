@@ -74,7 +74,7 @@
                 {% if user["signals"]["intentions_are_bad_probability"] >= 50 %}
                 <td class="red"><div class="div-red">{{user["signals"]["intentions_are_bad_probability"]}}%</div></td>
                 {% else %}
-                {% if user["signals"]["intentions_are_bad_probability"] >= 20 %}
+                {% if user["signals"]["intentions_are_bad_probability"] >= 30 %}
                 <td class="orange"><div class="div-orange">{{user["signals"]["intentions_are_bad_probability"]}}%</div></td>
                 {% else %}
                 <td class="green"><div class="div-green">{{user["signals"]["intentions_are_bad_probability"]}}%</div></td>

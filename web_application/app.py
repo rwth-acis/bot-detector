@@ -1,3 +1,4 @@
+import copy
 import json
 import os
 from json import dumps
@@ -116,9 +117,11 @@ def result():
                 if user["found_tweet"]["sentiment"] == "neutral":
                     neutral_count1 += 1
 
-
         return render_template('result.html', users=col.find(), folium_map=Markup(folium_map._repr_html_()),
-                               users_list=str(list(col.find())), app_url=os.environ['APP_URL'], negative_count1=negative_count1, positive_count1=positive_count1, neutral_count1=neutral_count1, negative_count2=negative_count2, positive_count2=positive_count2, neutral_count2=neutral_count2)
+                               users_list=str(list(col.find())), app_url=os.environ['APP_URL'],
+                               negative_count1=negative_count1, positive_count1=positive_count1,
+                               neutral_count1=neutral_count1, negative_count2=negative_count2,
+                               positive_count2=positive_count2, neutral_count2=neutral_count2)
     except Exception as e:
         # return dumps({'error': str(e)})
         print(e)
@@ -146,6 +149,26 @@ def covid():
         user.pop('status', None)
         userObj["user"] = user
         userObj["found_tweet"] = tweet._json
+
+        print("sentiment!")
+        analyzer = SentimentIntensityAnalyzer()
+        tweet_modified = remove_user_mentions(remove_urls(copy.deepcopy(userObj["found_tweet"])))
+        sentence = tweet_modified["full_text"]
+        sentiment = analyzer.polarity_scores(sentence)
+        print(sentence)
+        print(sentiment['compound'])
+        if sentiment['compound'] >= 0.1:
+            print("Positive")
+            userObj["found_tweet"]["sentiment"] = "positive"
+
+        elif sentiment['compound'] <= - 0.2:
+            print("Negative")
+            userObj["found_tweet"]["sentiment"] = "negative"
+
+        else:
+            print("Neutral")
+            userObj["found_tweet"]["sentiment"] = "positive"
+
         userObj["tweets"] = []
         for fulltweet in api.user_timeline(screen_name=tweet.user.screen_name,
                                            # max 200 tweets
