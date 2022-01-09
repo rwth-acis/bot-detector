@@ -51,9 +51,12 @@ class Signals:
         self._intentions_are_bad_probability += x
         print(f"Intentions are bad probability + {x}")
 
-    def recalculate_probabilities(self):
-        self._intentions_are_bad_probability = max(0, min(99, self._intentions_are_bad_probability))
-        self._is_bot_probability = max(0, min(99, self._is_bot_probability))
+    def recalculate_probabilities(self, identifies_itself_as_bot):
+        self._intentions_are_bad_probability = max(0, min(100, self._intentions_are_bad_probability))
+        if identifies_itself_as_bot:
+            self._is_bot_probability = max(0, min(100, self._is_bot_probability))
+        else:
+            self._is_bot_probability = max(0, min(99, self._is_bot_probability))
         print(f"recalculate probabilities + {self._intentions_are_bad_probability}")
         print(f"recalculate probabilities + {self._is_bot_probability}")
 
@@ -237,7 +240,7 @@ class Signals:
         self.update_mDC()
         self.update_smDC()
         self.update_k()
-        self.recalculate_probabilities()
+        self.recalculate_probabilities(identifies_itself_as_bot)
         self.update_parameters("cms", self._cms)
         self.update_parameters("mDC", self._mDC)
         self.update_parameters("smDC", self._smDC)

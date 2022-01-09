@@ -1,3 +1,4 @@
+
 body{
     margin: 0px;
     background: #1c92d2;  /* fallback for old browsers */
@@ -386,4 +387,96 @@ nav a:hover{
     font-size: 16px;
 }
 
+
+@media all and (max-width: 700px) {
+  body{
+      margin: 0px;
+      background: #1c92d2;
+
+  }
+
+
+  #body-content{
+   min-height: 98vh;
+
+  }
+
+  #big-bird{
+   width: 100%;
+   margin: 4% auto;
+   background-repeat: no-repeat;
+   height: 100vw;
+   background-size: 100%;
+   border: 1px solid white;
+   background-color: #15131e;
+   background-position: bottom;
+   background-image: url('/static/images/big-bird-bot.png') !important;
+
+  }
+
+  #big-bird h1{
+      color: #fff;
+      font: bold 40px Georgia;
+      text-shadow: 0 -1px 2px #FFF, 0 -2px 8px #1c92d2, 0 -5px 20px #1c92d2;
+      margin-left: 15%;
+      margin-top: 6%;
+      margin-bottom: 5%;
+
+  }
+
+  #big-bird h2{
+      color: #fff;
+      font: bold 20px Georgia;
+      text-shadow: 0 -1px 2px #FFF, 0 -2px 8px #1c92d2, 0 -5px 20px #1c92d2;
+      margin-left: 15%;
+      margin-top: 1%;
+
+  }
+
+  .start-btn{
+   margin: auto;
+   margin-top: 4%;
+   background: #006699;
+   color: #fff;
+   font-size: 12px;
+   font-weight: 600;
+   border: 1px solid #257C9E;
+   text-align: center;
+   display: block;
+   width: 80%;
+   border-radius: 10px;
+   padding: 5px;
+   box-shadow: 0 -1px 2px #FFF, 0 -2px 8px #1c92d2;
+  }
+
+  li {
+      display: block;
+      margin-left: 0%;
+      padding-right: 0%;
+      padding-bottom: 5px;
+      text-align: center;
+      border-bottom: 1px solid #f1f1f1;
+  }
+  ul{
+    padding: 0px;
+    padding-top: 5px;
+  }
+  #div-nav-logo{
+    margin: auto;
+    display: block;
+    width: 30px;
+    height: 25px;
+  }
+  #nav-logo{
+      margin-top: -5px;
+      margin-left: -2px;
+    }
+
+    .form-style-10{
+        width: 90%;
+        margin: auto;
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+}
 
