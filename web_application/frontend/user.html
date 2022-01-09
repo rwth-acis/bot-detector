@@ -19,9 +19,9 @@
         <thead>
         <tr>
             <th>User</th>
+            <th>Created at</th>
             <th>User description</th>
             <th>Tweet</th>
-            <th>Created at</th>
             <th>Statuses count</th>
 
         </tr>
@@ -30,11 +30,9 @@
         <tbody>
         <tr>
             <td class="user"><span id="screen-name"><a href='https://twitter.com/{{user["user"]["screen_name"]}}'>@{{user["user"]["screen_name"]}}</a></span> <br>  (<span id="name">{{user["user"]["name"]}}</span>)</td>
+            <td id="created-at">{{user["user"]["created_at"]}}</td>
             <td class="text">{{user["user"]["description"]}}</td>
             <td class="text found-tweet">{{tweet}}</td>
-
-
-            <td id="created-at">{{user["user"]["created_at"]}}</td>
             <td>{{user["user"]["statuses_count"]}}</td>
 
 
