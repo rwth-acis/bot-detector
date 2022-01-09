@@ -109,13 +109,18 @@
                 var chart = anychart.pie(data)
                 // set the chart radius making a donut chart
                 chart.innerRadius('55%');
-                chart.title('Sentiment analysis of tweets from users who are most likely bots:')
+                var title = chart.title();
+                title.enabled(true);
+                title.fontSize(12);
+                title.text('Sentiment analysis of tweets from users who are most likely bots:');
                 chart.container('chart-container1');
+
                 chart.hovered().outline().width("10%");
                 chart.selected().outline().width("3");
                 chart.selected().outline().fill("#455a64");
                 chart.selected().outline().stroke(null);
                 chart.selected().outline().offset(2);
+                chart.legend().fontSize(10);
                 chart.draw();
 
                 var data = anychart.data.set([
@@ -127,13 +132,18 @@
                 var chart = anychart.pie(data)
                 // set the chart radius making a donut chart
                 chart.innerRadius('55%');
-                chart.title('Sentiment analysis of tweets from users who are most likely human beings:')
+                var title = chart.title();
+                title.enabled(true);
+                title.fontSize(12);
+                title.text('Sentiment analysis of tweets from users who are most likely human beings:');
                 chart.container('chart-container2');
+
                 chart.hovered().outline().width("10%");
                 chart.selected().outline().width("3");
                 chart.selected().outline().fill("#455a64");
                 chart.selected().outline().stroke(null);
                 chart.selected().outline().offset(2);
+                chart.legend().fontSize(10);
                 chart.draw();
 
             });
