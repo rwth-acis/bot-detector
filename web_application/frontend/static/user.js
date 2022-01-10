@@ -2,9 +2,7 @@
 
 $(document).ready(function(){
                 document.getElementById("created-at").innerHTML=document.getElementById("created-at").innerHTML.replace(" +0000", "");
-                console.log(document.getElementById("tweets").innerHTML);
                 var results = parseTweets(JSON.parse(document.getElementById("tweets").innerHTML)); //Multiple tweets in an array
-                console.log(results);
 
                 //output
 

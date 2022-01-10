@@ -194,7 +194,6 @@ def covid():
 
         print(new_signals.get_parameters())
         userObj["signals"] = new_signals.get_parameters()
-
         col.insert_one(dict(userObj))
 
     return "OK!"
@@ -276,16 +275,19 @@ def recalc(id):
 
     for fulltweet in api.user_timeline(user_id=user["user"]["id"],
                                        # max 200 tweets
-                                       count=20,
+                                       count=10,
                                        include_rts=False,
                                        # Necessary to keep full_text
                                        tweet_mode='extended'
                                        ):
-        print(fulltweet._json)
         tw = fulltweet._json
         tw.pop('user', None)
+
         col.update_one({"_id": user["_id"]},
-                       {'$push': {'tweets': tw}})
+                       {'$pull': {'tweets': {'id': tw["id"]}}}
+                       )
+        col.update_one({"_id": user["_id"]},
+                       {'$addToSet': {'tweets': tw}})
 
     user = col.find_one(ObjectId(id))
     new_signals = Signals()
@@ -301,14 +303,14 @@ def recalc(id):
                                  user["tweets"])
     col.update_one({"_id": user["_id"]},
                    {'$set': {'signals': new_signals.get_parameters()}})
-    return "OK!"
+
+    return redirect(os.environ['APP_URL']+"/user/"+id)
 
 
 @app.route('/user/<id>')
 def user(id):
     try:
         user_found = col.find_one(ObjectId(id))
-        print(user_found)
         if user_found:
             return render_template('user.html', tweetArr=json.dumps(user_found["tweets"]), user=user_found,
                                    tweet=json.dumps(user_found["found_tweet"]))

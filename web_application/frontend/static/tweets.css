@@ -256,6 +256,21 @@ th{
  margin: auto;
 }
 
+.btn, .btn-info{
+ margin: 0px;
+ margin-bottom: 30px;
+ width: 200px;
+ background: #006699;
+ color: #fff;
+ font-size: 12px;
+ border: 1px solid #257C9E;
+}
+
+.btn:hover, .btn-info:hover{
+ background: #fff;
+ color: #006699;
+}
+
 @media only screen and (max-width: 700px) {
     #main-table-div, .signals-table-div{
         width: 98%;

@@ -89,6 +89,14 @@
 
         </tr>
         <tr>
+            <th>Number of time intervals between tweets that are < 20 sec</th>
+            {% if not(user["signals"]["small_interval_between_tweets_count"] is none) %}
+            <td>{{user["signals"]["small_interval_between_tweets_count"]}}</td>
+            {% else %}
+            <td>-</td>
+            {% endif %}
+        </tr>
+        <tr>
             <th>Retweet-to-tweet ratio</th>
             {% if not(user["signals"]["retweet_tweet_ratio"] is none) %}
             <td>{{"{:.2f}".format(user["signals"]["retweet_tweet_ratio"])}}</td>
@@ -202,7 +210,11 @@
         </tr>
     </table>
 </div>
+
+
+
 <div class="recent-tweets">
+    <a href="{{app_url}}/recalculate/{{user['_id']}}" class="btn btn-info">Update info</a>
     <h1>Latest Tweets:</h1>
     {% if tweetArr == "[]" %}
     <p style="background: #f1f1f1; padding: 20px; font-size: 13px;">Failed to get the latest tweets</p>

@@ -137,8 +137,17 @@ class Signals:
             self.increase_is_bot_probability(
                 -3 * determine_signal_strength(avg_tweet_similarity, "<", 0.3, 0.01))
 
+            small_interval_between_tweets_count = calculate_small_intervals(tweets)
+
+            self.increase_pamp(
+                min(4 * determine_signal_strength(small_interval_between_tweets_count, ">", 1, 0.5), 3 * len(tweets)))
+
+            self.increase_is_bot_probability(
+                2 * min(4 * determine_signal_strength(small_interval_between_tweets_count, ">", 1, 0.5), 3 * len(tweets)))
+
         else:
             avg_tweet_similarity = None
+            small_interval_between_tweets_count = None
 
         if len(tweets) > 5:
             time_entropy = tweeting_time_entropy(tweets)  # scipy.stats.entropy()
@@ -186,12 +195,12 @@ class Signals:
             self.increase_intentions_are_bad_probability(
                 -1 * determine_signal_strength(url_tweet_ratio, "<", 0.3, 0.2))
             self.increase_intentions_are_bad_probability(
-                min(determine_signal_strength(user_mentions_tweet_ratio, ">", 0.7, 0.05), len(tweets)))
+                min(determine_signal_strength(user_mentions_tweet_ratio, ">", 0.7, 0.05), len(tweets), 20))
             self.increase_intentions_are_bad_probability(
-                min(determine_signal_strength(hashtag_tweet_ratio, ">=", 3, 0.1), len(tweets)))
+                min(determine_signal_strength(hashtag_tweet_ratio, ">=", 3, 0.1), len(tweets), 20))
 
             self.increase_intentions_are_bad_probability(
-                min(determine_signal_strength(average_retweet_count, "<=", 0.1, 0.01), len(tweets)))
+                min(determine_signal_strength(average_retweet_count, "<=", 0.1, 0.02), len(tweets)))
             self.increase_intentions_are_bad_probability(
                 -1 * min(determine_signal_strength(average_retweet_count, ">=", 5, 10), len(tweets)))
             self.increase_intentions_are_bad_probability(
@@ -248,6 +257,7 @@ class Signals:
         self.update_parameters("is_bot_probability", self._is_bot_probability)
         self.update_parameters("intentions_are_bad_probability", self._intentions_are_bad_probability)
         self.update_parameters("avg_tweet_similarity", avg_tweet_similarity)
+        self.update_parameters("small_interval_between_tweets_count", small_interval_between_tweets_count)
         self.update_parameters("time_entropy", time_entropy)
         self.update_parameters("retweet_tweet_ratio", retweet_tweet_ratio)
         self.update_parameters("quote_tweet_ratio", quote_tweet_ratio)
@@ -341,16 +351,35 @@ def tweeting_time_entropy(tweets):
     for tweet in tweets:
         created_at.append(
             datetime.strptime(tweet["created_at"].replace(" +0000", ""), '%c'))  # Mon Dec 13 04:16:58 +0000 2021
-    res = scipy.stats.entropy(calculate_probability(created_at, 2), base=2)
+    res = scipy.stats.entropy(calculate_probability(created_at, 1), base=2)
     print(f"entropy: {res}")
     return float(res)
 
 
+def calculate_small_intervals(tweets):
+    created_at = []
+    for tweet in tweets:
+        created_at.append(
+            datetime.strptime(tweet["created_at"].replace(" +0000", ""), '%c'))  # Mon Dec 13 04:16:58 +0000 2021
+
+    created_at.sort(reverse=True)
+    small_intervals_count = 0
+    i = 0
+    while i < len(created_at) - 1:
+        if (created_at[i] - created_at[i + 1]).total_seconds() < 20:
+            small_intervals_count += 1;
+        i += 1
+
+    print(f"small_intervals_count: {small_intervals_count}")
+    return small_intervals_count
+
+
 def calculate_probability(created_at, measuring_interval):
+    created_at.sort(reverse=True)
     intervals = []
     i = 0
     while i < len(created_at) - 1:
-        intervals.append((created_at[i] - created_at[i + 1]).total_seconds() / 60)
+        intervals.append(int((created_at[i] - created_at[i + 1]).total_seconds() / 60))
         i += 1
     print(intervals)
     max_interval = max(intervals)
