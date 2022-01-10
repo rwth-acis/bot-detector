@@ -301,6 +301,10 @@ footer{
     color: rgb(29, 155, 240);
 }
 
+#burger{
+    display: none;
+}
+
 ul {
     margin-top: 0px;
     margin-bottom: 0px;
@@ -397,7 +401,7 @@ nav a:hover{
 
 
   #body-content{
-   min-height: 98vh;
+   min-height: 85vh;
 
   }
 
@@ -405,7 +409,7 @@ nav a:hover{
    width: 100%;
    margin: 4% auto;
    background-repeat: no-repeat;
-   height: 100vw;
+   height: 80vh;
    background-size: 100%;
    border: 1px solid white;
    background-color: #15131e;
@@ -435,7 +439,7 @@ nav a:hover{
 
   .start-btn{
    margin: auto;
-   margin-top: 4%;
+   margin-top: 8%;
    background: #006699;
    color: #fff;
    font-size: 12px;
@@ -444,33 +448,45 @@ nav a:hover{
    text-align: center;
    display: block;
    width: 80%;
-   border-radius: 10px;
+   border-radius: 0px;
    padding: 5px;
    box-shadow: 0 -1px 2px #FFF, 0 -2px 8px #1c92d2;
   }
 
+  #burger{
+      display: inline;
+      color: white;
+      margin-right: 10px;
+      margin-top: 2px;
+      margin-left: auto;
+      float: right;
+      font-size: 24px;
+  }
+
   li {
-      display: block;
+      display: none;
       margin-left: 0%;
       padding-right: 0%;
       padding-bottom: 5px;
       text-align: center;
       border-bottom: 1px solid #f1f1f1;
   }
+
+  li:nth-of-type(1){
+        border-top: 1px solid #f1f1f1;
+  }
+
   ul{
     padding: 0px;
     padding-top: 5px;
   }
   #div-nav-logo{
-    margin: auto;
-    display: block;
+    margin-left: 5px;
     width: 30px;
     height: 25px;
   }
-  #nav-logo{
-      margin-top: -5px;
-      margin-left: -2px;
-    }
+
+
 
     .form-style-10{
         width: 90%;

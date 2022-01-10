@@ -14,7 +14,12 @@
 
 
 {% block content %}
+    <div id="scroll1" style="overflow-x:scroll;">
+        <div></div>
+    </div>
     <div id="div-main-table">
+
+
         <table id="main-table" data-order='[[ 3, "result-k" ]]'>
             <thead>
             <tr>
@@ -89,6 +94,7 @@
             </tbody>
 
         </table>
+        </div>
     </div>
     <a id="downloadAnchorElem" class="btn btn-info" onclick="load();">Download your data</a>
     <div id="map">{{ folium_map }}</div>
@@ -99,6 +105,16 @@
     <script>
             $(document).ready(function(){
                 $('#main-table').DataTable();
+
+                $("document").ready(function(){
+                    $("#scroll1 div").width($("#main-table").width());
+                    $("#scroll1").on("scroll", function(){
+                        $("#div-main-table").scrollLeft($(this).scrollLeft());
+                    });
+                    $("#div-main-table").on("scroll", function(){
+                        $("#scroll1").scrollLeft($(this).scrollLeft());
+                    });
+                });
 
                 var data = anychart.data.set([
                   {x:'Positive', value:{{positive_count1}}, normal:  {fill: "#8ed9ff"} },
