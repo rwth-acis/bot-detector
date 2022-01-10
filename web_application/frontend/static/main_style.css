@@ -481,10 +481,35 @@ nav a:hover{
 
 
     .form-style-10{
-        width: 90%;
+        width: 99%;
         margin: auto;
         margin-top: 20px;
         margin-bottom: 20px;
+        border-radius: 12px;
+        -webkit-border-radius:12px;
+        -moz-border-radius: 12px;
+        box-shadow: 0px 0px 0px rgba(0, 0, 6, 0.7);
+        -moz-box-shadow: 0px 0px 0px rgba(0, 0, 6, 0.7);
+        -webkit-box-shadow: 0px 0px 0px rgba(0, 0, 6, 0.7);
     }
+
+    .form-style-10 .section span {
+    	margin-left: -54px;
+    	margin-top: -10px;
+    	padding: 8px 15px 8px 15px;
+    	font-size: 20px;
+    }
+    .form-style-10 .section{
+        	padding-left: 20px;
+        	margin-bottom: 2px;
+    }
+
+    .form-style-10 .inner-wrap{
+    	margin-left: -25px;
+    	margin-right: -25px;
+    	margin-bottom: 30px;
+    }
+
+
 }
 
