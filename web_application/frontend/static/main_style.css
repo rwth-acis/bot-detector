@@ -499,6 +499,10 @@ nav a:hover{
     	padding: 5px 10px 5px 10px;
     	font-size: 16px;
     }
+    .form-style-10 h1 {
+        padding-left: 35px;
+     }
+
     .form-style-10 .section{
         	padding-left: 20px;
         	margin-bottom: 2px;
