@@ -203,8 +203,12 @@
     </table>
 </div>
 <div class="recent-tweets">
-    <h1>Recent Tweets:</h1>
+    <h1>Latest Tweets:</h1>
+    {% if tweetArr == "[]" %}
+    <p style="background: #f1f1f1; padding: 20px; font-size: 13px;">Failed to get the latest tweets</p>
+    {% endif %}
 </div>
+
 <div id="tweets">
 {{tweetArr}}
 </div>
