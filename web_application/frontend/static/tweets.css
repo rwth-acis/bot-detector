@@ -82,6 +82,7 @@
 }
 .tweet-content{
     margin-left: 65px;
+    text-align: left;
 }
 .tweet-header-info {
   font-weight:bold;
