@@ -280,22 +280,24 @@ def average_tweet_similarity(tweets):
     count = len(tweets) * (len(tweets) - 1) / 2
     if count == 0:
         return 0
-    tweets_with_replaced_urls = replace_urls(copy.deepcopy(tweets))
-    tweets_with_replaced_users = replace_user_mentions(copy.deepcopy(tweets))
-    tweets_with_replaced_all = replace_user_mentions(copy.deepcopy(tweets_with_replaced_urls))
+    #tweets_with_replaced_urls = replace_urls(copy.deepcopy(tweets))
+    #tweets_with_replaced_users = replace_user_mentions(copy.deepcopy(tweets))
+    #tweets_with_replaced_all = replace_user_mentions(copy.deepcopy(tweets_with_replaced_urls))
 
     i = 0
     while i < len(tweets):
         j = i
         while j < len(tweets):
             if i != j:
-                tweet_similarity = max(similarity(tweets[i]["full_text"], tweets[j]["full_text"]),
+                tweet_similarity = similarity(tweets[i]["full_text"], tweets[j]["full_text"])
+                """
                                        similarity(tweets_with_replaced_all[i]["full_text"],
                                                   tweets_with_replaced_all[j]["full_text"]),
                                        similarity(tweets_with_replaced_users[i]["full_text"],
                                                   tweets_with_replaced_users[j]["full_text"]),
                                        similarity(tweets_with_replaced_urls[i]["full_text"],
-                                                  tweets_with_replaced_urls[j]["full_text"]))
+                                                  tweets_with_replaced_urls[j]["full_text"])
+                """
                 avg_tweet_similarity += tweet_similarity
             j += 1
         i += 1
