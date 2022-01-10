@@ -4,7 +4,7 @@ import os
 from json import dumps
 
 import tweepy as tweepy
-from flask import Flask, render_template, url_for
+from flask import Flask, render_template, url_for, request
 from flask_pymongo import PyMongo
 import folium
 from geopy.exc import GeocoderTimedOut
@@ -273,9 +273,12 @@ def recalc(id):
 
     user = col.find_one(ObjectId(id))
 
+    col.update_one({"_id": user["_id"]},
+                   {'$set': {'tweets': []}})
+
     for fulltweet in api.user_timeline(user_id=user["user"]["id"],
                                        # max 200 tweets
-                                       count=10,
+                                       count=20,
                                        include_rts=False,
                                        # Necessary to keep full_text
                                        tweet_mode='extended'
@@ -283,9 +286,12 @@ def recalc(id):
         tw = fulltweet._json
         tw.pop('user', None)
 
+        """
         col.update_one({"_id": user["_id"]},
                        {'$pull': {'tweets': {'id': tw["id"]}}}
                        )
+        """
+
         col.update_one({"_id": user["_id"]},
                        {'$addToSet': {'tweets': tw}})
 
@@ -304,8 +310,64 @@ def recalc(id):
     col.update_one({"_id": user["_id"]},
                    {'$set': {'signals': new_signals.get_parameters()}})
 
-    return redirect(os.environ['APP_URL']+"/user/"+id)
+    return redirect(os.environ['APP_URL'] + "/user/" + id)
 
+
+@app.route('/user-check/<screen_name>', methods=['post', 'get'])
+def user_check(screen_name):
+    if request.method == 'POST':
+        screen_name = request.form.get('screen-name').replace("@", "")
+    if screen_name == "form":
+        return render_template('user-check.html', blank=True, exception=False)
+
+    consumer_key = os.environ['CONSUMER_KEY']
+    consumer_secret = os.environ['CONSUMER_SECRET']
+    access_token = os.environ['ACCESS_TOKEN']
+    access_token_secret = os.environ['ACCESS_TOKEN_SECRET']
+
+    auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+    auth.set_access_token(access_token, access_token_secret)
+    api = tweepy.API(auth, wait_on_rate_limit=True)
+
+    userObj = {}
+    try:
+        user = api.get_user(screen_name=screen_name)._json
+        user.pop('status', None)
+        userObj["user"] = user
+
+        userObj["tweets"] = []
+        print(screen_name)
+        tweets_raw = api.user_timeline(screen_name=screen_name,
+                                       # max 200 tweets
+                                       count=20,
+                                       include_rts=False,
+                                       # Necessary to keep full_text
+                                       tweet_mode='extended'
+                                       )
+        print(tweets_raw)
+        for fulltweet in tweets_raw:
+            tw = fulltweet._json
+            tw.pop('user', None)
+            userObj["tweets"].append(tw)
+
+        new_signals = Signals()
+        # friends_count, followers_count, verified, default_profile, default_profile_image, created_at, name,
+        # screen_name, description, tweets
+        new_signals.generate_signals(user["friends_count"], user["statuses_count"], user["followers_count"],
+                                     user["verified"],
+                                     user["default_profile"],
+                                     user["default_profile_image"], user["created_at"], user["name"],
+                                     user["screen_name"],
+                                     user["description"],
+                                     userObj["tweets"])
+
+        print(new_signals.get_parameters())
+        userObj["signals"] = new_signals.get_parameters()
+
+        return render_template('user-check.html', blank=False, exception=False, tweetArr=json.dumps(userObj["tweets"]), user=userObj)
+    except Exception as e:
+        # return dumps({'error': str(e)})
+        return render_template('user-check.html', blank=True, exception=True)
 
 @app.route('/user/<id>')
 def user(id):

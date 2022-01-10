@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+{% block title %}User{% endblock %}
+{% block html_head %}
+<link href="https://fonts.googleapis.com/css?family=Asap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='tweets.css') }}">
+
+
+<script src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
+<script src="{{ url_for('static', filename='tweet_to_html.js') }}"></script>
+<script src="{{ url_for('static', filename='user.js') }}"></script>
+
+{% endblock %}
+
+
+{% block content %}
+
+
+{% if blank%}
+<div class="form-style-10" style="background: #006699;">
+    <form action="/user-check/form" method="post">
+        <div class="inner-wrap">
+            <label for="screen-name" style="color: #006699; font-size: 16px;">Enter handle:</label>
+            <input type="text" name="screen-name" value="" required>
+            <input type="submit" style="margin-top: 10px;" value="Submit">
+        </div>
+    </form>
+</div>
+{% endif %}
+
+{% if not blank%}
+<div class="form-style-10" style="background: #006699;">
+    <form action="/user-check/form" method="post">
+        <div class="inner-wrap">
+            <label for="screen-name" style="color: #006699; font-size: 16px;">Enter handle:</label>
+            <input type="text" name="screen-name" value="@{{user['user']['screen_name']}}" required>
+            <input type="submit" style="margin-top: 10px;" value="Submit">
+        </div>
+    </form>
+</div>
+{% endif %}
+
+
+{% if exception %}
+<p>Failed to retrieve data from Twitter API</p>
+{% endif %}
+
+{% if not blank%}
+<div id="main-table-div">
+    <div id="div-main-table">
+        <table id="main-table">
+
+            <tr>
+                <th>User</th>
+                <td class="user"><span id="screen-name"><a href='https://twitter.com/{{user["user"]["screen_name"]}}'>@{{user["user"]["screen_name"]}}</a></span> <br>  (<span id="name">{{user["user"]["name"]}}</span>)</td>
+
+            </tr>
+            <tr>
+                <th>Created at</th>
+                <td id="created-at">{{user["user"]["created_at"]}}</td>
+            </tr>
+            <tr>
+                <th>User description</th>
+                <td class="text">{{user["user"]["description"]}}</td>
+            </tr>
+            <tr>
+                <th>Statuses count</th>
+                <td>{{user["user"]["statuses_count"]}}</td>
+            </tr>
+
+
+        </table>
+    </div>
+</div>
+<div class="signals-table-div">
+    <table class="signals-table">
+        <tr>
+
+            <th>Is a bot (probability)</th>
+            {% if user["signals"]["is_bot_probability"] >= 50 %}
+            <td class="red"><div class="div-red">{{user["signals"]["is_bot_probability"]}}%</div></td>
+            {% else %}
+            {% if user["signals"]["is_bot_probability"] >= 30 %}
+            <td class="orange"><div class="div-orange">{{user["signals"]["is_bot_probability"]}}%</div></td>
+            {% else %}
+            <td class="green"><div class="div-green">{{user["signals"]["is_bot_probability"]}}%</div></td>
+            {% endif %}
+            {% endif %}
+        </tr>
+        <tr>
+            <th>Default profile</th>
+            <td>{{user["user"]["default_profile"]}}</td>
+
+        </tr>
+        <tr>
+            <th>Default profile image</th>
+            <td>{{user["user"]["default_profile_image"]}}</td>
+        </tr>
+        <tr>
+            <th>Average tweet similarity</th>
+            {% if not(user["signals"]["avg_tweet_similarity"] is none) %}
+            <td>{{"{:.2f}".format(user["signals"]["avg_tweet_similarity"])}}</td>
+            {% else %}
+            <td>-</td>
+            {% endif %}
+
+        </tr>
+        <tr>
+            <th>Tweeting time entropy</th>
+
+            {% if not(user["signals"]["time_entropy"] is none)%}
+            <td>{{"{:.2f}".format(user["signals"]["time_entropy"])}}</td>
+            {% else %}
+            <td>-</td>
+            {% endif %}
+
+
+        </tr>
+        <tr>
+            <th>Number of time intervals between tweets that are < 20 sec</th>
+            {% if not(user["signals"]["small_interval_between_tweets_count"] is none) %}
+            <td>{{user["signals"]["small_interval_between_tweets_count"]}}</td>
+            {% else %}
+            <td>-</td>
+            {% endif %}
+        </tr>
+        <tr>
+            <th>Retweet-to-tweet ratio</th>
+            {% if not(user["signals"]["retweet_tweet_ratio"] is none) %}
+            <td>{{"{:.2f}".format(user["signals"]["retweet_tweet_ratio"])}}</td>
+            {% else %}
+            <td>-</td>
+            {% endif %}
+
+        </tr>
+        <tr>
+            <th>Quote-to-tweet ratio</th>
+            {% if not(user["signals"]["quote_tweet_ratio"] is none) %}
+            <td>{{"{:.2f}".format(user["signals"]["quote_tweet_ratio"])}}</td>
+            {% else %}
+            <td>-</td>
+            {% endif %}
+        </tr>
+        <tr>
+            <th>Followers friends ratio</th>
+            {% if not(user["signals"]["followers_friends_ratio"] is none) %}
+            <td>{{"{:.2f}".format(user["signals"]["followers_friends_ratio"])}}</td>
+            {% else %}
+            <td>-</td>
+            {% endif %}
+        </tr>
+        <tr>
+            <th>Friends growth rate <br>(friends per day)</th>
+            {% if not(user["signals"]["friends_growth_rate"] is none) %}
+            <td>{{"{:.2f}".format(user["signals"]["friends_growth_rate"])}}</td>
+            {% else %}
+            <td>-</td>
+            {% endif %}
+        </tr>
+        <tr>
+            <th>Tweets growth rate <br>(tweets per day)</th>
+            {% if not(user["signals"]["statuses_growth_rate"] is none) %}
+            <td>{{"{:.2f}".format(user["signals"]["statuses_growth_rate"])}}</td>
+            {% else %}
+            <td>-</td>
+            {% endif %}
+        </tr>
+
+    </table>
+</div>
+<div class="signals-table-div">
+    <table class="signals-table">
+        <tr>
+            <th>Intentions are bad (probability)</th>
+            {% if user["signals"]["intentions_are_bad_probability"] >= 50 %}
+            <td class="red"><div class="div-red">{{user["signals"]["intentions_are_bad_probability"]}}%</div></td>
+            {% else %}
+            {% if user["signals"]["intentions_are_bad_probability"] >= 30 %}
+            <td class="orange"><div class="div-orange">{{user["signals"]["intentions_are_bad_probability"]}}%</div></td>
+            {% else %}
+            <td class="green"><div class="div-green">{{user["signals"]["intentions_are_bad_probability"]}}%</div></td>
+            {% endif %}
+            {% endif %}
+        </tr>
+        <th>Verified</th>
+        <td>{{user["user"]["verified"]}}</td>
+        </tr>
+        <tr>
+            <th>Identifies itself as bot</th>
+            <td>{{user["signals"]["identifies_itself_as_bot"]}}</td>
+        </tr>
+        <tr>
+            <th>Number of malicious URLs</th>
+            {% if not(user["signals"]["is_sensitive_count"] is none) %}
+            <td>{{user["signals"]["is_sensitive_count"]}}</td>
+            {% else %}
+            <td>-</td>
+            {% endif %}
+        </tr>
+        <tr>
+            <th>URL-to-tweet ratio</th>
+            {% if not(user["signals"]["url_tweet_ratio"] is none) %}
+            <td>{{"{:.2f}".format(user["signals"]["url_tweet_ratio"])}}</td>
+            {% else %}
+            <td>-</td>
+            {% endif %}
+        </tr>
+        <th>User mentions-to-tweet ratio</th>
+        {% if not(user["signals"]["user_mentions_tweet_ratio"] is none) %}
+        <td>{{"{:.2f}".format(user["signals"]["user_mentions_tweet_ratio"])}}</td>
+        {% else %}
+        <td>-</td>
+        {% endif %}
+        </tr>
+        <tr>
+            <th>Hashtag-to-tweet ratio</th>
+            {% if not(user["signals"]["hashtag_tweet_ratio"] is none) %}
+            <td>{{"{:.2f}".format(user["signals"]["hashtag_tweet_ratio"])}}</td>
+            {% else %}
+            <td>-</td>
+            {% endif %}
+        </tr>
+        <tr>
+            <th>Average favorite count</th>
+            {% if not(user["signals"]["average_favorite_count"] is none) %}
+            <td>{{"{:.2f}".format(user["signals"]["average_favorite_count"])}}</td>
+            {% else %}
+            <td>-</td>
+            {% endif %}
+        </tr>
+        <tr>
+            <th>Average retweet count</th>
+            {% if not(user["signals"]["average_retweet_count"] is none) %}
+            <td>{{"{:.2f}".format(user["signals"]["average_retweet_count"])}}</td>
+            {% else %}
+            <td>-</td>
+            {% endif %}
+        </tr>
+    </table>
+</div>
+
+
+
+<div class="recent-tweets">
+    <h1>Latest Tweets:</h1>
+    {% if tweetArr == "[]" %}
+    <p style="background: #f1f1f1; padding: 20px; font-size: 13px;">Failed to get the latest tweets</p>
+    {% endif %}
+</div>
+
+<div id="tweets">
+    {{tweetArr}}
+</div>
+<div id="profile-image" style="display:none;">{{user["user"]["profile_image_url_https"]}}</div>
+{% endif %}
+
+
+{% endblock %}

@@ -152,13 +152,13 @@ class Signals:
         if len(tweets) > 5:
             time_entropy = tweeting_time_entropy(tweets)  # scipy.stats.entropy()
             print("entropy")
-            self.increase_pamp(min(4 * determine_signal_strength(time_entropy, "<", 2, 0.1), 3 * len(tweets)))
-            self.increase_safe_signal(min(4 * determine_signal_strength(time_entropy, ">", 2.7, 0.01), 3 * len(tweets)))
+            self.increase_pamp(min(4 * determine_signal_strength(time_entropy, "<", 1.5+len(tweets)/20, 0.1), 3 * len(tweets)))
+            self.increase_safe_signal(min(4 * determine_signal_strength(time_entropy, ">", 2.2+len(tweets)/20, 0.01), 3 * len(tweets)))
 
             self.increase_is_bot_probability(
-                2 * min(4 * determine_signal_strength(time_entropy, "<", 2, 0.1), 3 * len(tweets)))
+                2 * min(4 * determine_signal_strength(time_entropy, "<", 1.5+len(tweets)/20, 0.1), 3 * len(tweets)))
             self.increase_is_bot_probability(
-                -3 * min(4 * determine_signal_strength(time_entropy, ">", 2.7, 0.01), 3 * len(tweets)))
+                -3 * min(4 * determine_signal_strength(time_entropy, ">", 2.2+len(tweets)/20, 0.01), 3 * len(tweets)))
         else:
             time_entropy = None
 
@@ -195,7 +195,7 @@ class Signals:
             self.increase_intentions_are_bad_probability(
                 -1 * determine_signal_strength(url_tweet_ratio, "<", 0.3, 0.2))
             self.increase_intentions_are_bad_probability(
-                min(determine_signal_strength(user_mentions_tweet_ratio, ">", 0.7, 0.05), len(tweets), 20))
+                min(determine_signal_strength(user_mentions_tweet_ratio, ">", 1, 0.05), len(tweets), 20))
             self.increase_intentions_are_bad_probability(
                 min(determine_signal_strength(hashtag_tweet_ratio, ">=", 3, 0.1), len(tweets), 20))
 
