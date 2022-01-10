@@ -225,6 +225,7 @@ table.dataTable tbody tr.even .created-at{
 
 #chart-container1, #chart-container2{
     width: 40%;
+    min-width: 500px;
     height: 400px;
     background: #f3f3f3;
     margin: auto;
