@@ -248,8 +248,10 @@ table.dataTable tbody tr.even .created-at{
 
     #chart-container1, #chart-container2{
         width: 98%;
+        min-width: 200px;
         height: 400px;
     }
+
     #map{
         width: 98%;
     }
@@ -261,6 +263,7 @@ table.dataTable tbody tr.even .created-at{
         min-width: 200px;
         overflow-x: scroll;
      }
+
      #scroll1{
          width: 98%;
          padding-left: 1%;
