@@ -184,14 +184,14 @@ class Signals:
             self.increase_danger_signal(
                 min(determine_signal_strength(average_favorite_count, "<=", 0.1, 0.01), len(tweets)))
             self.increase_safe_signal(min(determine_signal_strength(average_favorite_count, ">=", 10, 20), len(tweets)))
-            self.increase_pamp(5 * is_sensitive_count)
+            self.increase_pamp(10 * is_sensitive_count)
 
             self.increase_is_bot_probability(
                 min(determine_signal_strength(max(retweet_tweet_ratio, quote_tweet_ratio), ">", 0.7, 0.01),
                     len(tweets)))
 
             self.increase_intentions_are_bad_probability(
-                min(determine_signal_strength(url_tweet_ratio, ">", 0.7, 0.05), len(tweets)))
+                min(determine_signal_strength(url_tweet_ratio, ">", 0.8, 0.05), len(tweets)))
             self.increase_intentions_are_bad_probability(
                 -1 * determine_signal_strength(url_tweet_ratio, "<", 0.3, 0.2))
             self.increase_intentions_are_bad_probability(
@@ -199,15 +199,15 @@ class Signals:
             self.increase_intentions_are_bad_probability(
                 min(determine_signal_strength(hashtag_tweet_ratio, ">=", 3, 0.1), len(tweets), 20))
 
+            #self.increase_intentions_are_bad_probability(
+            #    min(determine_signal_strength(average_retweet_count, "<=", 0.1, 0.02), len(tweets)))
             self.increase_intentions_are_bad_probability(
-                min(determine_signal_strength(average_retweet_count, "<=", 0.1, 0.02), len(tweets)))
-            self.increase_intentions_are_bad_probability(
-                -1 * min(determine_signal_strength(average_retweet_count, ">=", 5, 10), len(tweets)))
+                -1 * min(determine_signal_strength(average_retweet_count, ">=", 2, 10), len(tweets)))
             self.increase_intentions_are_bad_probability(
                 min(determine_signal_strength(average_favorite_count, "<=", 0.1, 0.01), len(tweets)))
             self.increase_intentions_are_bad_probability(
-                -1 * min(determine_signal_strength(average_favorite_count, ">=", 10, 20), len(tweets)))
-            self.increase_intentions_are_bad_probability(5 * is_sensitive_count)
+                -1 * min(determine_signal_strength(average_favorite_count, ">=", 5, 10), len(tweets)))
+            self.increase_intentions_are_bad_probability(10 * is_sensitive_count)
 
         else:
             retweet_tweet_ratio, quote_tweet_ratio, url_tweet_ratio, user_mentions_tweet_ratio, hashtag_tweet_ratio, average_favorite_count, average_retweet_count, is_sensitive_count = None, None, None, None, None, None, None, None
