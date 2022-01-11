@@ -379,11 +379,14 @@ def calculate_small_intervals(tweets):
 def calculate_probability(created_at, measuring_interval):
     created_at.sort(reverse=True)
     intervals = []
+    #intervals_seconds = []
     i = 0
     while i < len(created_at) - 1:
-        intervals.append(int((created_at[i] - created_at[i + 1]).total_seconds() / 60))
+        intervals.append(int((created_at[i] - created_at[i + 1]).total_seconds() / 60*4))
+        #intervals_seconds.append(int((created_at[i] - created_at[i + 1]).total_seconds()))
         i += 1
     print(intervals)
+    #print(intervals_seconds)
     max_interval = max(intervals)
     min_interval = min(intervals)
     if max_interval == min_interval:
