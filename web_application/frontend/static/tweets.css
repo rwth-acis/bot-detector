@@ -51,6 +51,15 @@
     border-radius: 10px;
 }
 
+#tweet-time{
+    float: right;
+    text-align: right;
+}
+
+#tweet-time a{
+    text-align: right;
+}
+
 .tweet-info-counts {
   display: flex;
   margin-left: 65px;
@@ -79,6 +88,7 @@
 
   font-size:12px;
   margin-bottom: 20px;
+  text-align: left;
 }
 .tweet-content{
     margin-left: 65px;

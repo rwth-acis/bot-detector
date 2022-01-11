@@ -34,6 +34,10 @@ col = db["Users"]
 def home():
     return render_template("base.html", app_url=os.environ['APP_URL'])
 
+@app.route("/table")
+def table():
+    return render_template("table.html")
+
 
 @app.route("/index")
 def about():
@@ -118,7 +122,7 @@ def result():
                     neutral_count1 += 1
 
         return render_template('result.html', users=col.find(), folium_map=Markup(folium_map._repr_html_()),
-                               users_list=str(list(col.find())), app_url=os.environ['APP_URL'],
+                               app_url=os.environ['APP_URL'],
                                negative_count1=negative_count1, positive_count1=positive_count1,
                                neutral_count1=neutral_count1, negative_count2=negative_count2,
                                positive_count2=positive_count2, neutral_count2=neutral_count2)

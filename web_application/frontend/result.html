@@ -4,8 +4,27 @@
 
 {% block html_head %}
     <script src="https://d3js.org/d3.v7.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
-    <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+
+<!---->
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.css" />
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.13/css/dataTables.jqueryui.css" />
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.2.4/css/buttons.jqueryui.css" />
+
+<script type="text/javascript" src="https://code.jquery.com/jquery-2.2.4.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.js"></script>
+<script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.js"></script>
+<script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.13/js/dataTables.jqueryui.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.4/js/dataTables.buttons.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.4/js/buttons.jqueryui.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.4/js/buttons.colVis.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.4/js/buttons.flash.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.4/js/buttons.html5.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.4/js/buttons.print.js"></script>
+ <!--   -->
+
     <script src="https://cdn.anychart.com/releases/8.10.0/js/anychart-core.min.js"></script>
     <script src="https://cdn.anychart.com/releases/8.10.0/js/anychart-pie.min.js"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='table_page.css') }}">
@@ -15,12 +34,12 @@
 
 {% block content %}
 
-<div class="title-section">Users who posted tweets and retweets with #covid19:</div>
+    <div class="title-section">Users who posted tweets and retweets with #covid19:</div>
 
     <div id="scroll1" style="overflow-x:scroll;">
         <div></div>
     </div>
-    <div id="div-main-table">
+    <div id="div-main-table" class="display nowrap">
 
 
         <table id="main-table" data-order='[[ 3, "result-k" ]]'>
@@ -95,11 +114,11 @@
             </tr>
             {% endfor %}
             </tbody>
+            <tfoot>
+            </tfoot>
 
         </table>
-        </div>
     </div>
-    <a id="downloadAnchorElem" class="btn btn-info" onclick="load();">Download your data</a>
     <div id="map">{{ folium_map }}</div>
     <div id="chart-container1">
     </div>
@@ -107,17 +126,76 @@
     </div>
     <script>
             $(document).ready(function(){
-                $('#main-table').DataTable();
+                $('#main-table').DataTable({
+                    dom: 'lBfrtip',
+                    buttons: ['csv', 'excel',
+                        {
+                            text: 'JSON',
+                            action: function ( e, dt, button, config ) {
+                                var data = dt.buttons.exportData();
 
-                $("document").ready(function(){
-                    $("#scroll1 div").width($("#main-table").width());
-                    $("#scroll1").on("scroll", function(){
-                        $("#div-main-table").scrollLeft($(this).scrollLeft());
-                    });
-                    $("#div-main-table").on("scroll", function(){
-                        $("#scroll1").scrollLeft($(this).scrollLeft());
-                    });
+                                $.fn.dataTable.fileSave(
+                                    new Blob( [ JSON.stringify( data ) ] ),
+                                    'Export.json'
+                                );
+                            }
+                        },
+                        {
+                          extend: 'pdf',
+                          customize: function(doc) {
+
+                                var colCount = new Array();
+                                var tr = $('#main-table tbody tr:first-child');
+                                var trWidth = $(tr).width();
+
+                                var length = $('#main-table tbody tr:first-child td').length;
+
+                                $('#main-table').find('tbody tr:first-child td').each(function() {
+                                    var tdWidth = $(this).width();
+                                    var widthFinal = parseFloat(tdWidth * 115);
+                                    widthFinal = widthFinal.toFixed(2) / trWidth.toFixed(2);
+                                    if ($(this).attr('colspan')) {
+                                        for (var i = 1; i <= $(this).attr('colspan'); $i++) {
+                                            colCount.push('*');
+                                        }
+                                    } else {
+                                        colCount.push(parseFloat(widthFinal.toFixed(2)) + '%');
+                                    }
+                                });
+                                        // Styling the table: create style object
+                                var objLayout = {};
+                                // Horizontal line thickness
+                                objLayout['hLineWidth'] = function(i) { return .5; };
+                                // Vertical line thickness
+                                objLayout['vLineWidth'] = function(i) { return .5; };
+                                // Horizontal line color
+                                objLayout['hLineColor'] = function(i) { return '#aaa'; };
+                                // Vertical line color
+                                objLayout['vLineColor'] = function(i) { return '#aaa'; };
+                                // Left padding of the cell
+                                objLayout['paddingLeft'] = function(i) { return 4; };
+                                // Right padding of the cell
+                                objLayout['paddingRight'] = function(i) { return 4; };
+                                // Inject the object in the document
+                                doc.content[1].layout = objLayout;
+                                doc.content[1].table.widths = colCount;
+                                doc.defaultStyle.fontSize = 7;
+                                doc.styles.tableHeader.fontSize = 7;
+                            }
+                          }
+                    ],
+                    "lengthMenu": [10,25,50,100]
+                 });
+
+
+                $("#scroll1 div").width($("#main-table").width());
+                $("#scroll1").on("scroll", function(){
+                    $("#div-main-table").scrollLeft($(this).scrollLeft());
                 });
+                $("#div-main-table").on("scroll", function(){
+                    $("#scroll1").scrollLeft($(this).scrollLeft());
+                 });
+
 
                 var data = anychart.data.set([
                   {x:'Positive', value:{{positive_count1}}, normal:  {fill: "#8ed9ff"} },
@@ -167,12 +245,6 @@
 
             });
 
-            function load(){
-                   var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent("{{users_list}}".replaceAll("&#39;", "\""));
-                    var dlAnchorElem = document.getElementById('downloadAnchorElem');
-                    dlAnchorElem.setAttribute("href",     dataStr     );
-                    dlAnchorElem.setAttribute("download", "data.json");
-            }
     </script>
 
 {% endblock %}

@@ -20,9 +20,15 @@
 <div class="form-style-10" style="background: #006699;">
     <form action="/user-check/form" method="post">
         <div class="inner-wrap">
-            <label for="screen-name" style="color: #006699; font-size: 16px;">Enter handle:</label>
-            <input type="text" name="screen-name" value="" required>
-            <input type="submit" style="margin-top: 10px;" value="Submit">
+            <label for="screen-name" style="color: #006699; font-size: 13px; margin-bottom: 5px;">Enter handle:</label>
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1" style="border: 1px solid #006699;">@</span>
+                </div>
+                <input type="text" name="screen-name" value="" required class="form-control" placeholder="Handle" aria-label="Handle" aria-describedby="basic-addon1" style="position: relative; -webkit-box-flex: 1; -ms-flex: 1 1 auto; flex: 1 1 auto; width: 1%; margin-bottom: 0; margin-top: 0px; padding: 3px;">
+            </div>
+
+            <input type="submit" style="margin-top: 5px; font-size: 13px;" value="Submit">
         </div>
     </form>
 </div>
@@ -32,9 +38,15 @@
 <div class="form-style-10" style="background: #006699;">
     <form action="/user-check/form" method="post">
         <div class="inner-wrap">
-            <label for="screen-name" style="color: #006699; font-size: 16px;">Enter handle:</label>
-            <input type="text" name="screen-name" value="@{{user['user']['screen_name']}}" required>
-            <input type="submit" style="margin-top: 10px;" value="Submit">
+            <label for="screen-name" style="color: #006699; font-size: 13px; margin-bottom: 5px;">Enter handle:</label>
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1" style="border: 1px solid #006699;">@</span>
+                </div>
+                <input type="text" name="screen-name" value="{{user['user']['screen_name']}}" required class="form-control" placeholder="Handle" aria-label="Handle" aria-describedby="basic-addon1" style="position: relative; -webkit-box-flex: 1; -ms-flex: 1 1 auto; flex: 1 1 auto; width: 1%; margin-bottom: 0; margin-top: 0px;">
+            </div>
+
+            <input type="submit" style="margin-top: 5px; font-size: 13px;" value="Submit">
         </div>
     </form>
 </div>
@@ -52,7 +64,7 @@
 
             <tr>
                 <th>User</th>
-                <td class="user"><span id="screen-name"><a href='https://twitter.com/{{user["user"]["screen_name"]}}'>@{{user["user"]["screen_name"]}}</a></span> <br>  (<span id="name">{{user["user"]["name"]}}</span>)</td>
+                <td class="user"><span id="screen-name-raw" style="display: none;">{{user["user"]["screen_name"]}}</span> <span id="screen-name"><a href='https://twitter.com/{{user["user"]["screen_name"]}}'>@{{user["user"]["screen_name"]}}</a></span> <br>  (<span id="name">{{user["user"]["name"]}}</span>)</td>
 
             </tr>
             <tr>

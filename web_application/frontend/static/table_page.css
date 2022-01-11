@@ -30,7 +30,7 @@
  	-webkit-border-radius: 10px ;
  	-moz-border-radius: 10px;
  	color: #006699;
- 	font: 600 14px 'Bitter', serif;
+ 	font-size: 13px;
  	-moz-box-shadow: inset 0px 2px 2px 0px rgba(0, 0, 0, 0.3);
  	-webkit-box-shadow: inset 0px 2px 2px 0px rgba(0, 0, 0, 0.3);
  	box-shadow: inset 0px 2px 2px 0px rgba(0, 0, 0, 0.3);
@@ -71,6 +71,9 @@
   -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
 }
 
+.dt-buttons{
+    margin-left: 3%;
+}
 
 table.dataTable tbody tr.even{
     background-color: #f1f1f1;
