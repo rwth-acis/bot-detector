@@ -17,20 +17,41 @@
     	-webkit-box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
 }
 
+.title-section{
+ text-align: center;
+
+ width: 70%;
+ margin: auto;
+ margin-top: 15px;
+ font-weight: 600;
+    background-color: #fff;
+ 	padding: 10px 15px 10px 15px;
+ 	border-radius: 10px;
+ 	-webkit-border-radius: 10px ;
+ 	-moz-border-radius: 10px;
+ 	color: #006699;
+ 	font: 600 14px 'Bitter', serif;
+ 	-moz-box-shadow: inset 0px 2px 2px 0px rgba(0, 0, 0, 0.3);
+ 	-webkit-box-shadow: inset 0px 2px 2px 0px rgba(0, 0, 0, 0.3);
+ 	box-shadow: inset 0px 2px 2px 0px rgba(0, 0, 0, 0.3);
+
+ 	border: 1px solid rgba(0, 153, 203, 0.5);
+}
+
 #div-main-table::-webkit-scrollbar {
   -webkit-appearance: none;
   width: 10px;
 }
 
 #scroll1 div {
-    height: 10px;
+    height: 1px;
 }
 #scroll1{
     width: 98%;
     min-width: 700px;
     max-width: 1000px;
     margin: auto;
-    margin-top: 20px;
+    margin-top: 3px;
     padding-left: 1%;
     padding-right: 1%;
 }
