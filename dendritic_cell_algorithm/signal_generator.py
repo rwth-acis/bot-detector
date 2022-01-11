@@ -368,7 +368,7 @@ def calculate_small_intervals(tweets):
     small_intervals_count = 0
     i = 0
     while i < len(created_at) - 1:
-        if (created_at[i] - created_at[i + 1]).total_seconds() < 20:
+        if (created_at[i] - created_at[i + 1]).total_seconds() < 15:
             small_intervals_count += 1;
         i += 1
 
