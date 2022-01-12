@@ -303,6 +303,7 @@ th{
     }
     #main-table, .signals-table{
             min-width: 350px;
+            min-height: 200px;
     }
 
 }
