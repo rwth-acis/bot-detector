@@ -29,6 +29,9 @@
     <script src="https://cdn.anychart.com/releases/8.10.0/js/anychart-pie.min.js"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='table_page.css') }}">
 
+<link rel="stylesheet" href="{{ url_for('static', filename='jQuery-plugin-progressbar.css') }}">
+<script src="{{ url_for('static', filename='jQuery-plugin-progressbar.js') }}"></script>
+
 {% endblock %}
 
 
@@ -89,22 +92,34 @@
                 {% endif %}
                 {% endif %}-->
                 {% if user["signals"]["is_bot_probability"] >= 50 %}
-                <td class="red"><div class="div-red">{{user["signals"]["is_bot_probability"]}}%</div></td>
+                <td class="red">
+                    <div class="progress-bar position" data-percent='{{user["signals"]["is_bot_probability"]}}' data-duration="800" data-color="white,red,red"></div>
+                </td>
                 {% else %}
                 {% if user["signals"]["is_bot_probability"] >= 30 %}
-                <td class="orange"><div class="div-orange">{{user["signals"]["is_bot_probability"]}}%</div></td>
+                <td class="orange">
+                    <div class="progress-bar position" data-percent='{{user["signals"]["is_bot_probability"]}}' data-duration="800" data-color="white,orange,orange"></div>
+                </td>
                 {% else %}
-                <td class="green"><div class="div-green">{{user["signals"]["is_bot_probability"]}}%</div></td>
+                <td class="green">
+                    <div class="progress-bar position" data-percent='{{user["signals"]["is_bot_probability"]}}' data-duration="800" data-color="white,green,green"></div>
+                </td>
                 {% endif %}
                 {% endif %}
 
                 {% if user["signals"]["intentions_are_bad_probability"] >= 50 %}
-                <td class="red"><div class="div-red">{{user["signals"]["intentions_are_bad_probability"]}}%</div></td>
+                <td class="red">
+                    <div class="progress-bar position" data-percent='{{user["signals"]["intentions_are_bad_probability"]}}' data-duration="800" data-color="white,red,red"></div>
+                </td>
                 {% else %}
                 {% if user["signals"]["intentions_are_bad_probability"] >= 30 %}
-                <td class="orange"><div class="div-orange">{{user["signals"]["intentions_are_bad_probability"]}}%</div></td>
+                <td class="orange">
+                    <div class="progress-bar position" data-percent='{{user["signals"]["intentions_are_bad_probability"]}}' data-duration="800" data-color="white,orange,orange"></div>
+                </td>
                 {% else %}
-                <td class="green"><div class="div-green">{{user["signals"]["intentions_are_bad_probability"]}}%</div></td>
+                <td class="green">
+                    <div class="progress-bar position" data-percent='{{user["signals"]["intentions_are_bad_probability"]}}' data-duration="800" data-color="white,green,green"></div>
+                </td>
                 {% endif %}
                 {% endif %}
 
@@ -126,6 +141,7 @@
     </div>
     <script>
             $(document).ready(function(){
+                $(".progress-bar").loading();
                 $('#main-table').DataTable({
                     dom: 'lBfrtip',
                     buttons: ['csv', 'excel',
@@ -244,6 +260,7 @@
                 chart.draw();
 
             });
+
 
     </script>
 

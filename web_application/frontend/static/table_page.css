@@ -265,9 +265,18 @@ table.dataTable tbody tr.even .created-at{
 
 @media only screen and (max-width: 700px) {
 
+    body{
+          margin: 0px;
+          background: #70C0EF;
+
+    }
+
     #body-content{
      width: 100%;
 
+    }
+    .title-section{
+        width: 98%;
     }
 
     #chart-container1, #chart-container2{

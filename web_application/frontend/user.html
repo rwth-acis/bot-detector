@@ -3,6 +3,11 @@
 {% block html_head %}
 <link href="https://fonts.googleapis.com/css?family=Asap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+<link href="http://www.jqueryscript.net/css/jquerysctipttop.css" rel="stylesheet" type="text/css">
+<link rel="stylesheet" href="{{ url_for('static', filename='jQuery-plugin-progressbar.css') }}">
+<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script src="{{ url_for('static', filename='jQuery-plugin-progressbar.js') }}"></script>
+
 <link rel="stylesheet" href="{{ url_for('static', filename='tweets.css') }}">
 
 
@@ -14,6 +19,7 @@
 
 
 {% block content %}
+
 <div id="main-table-div">
 <div id="div-main-table">
     <table id="main-table">
@@ -50,38 +56,82 @@
 
             <th>Is a bot (probability)</th>
             {% if user["signals"]["is_bot_probability"] >= 50 %}
-            <td class="red"><div class="div-red">{{user["signals"]["is_bot_probability"]}}%</div></td>
+            <td class="red">
+                <div class="progress-bar position" data-percent='{{user["signals"]["is_bot_probability"]}}' data-duration="800" data-color="white,red,red"></div>
+            </td>
             {% else %}
             {% if user["signals"]["is_bot_probability"] >= 30 %}
-            <td class="orange"><div class="div-orange">{{user["signals"]["is_bot_probability"]}}%</div></td>
+            <td class="orange">
+                    <div class="progress-bar position" data-percent='{{user["signals"]["is_bot_probability"]}}' data-duration="800" data-color="white,orange,orange"></div>
+            </td>
             {% else %}
-            <td class="green"><div class="div-green">{{user["signals"]["is_bot_probability"]}}%</div></td>
+            <td class="green">
+                <div class="progress-bar position" data-percent='{{user["signals"]["is_bot_probability"]}}' data-duration="800" data-color="white,green,green"></div>
+            </td>
             {% endif %}
             {% endif %}
         </tr>
         <tr>
             <th>Default profile</th>
-            <td>{{user["user"]["default_profile"]}}</td>
+            {% if user["user"]["default_profile"] == True %}
+            <td class="orange">{{user["user"]["default_profile"]}}</td>
+            {% else %}
+            <td class="green">{{user["user"]["default_profile"]}}</td>
+            {% endif %}
 
         </tr>
         <tr>
             <th>Default profile image</th>
-            <td>{{user["user"]["default_profile_image"]}}</td>
+            {% if user["user"]["default_profile_image"] == True %}
+            <td class="red">{{user["user"]["default_profile_image"]}}</td>
+            {% else %}
+            <td class="green">{{user["user"]["default_profile_image"]}}</td>
+            {% endif %}
         </tr>
         <tr>
             <th>Average tweet similarity</th>
             {% if not(user["signals"]["avg_tweet_similarity"] is none) %}
-            <td>{{"{:.2f}".format(user["signals"]["avg_tweet_similarity"])}}</td>
+            {% if user["signals"]["avg_tweet_similarity"] >= 0.4 %}
+            <td class="red">
+                <div class="progress-bar position" data-ispercent="'false'"  data-percent='{{("{:.2f}".format(user["signals"]["avg_tweet_similarity"]))}}' data-duration="800" data-color="white,red,red"></div>
+            </td>
+            {% else %}
+            {% if user["signals"]["avg_tweet_similarity"] >= 0.25 %}
+            <td class="orange">
+                <div class="progress-bar position" data-ispercent="'false'" data-percent='{{("{:.2f}".format(user["signals"]["avg_tweet_similarity"]))}}' data-duration="800" data-color="white,orange,orange"></div>
+            </td>
+            {% else %}
+            <td class="green">
+                <div class="progress-bar position" data-ispercent="'false'"  data-percent='{{("{:.2f}".format(user["signals"]["avg_tweet_similarity"]))}}' data-duration="800" data-color="white,green,green"></div>
+            </td>
+            {% endif %}
+            {% endif %}
             {% else %}
             <td>-</td>
             {% endif %}
+
 
         </tr>
         <tr>
             <th>Tweeting time entropy</th>
 
             {% if not(user["signals"]["time_entropy"] is none)%}
-            <td>{{"{:.2f}".format(user["signals"]["time_entropy"])}}</td>
+            {% if user["signals"]["time_entropy"] <= 1.8 %}
+            <td class="red">
+                {{"{:.2f}".format(user["signals"]["time_entropy"])}}
+            </td>
+            {% else %}
+            {% if user["signals"]["time_entropy"] <= 2.4 %}
+            <td class="orange">
+                {{"{:.2f}".format(user["signals"]["time_entropy"])}}
+            </td>
+            {% else %}
+            <td class="green">
+                {{"{:.2f}".format(user["signals"]["time_entropy"])}}
+            </td>
+            {% endif %}
+            {% endif %}
+
             {% else %}
             <td>-</td>
             {% endif %}
@@ -91,7 +141,21 @@
         <tr>
             <th>Number of time intervals between tweets that are < 15 sec</th>
             {% if not(user["signals"]["small_interval_between_tweets_count"] is none) %}
-            <td>{{user["signals"]["small_interval_between_tweets_count"]}}</td>
+            {% if user["signals"]["small_interval_between_tweets_count"] > 3 %}
+            <td class="red">
+                {{user["signals"]["small_interval_between_tweets_count"]}}
+            </td>
+            {% else %}
+            {% if user["signals"]["small_interval_between_tweets_count"] > 0 %}
+            <td class="orange">
+                {{user["signals"]["small_interval_between_tweets_count"]}}
+            </td>
+            {% else %}
+            <td class="green">
+                {{user["signals"]["small_interval_between_tweets_count"]}}
+            </td>
+            {% endif %}
+            {% endif %}
             {% else %}
             <td>-</td>
             {% endif %}
@@ -99,7 +163,15 @@
         <tr>
             <th>Retweet-to-tweet ratio</th>
             {% if not(user["signals"]["retweet_tweet_ratio"] is none) %}
-            <td>{{"{:.2f}".format(user["signals"]["retweet_tweet_ratio"])}}</td>
+            {% if user["signals"]["retweet_tweet_ratio"] >= 0.7 %}
+            <td class="orange">
+                <div class="progress-bar position" data-ispercent="'false'"  data-percent='{{"{:.2f}".format(user["signals"]["retweet_tweet_ratio"])}}' data-duration="800" data-color="white,red,red"></div>
+            </td>
+            {% else %}
+            <td class="green">
+                <div class="progress-bar position" data-ispercent="'false'"  data-percent='{{"{:.2f}".format(user["signals"]["retweet_tweet_ratio"])}}' data-duration="800" data-color="white,green,green"></div>
+            </td>
+            {% endif %}
             {% else %}
             <td>-</td>
             {% endif %}
@@ -108,7 +180,15 @@
         <tr>
             <th>Quote-to-tweet ratio</th>
             {% if not(user["signals"]["quote_tweet_ratio"] is none) %}
-            <td>{{"{:.2f}".format(user["signals"]["quote_tweet_ratio"])}}</td>
+            {% if user["signals"]["quote_tweet_ratio"] >= 0.7 %}
+            <td class="orange">
+                <div class="progress-bar position" data-ispercent="'false'"  data-percent='{{"{:.2f}".format(user["signals"]["quote_tweet_ratio"])}}' data-duration="800" data-color="white,red,red"></div>
+            </td>
+            {% else %}
+            <td class="green">
+                <div class="progress-bar position" data-ispercent="'false'"  data-percent='{{"{:.2f}".format(user["signals"]["quote_tweet_ratio"])}}' data-duration="800" data-color="white,green,green"></div>
+            </td>
+            {% endif %}
             {% else %}
             <td>-</td>
             {% endif %}
@@ -124,7 +204,21 @@
         <tr>
             <th>Friends growth rate <br>(friends per day)</th>
             {% if not(user["signals"]["friends_growth_rate"] is none) %}
-            <td>{{"{:.2f}".format(user["signals"]["friends_growth_rate"])}}</td>
+            {% if user["signals"]["friends_growth_rate"] >= 10 %}
+            <td class="red">
+                {{"{:.2f}".format(user["signals"]["friends_growth_rate"])}}
+            </td>
+            {% else %}
+            {% if user["signals"]["friends_growth_rate"] >= 5 %}
+            <td class="orange">
+                {{"{:.2f}".format(user["signals"]["friends_growth_rate"])}}
+            </td>
+            {% else %}
+            <td class="green">
+                {{"{:.2f}".format(user["signals"]["friends_growth_rate"])}}
+            </td>
+            {% endif %}
+            {% endif %}
             {% else %}
             <td>-</td>
             {% endif %}
@@ -132,7 +226,21 @@
         <tr>
             <th>Tweets growth rate <br>(tweets per day)</th>
             {% if not(user["signals"]["statuses_growth_rate"] is none) %}
-            <td>{{"{:.2f}".format(user["signals"]["statuses_growth_rate"])}}</td>
+            {% if user["signals"]["statuses_growth_rate"] >= 30 %}
+            <td class="red">
+                {{"{:.2f}".format(user["signals"]["statuses_growth_rate"])}}
+            </td>
+            {% else %}
+            {% if user["signals"]["statuses_growth_rate"] >= 20 %}
+            <td class="orange">
+                {{"{:.2f}".format(user["signals"]["statuses_growth_rate"])}}
+            </td>
+            {% else %}
+            <td class="green">
+                {{"{:.2f}".format(user["signals"]["statuses_growth_rate"])}}
+            </td>
+            {% endif %}
+            {% endif %}
             {% else %}
             <td>-</td>
             {% endif %}
@@ -145,26 +253,46 @@
         <tr>
             <th>Intentions are bad (probability)</th>
             {% if user["signals"]["intentions_are_bad_probability"] >= 50 %}
-            <td class="red"><div class="div-red">{{user["signals"]["intentions_are_bad_probability"]}}%</div></td>
+            <td class="red">
+                <div class="progress-bar position" data-percent='{{user["signals"]["intentions_are_bad_probability"]}}' data-duration="800" data-color="white,red,red"></div>
+            </td>
             {% else %}
             {% if user["signals"]["intentions_are_bad_probability"] >= 30 %}
-            <td class="orange"><div class="div-orange">{{user["signals"]["intentions_are_bad_probability"]}}%</div></td>
+            <td class="orange">
+                <div class="progress-bar position" data-percent='{{user["signals"]["intentions_are_bad_probability"]}}' data-duration="800" data-color="white,orange,orange"></div>
+            </td>
             {% else %}
-            <td class="green"><div class="div-green">{{user["signals"]["intentions_are_bad_probability"]}}%</div></td>
+            <td class="green">
+                <div class="progress-bar position" data-percent='{{user["signals"]["intentions_are_bad_probability"]}}' data-duration="800" data-color="white,green,green"></div>
+            </td>
             {% endif %}
             {% endif %}
         </tr>
             <th>Verified</th>
-            <td>{{user["user"]["verified"]}}</td>
+
+            {% if user["user"]["verified"] == False %}
+            <td class="orange">{{user["user"]["verified"]}}</td>
+            {% else %}
+            <td class="green">{{user["user"]["verified"]}}</td>
+            {% endif %}
         </tr>
         <tr>
             <th>Identifies itself as bot</th>
-            <td>{{user["signals"]["identifies_itself_as_bot"]}}</td>
+
+            {% if user["signals"]["identifies_itself_as_bot"] == False %}
+            <td style="text-align: center;">{{user["user"]["verified"]}}</td>
+            {% else %}
+            <td class="green">{{user["signals"]["identifies_itself_as_bot"]}}</td>
+            {% endif %}
         </tr>
         <tr>
             <th>Number of malicious URLs</th>
             {% if not(user["signals"]["is_sensitive_count"] is none) %}
-            <td>{{user["signals"]["is_sensitive_count"]}}</td>
+            {% if user["signals"]["is_sensitive_count"] > 0 %}
+            <td class="red">{{user["signals"]["is_sensitive_count"]}}</td>
+            {% else %}
+            <td class="green">{{user["signals"]["is_sensitive_count"]}}</td>
+            {% endif %}
             {% else %}
             <td>-</td>
             {% endif %}
@@ -172,14 +300,45 @@
         <tr>
             <th>URL-to-tweet ratio</th>
             {% if not(user["signals"]["url_tweet_ratio"] is none) %}
-            <td>{{"{:.2f}".format(user["signals"]["url_tweet_ratio"])}}</td>
+
+            {% if user["signals"]["url_tweet_ratio"] >= 0.9 %}
+            <td class="red">
+                {{"{:.2f}".format(user["signals"]["url_tweet_ratio"])}}
+            </td>
+            {% else %}
+            {% if user["signals"]["url_tweet_ratio"] >= 0.7 %}
+            <td class="orange">
+                {{"{:.2f}".format(user["signals"]["url_tweet_ratio"])}}
+            </td>
+            {% else %}
+            <td class="green">
+                {{"{:.2f}".format(user["signals"]["url_tweet_ratio"])}}
+            </td>
+            {% endif %}
+            {% endif %}
+
             {% else %}
             <td>-</td>
             {% endif %}
         </tr>
             <th>User mentions-to-tweet ratio</th>
             {% if not(user["signals"]["user_mentions_tweet_ratio"] is none) %}
-            <td>{{"{:.2f}".format(user["signals"]["user_mentions_tweet_ratio"])}}</td>
+
+            {% if user["signals"]["user_mentions_tweet_ratio"] >= 3 %}
+            <td class="red">
+                {{"{:.2f}".format(user["signals"]["user_mentions_tweet_ratio"])}}
+            </td>
+            {% else %}
+            {% if user["signals"]["user_mentions_tweet_ratio"] >= 0.7 %}
+            <td class="orange">
+                {{"{:.2f}".format(user["signals"]["user_mentions_tweet_ratio"])}}
+            </td>
+            {% else %}
+            <td class="green">
+                {{"{:.2f}".format(user["signals"]["user_mentions_tweet_ratio"])}}
+            </td>
+            {% endif %}
+            {% endif %}
             {% else %}
             <td>-</td>
             {% endif %}
@@ -187,7 +346,21 @@
         <tr>
             <th>Hashtag-to-tweet ratio</th>
             {% if not(user["signals"]["hashtag_tweet_ratio"] is none) %}
-            <td>{{"{:.2f}".format(user["signals"]["hashtag_tweet_ratio"])}}</td>
+            {% if user["signals"]["hashtag_tweet_ratio"] >= 4 %}
+            <td class="red">
+                {{"{:.2f}".format(user["signals"]["hashtag_tweet_ratio"])}}
+            </td>
+            {% else %}
+            {% if user["signals"]["hashtag_tweet_ratio"] >= 3 %}
+            <td class="orange">
+                {{"{:.2f}".format(user["signals"]["hashtag_tweet_ratio"])}}
+            </td>
+            {% else %}
+            <td class="green">
+                {{"{:.2f}".format(user["signals"]["hashtag_tweet_ratio"])}}
+            </td>
+            {% endif %}
+            {% endif %}
             {% else %}
             <td>-</td>
             {% endif %}
@@ -195,7 +368,15 @@
         <tr>
             <th>Average favorite count</th>
             {% if not(user["signals"]["average_favorite_count"] is none) %}
-            <td>{{"{:.2f}".format(user["signals"]["average_favorite_count"])}}</td>
+            {% if user["signals"]["average_favorite_count"] >= 0.5 %}
+            <td class="green">
+                {{"{:.2f}".format(user["signals"]["average_favorite_count"])}}
+            </td>
+            {% else %}
+            <td>
+                {{"{:.2f}".format(user["signals"]["average_favorite_count"])}}
+            </td>
+            {% endif %}
             {% else %}
             <td>-</td>
             {% endif %}
@@ -203,7 +384,15 @@
         <tr>
             <th>Average retweet count</th>
             {% if not(user["signals"]["average_retweet_count"] is none) %}
-            <td>{{"{:.2f}".format(user["signals"]["average_retweet_count"])}}</td>
+            {% if user["signals"]["average_retweet_count"] >= 0 %}
+            <td class="green">
+                {{"{:.2f}".format(user["signals"]["average_retweet_count"])}}
+            </td>
+            {% else %}
+            <td>
+                {{"{:.2f}".format(user["signals"]["average_retweet_count"])}}
+            </td>
+            {% endif %}
             {% else %}
             <td>-</td>
             {% endif %}

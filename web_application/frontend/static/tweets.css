@@ -132,7 +132,7 @@ th{
 }
 
 #main-table, .signals-table{
-    min-height: 350px;
+    min-height: 450px;
     border: solid 1px #006699;
     box-shadow: 0px 0px 3px rgba(0, 0, 6, 0.7);
         -moz-box-shadow: 0px 0px 3px rgba(0, 0, 6, 0.7);
@@ -152,6 +152,12 @@ th{
 
     max-width: 240px;
     min-width: 200px;
+
+}
+
+.signals-table td{
+
+    text-align: center;
 
 }
 
@@ -282,6 +288,12 @@ th{
 }
 
 @media only screen and (max-width: 700px) {
+    body{
+          margin: 0px;
+          background: #70C0EF;
+
+    }
+
     #main-table-div, .signals-table-div{
         width: 98%;
         display: block;
@@ -291,6 +303,6 @@ th{
     }
     #main-table, .signals-table{
             min-width: 350px;
-        }
+    }
 
 }
