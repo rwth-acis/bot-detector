@@ -384,7 +384,7 @@
         <tr>
             <th>Average retweet count</th>
             {% if not(user["signals"]["average_retweet_count"] is none) %}
-            {% if user["signals"]["average_retweet_count"] >= 0 %}
+            {% if user["signals"]["average_retweet_count"] > 0 %}
             <td class="green">
                 {{"{:.2f}".format(user["signals"]["average_retweet_count"])}}
             </td>
