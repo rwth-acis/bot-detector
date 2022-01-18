@@ -20,10 +20,10 @@ def cresci_csv_to_json(path):
 
     """
     # csv.field_size_limit(2147483647)
-    csvfileusers = open(f'{path}users.csv', 'r', encoding="cp850")
-    csvfiletweets = open(f'{path}tweets.csv', 'r', encoding="cp850")
-    jsonfileusers = open(f'{path}users.json', 'w', encoding='cp850')
-    jsonfiletweets = open(f'{path}tweets.json', 'w', encoding='cp850')
+    csvfileusers = open(f'{path}users.csv', 'r', encoding="cp850", errors="replace")
+    csvfiletweets = open(f'{path}tweets-2.csv', 'r', encoding="cp850", errors="replace")
+    jsonfileusers = open(f'{path}users.json', 'w', encoding='cp850', errors="replace")
+    jsonfiletweets = open(f'{path}tweets.json', 'w', encoding='cp850', errors="replace")
 
     fieldnames1 = (
         "id", "name", "screen_name", "statuses_count", "followers_count", "friends_count", "favourites_count",
@@ -38,7 +38,9 @@ def cresci_csv_to_json(path):
         "follow_request_sent", "protected", "verified", "notifications", "description", "contributors_enabled",
         "following",
         "created_at", "timestamp", "crawled_at", "updated")
+
     reader = csv.DictReader(csvfileusers, fieldnames1)
+
     userObj = {'users': []}
 
     for row in reader:
@@ -54,13 +56,17 @@ def cresci_csv_to_json(path):
                    "reply_count", "favorite_count", "favorited", "retweeted", "possibly_sensitive", "num_hashtags",
                    "num_urls", "num_mentions", "created_at", "timestamp", "crawled_at", "updated")
 
+
     reader = csv.DictReader(csvfiletweets, fieldnames2)
 
     tweetsObj = {'tweets': []}
+    try:
+        for row in reader:
+            tweetsObj['tweets'].append(row)
+            print(row["id"])
+    except csv.Error as e:
+        sys.exit('file %s, line %d: %s' % (csvfiletweets, reader.line_num, e))
 
-    for row in reader:
-        tweetsObj['tweets'].append(row)
-        # print(row)
 
     jsonfiletweets.write(json.dumps(tweetsObj, ensure_ascii=False, indent=4))
     csvfiletweets.close()

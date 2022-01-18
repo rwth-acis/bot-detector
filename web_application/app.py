@@ -2,6 +2,7 @@ import copy
 import json
 import os
 from json import dumps
+import logging
 
 import tweepy as tweepy
 from flask import Flask, render_template, url_for, request
@@ -20,6 +21,7 @@ from dendritic_cell_algorithm.signal_generator import Signals, remove_urls, remo
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 load_dotenv()
+logging.getLogger().setLevel(logging.INFO)
 
 app = Flask(__name__, template_folder='frontend')
 

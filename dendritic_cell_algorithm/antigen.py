@@ -11,11 +11,7 @@ class Antigen:
         self.array = array
         self.result = result
 
-    def expose_to_cell(self, cell):
-        self.collected_by.setdefault(cell.id, {"cell": cell, "count": 0})
-        self.collected_by[cell.id]["count"] += 1
-        cell, status = cell.expose_cell(self)
-        return cell, status
+
 
     def can_be_classified(self):
         if self.number_of_copies == self.number_of_migrated_cells:
@@ -34,12 +30,14 @@ class Antigen:
                                                              mcav, ans, self.id))
         self.result.setdefault("classified_count", 0)
         self.result["classified_count"] += 1
+        classified_correctly = None
         if self.class_label != "unknown":
             classified_correctly = (self.class_label == ans)
             print("_______________________CORRECT?!_______________________")
             print(classified_correctly)
-            self.result.setdefault("classified_correctly_count", 0)
-            self.result["classified_correctly_count"] += 1
+            if classified_correctly:
+                self.result.setdefault("classified_correctly_count", 0)
+                self.result["classified_correctly_count"] += 1
             self.result[self.id] = 'Antigen {5} :: {0} / {1} = {2} -> {3} ' \
                                    ':: correct: {4} '.format(number_of_mdc,
                                                              self.number_of_migrated_cells,
@@ -47,8 +45,12 @@ class Antigen:
                                                              classified_correctly,
                                                              self.id)
 
-        self.array.remove(self)
-        print("remove")
+        try:
+            self.array.remove(self)
+            print("remove")
+        except Exception as e:
+            print("did not remove")
+
         print(self)
         return ans, classified_correctly
 
