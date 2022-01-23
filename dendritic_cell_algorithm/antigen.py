@@ -25,7 +25,7 @@ class Antigen:
             if self.collected_by[id]["cell"].class_label == "Anomaly":
                 number_of_mdc += self.collected_by[id]["count"]
         mcav = 0 if number_of_mdc == 0 else number_of_mdc / self.number_of_migrated_cells
-        ans = "Anomaly" if (mcav > 0.5) else "Normal"
+        ans = "Anomaly" if (mcav >= 0.4) else "Normal"
         print('{0} / {1} = {2} -> {3} :: Antigen {4}'.format(number_of_mdc, self.number_of_migrated_cells,
                                                              mcav, ans, self.id))
         self.result.setdefault("classified_count", 0)

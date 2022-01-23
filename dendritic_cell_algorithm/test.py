@@ -7,12 +7,13 @@ import time
 import logging
 from signal_generator_cresci_2017 import Signals
 
-
 from data_preprocessor import cresci_csv_to_json
 from data_preprocessor import collect_from_twitter
 
-cresci_csv_to_json('../datasets/cresci-2017/social_spambots_1.csv/')
+cresci_csv_to_json('../datasets/cresci-2017/genuine_accounts.csv/')
 # collect_from_twitter("covid19", 5, 5)
+
+
 
 """csvfile = open('../datasets/cresci-2017/social_spambots_1.csv/tweets.csv', 'r', errors="replace").readlines()
 filename = 1
@@ -40,12 +41,12 @@ else:
     print("Neutral")
     """
 
-pp = pprint.PrettyPrinter(indent=4, sort_dicts=False)
+"""pp = pprint.PrettyPrinter(indent=4, sort_dicts=False)
 
 f = open('../datasets/cresci-2017/traditional_spambots_1.csv/result.json', 'r', encoding="cp850")
 
 # Reading from file
-data = json.loads(f.read())
+data = json.loads(f.read())"""
 
 # Iterating through the json
 # list

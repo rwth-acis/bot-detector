@@ -6,7 +6,7 @@ import pprint
 from dotenv import load_dotenv
 from dendritic_cell import DendriticCell
 from antigen import Antigen
-from signal_generator_cresci_2017 import Signals
+from signal_generator_twibot_2020 import Signals
 
 
 def random_in_bounds(min_value, max_value):
@@ -42,7 +42,7 @@ if __name__ == "__main__":
     pp = pprint.PrettyPrinter(indent=4, sort_dicts=False)
 
     # JSON file
-    f = open('../datasets/cresci-2017/genuine_accounts.csv/result-1.json', "r", encoding="cp850")
+    f = open('../datasets/twibot-2020/dev.json', "r", encoding="cp850")
     # f = open('../datasets/cresci-2017/traditional_spambots1_sample.json', "r", encoding="cp850")
 
     # Reading from file
@@ -50,30 +50,37 @@ if __name__ == "__main__":
 
     # Iterating through the json
     # list
-    for user in data['users']:
+    for user in data:
         print(user)
-        if len(user["tweets"]) >= 0:
+        if user["tweet"] is None:
+            user["tweet"] = []
+        if len(user["tweet"]) >= 0:
             s = Signals()
-            s.generate_signals(int(user["friends_count"]), int(user["statuses_count"]), int(user["followers_count"]),
-                               int(user["verified"]) if (str(user["verified"]) != "NULL" and str(user["verified"]) != "") else False,
-                               int(user["default_profile"]) if (str(user["default_profile"]) != "NULL" and str(user["default_profile"]) != "") else False,
-                               int(user["default_profile_image"]) if (str(user["default_profile_image"]) != "NULL" and str(user["default_profile_image"]) != "") else False,
-                               user["timestamp"], user["name"],
-                               user["screen_name"], user["description"], user["tweets"])
+            s.generate_signals(int(user["profile"]["friends_count"][:-1]), int(user["profile"]["statuses_count"][:-1]),
+                               int(user["profile"]["followers_count"][:-1]),
+                               True if (user["profile"]["verified"] == "True ") else False,
+                               True if (user["profile"]["default_profile"] == "True ") else False,
+                               True if (user["profile"]["default_profile_image"] == "True ") else False,
+                               user["profile"]["created_at"][:-1], user["profile"]["name"][:-1],
+                               user["profile"]["screen_name"][:-1], user["profile"]["description"][:-1], user["tweet"])
 
-            print(user["id"])
+            print(user["ID"])
             print(s.get_k())
-            new_antigen = Antigen(user["id"], user["screen_name"], s.get_k(), s.get_csm(), 5,
-                                  antigen_array, result, class_label="Normal")
+            if user["label"] == "1":
+                new_antigen = Antigen(user["ID"], user["profile"]["screen_name"], s.get_k(), s.get_csm(), 10,
+                                      antigen_array, result, class_label="Anomaly")
+            else:
+                new_antigen = Antigen(user["ID"], user["profile"]["screen_name"], s.get_k(), s.get_csm(), 10,
+                                      antigen_array, result, class_label="Normal")
             antigen_array.append(new_antigen)
         else:
-            print(user["id"])
+            print(user["ID"])
             print("not enough tweets")
 
     # =========================== INITIALIZE DCs ====================================
 
     dc_array = []
-    for i in range(100):
+    for i in range(200):
         dc = DendriticCell(str(i))
         dc_array.append(dc)
 
@@ -127,7 +134,7 @@ if __name__ == "__main__":
     """with open('result1.json', 'w') as outfile:
             outfile.write(jsonStr)"""
 
-    with open('../datasets/cresci-2017/genuine_accounts.csv/result-DCA-of-1.json', 'w') as outfile:
+    with open('../datasets/twibot-2020/result-dev.json', 'w') as outfile:
         outfile.write(jsonStr)
 
     # Closing file

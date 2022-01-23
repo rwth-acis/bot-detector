@@ -151,7 +151,8 @@ class Signals:
         return self._smDC_bad_intentions
 
     def update_smDC(self):
-        self._smDC = float(os.environ['W_PAMP_SMDC']) * self._pamp + float(os.environ['W_DS_SMDC']) * self._danger_signal + \
+        self._smDC = float(os.environ['W_PAMP_SMDC']) * self._pamp + float(
+            os.environ['W_DS_SMDC']) * self._danger_signal + \
                      float(os.environ['W_SS_SMDC']) * self._safe_signal
         self._smDC_bot = float(os.environ['W_PAMP_SMDC']) * self._pamp_bot + float(os.environ[
                                                                                        'W_DS_SMDC']) * self._danger_signal_bot + \
@@ -209,8 +210,9 @@ class Signals:
                                   "default_profile")
 
         logging.info("Check default_profile_image")
-        self.increase_danger_signal(float(os.environ["DEFAULT_PROFILE_IMAGE_DS_MULTIPLIER"]) * int(default_profile_image),
-                                    True, False, "default_profile_image")
+        self.increase_danger_signal(
+            float(os.environ["DEFAULT_PROFILE_IMAGE_DS_MULTIPLIER"]) * int(default_profile_image),
+            True, False, "default_profile_image")
         self.increase_safe_signal(
             float(os.environ["DEFAULT_PROFILE_IMAGE_SS_MULTIPLIER"]) * (1 - int(default_profile_image)),
             True, False, "default_profile_image")
@@ -330,8 +332,10 @@ class Signals:
                 False, True, "average_retweet_count")"""
 
             self.increase_safe_signal(min(determine_signal_strength(average_retweet_count, ">=",
-                                                                    float(os.environ["SS_THRESHOLD_AVERAGE_RETWEET_COUNT"]),
-                                                                    float(os.environ["SS_INTERVAL_AVERAGE_RETWEET_COUNT"])),
+                                                                    float(os.environ[
+                                                                              "SS_THRESHOLD_AVERAGE_RETWEET_COUNT"]),
+                                                                    float(os.environ[
+                                                                              "SS_INTERVAL_AVERAGE_RETWEET_COUNT"])),
                                           float(os.environ["SS_UPPER_BOUND_BASIC_RATIO"]) * len(tweets)),
                                       False, True, "average_retweet_count")
 
@@ -343,8 +347,10 @@ class Signals:
                 False, True, "average_retweet_count")
 
             self.increase_safe_signal(min(determine_signal_strength(average_favorite_count, ">=",
-                                                                    float(os.environ["SS_THRESHOLD_AVERAGE_FAVORITE_COUNT"]),
-                                                                    float(os.environ["SS_INTERVAL_AVERAGE_FAVORITE_COUNT"])),
+                                                                    float(os.environ[
+                                                                              "SS_THRESHOLD_AVERAGE_FAVORITE_COUNT"]),
+                                                                    float(os.environ[
+                                                                              "SS_INTERVAL_AVERAGE_FAVORITE_COUNT"])),
                                           float(os.environ["SS_UPPER_BOUND_BASIC_RATIO"]) * len(tweets)),
                                       False, True, "average_retweet_count")
 
@@ -361,8 +367,9 @@ class Signals:
         # self.increase_danger_signal(determine_signal_strength(screen_name_length, ">=", 13, 2))
 
         identifies_itself_as_bot = contains_bot_info(description)
-        self.increase_safe_signal(float(os.environ["SS_MULTIPLIER_IDENTIFIES_ITSELF_AS_BOT"]) * int(identifies_itself_as_bot),
-                                  False, True, "identifies_itself_as_bot")
+        self.increase_safe_signal(
+            float(os.environ["SS_MULTIPLIER_IDENTIFIES_ITSELF_AS_BOT"]) * int(identifies_itself_as_bot),
+            False, True, "identifies_itself_as_bot")
 
         if friends_count > 0:
             followers_friends_ratio = followers_count / friends_count
@@ -382,17 +389,20 @@ class Signals:
             statuses_growth_rate = statuses_count / user_age
             logging.info("friends_growth_rate")
             self.increase_danger_signal(
-                min(float(os.environ["DS_MULTIPLIER_FRIENDS_GROWTH_RATE"]) * determine_signal_strength(friends_growth_rate, ">=",
-                                                                                                       float(os.environ["DS_THRESHOLD_FRIENDS_GROWTH_RATE"]),
-                                                                                                       float(os.environ["DS_INTERVAL_FRIENDS_GROWTH_RATE"])),
+                min(float(os.environ["DS_MULTIPLIER_FRIENDS_GROWTH_RATE"]) * determine_signal_strength(
+                    friends_growth_rate, ">=",
+                    float(os.environ["DS_THRESHOLD_FRIENDS_GROWTH_RATE"]),
+                    float(os.environ["DS_INTERVAL_FRIENDS_GROWTH_RATE"])),
                     user_age * float(os.environ["DS_UPPER_BOUND_FRIENDS_GROWTH_RATE"])), True, False,
                 "friends_growth_rate")
 
             logging.info("statuses_growth_rate")
-            self.increase_danger_signal(float(os.environ["DS_MULTIPLIER_STATUSES_GROWTH_RATE"]) * determine_signal_strength(statuses_growth_rate, ">=",
-                                                                                                                            float(os.environ["DS_THRESHOLD_STATUSES_GROWTH_RATE"]),
-                                                                                                                            float(os.environ["DS_INTERVAL_STATUSES_GROWTH_RATE"])), True, False,
-                                        "statuses_growth_rate")
+            self.increase_danger_signal(
+                float(os.environ["DS_MULTIPLIER_STATUSES_GROWTH_RATE"]) * determine_signal_strength(
+                    statuses_growth_rate, ">=",
+                    float(os.environ["DS_THRESHOLD_STATUSES_GROWTH_RATE"]),
+                    float(os.environ["DS_INTERVAL_STATUSES_GROWTH_RATE"])), True, False,
+                "statuses_growth_rate")
 
         else:
             friends_growth_rate = None
@@ -445,7 +455,7 @@ def average_tweet_similarity(tweets):
         return 0
     # tweets_with_replaced_urls = replace_urls(copy.deepcopy(tweets))
     # tweets_with_replaced_users = replace_user_mentions(copy.deepcopy(tweets))
-    # tweets_with_replaced_all = replace_user_mentions(copy.deepcopy(tweets_with_replaced_urls))
+    # tweets_with_replaced_all = replace_user_mentions(replace_urls(copy.deepcopy(tweets)))
 
     i = 0
     while i < len(tweets):
@@ -477,6 +487,14 @@ def replace_urls(tweets):
                                                   tweet["entities"]["urls"][i]["expanded_url"])
             i += 1
     return tweets
+    """
+    for tweet in tweets:
+        i = 0
+        while i < len(tweet["entities"]["urls"]):
+            tweet["text"] = tweet["text"].replace(tweet["entities"]["urls"][i]["url"],
+                                                  "https://hier-is-url")
+            i += 1
+    return tweets"""
 
 
 def remove_urls(tweet):
@@ -502,14 +520,23 @@ def replace_user_mentions(tweets):
             tweet["text"] = tweet["text"].replace(tweet["entities"]["user_mentions"][i]["screen_name"], "")
             i += 1
     return tweets
+    """
+    for tweet in tweets:
+        i = 0
+        while i < len(tweet["entities"]["user_mentions"]):
+            tweet["text"] = tweet["text"].replace(tweet["entities"]["user_mentions"][i]["screen_name"], "screen_name")
+            i += 1
+    return tweets"""
 
 
 def similarity(string1, string2):
     max_length = max(len(string1), len(string2))
     # levenshtein_distance = nltk.edit_distance(string1, string2)
     levenshtein_distance = enchant.utils.levenshtein(string1, string2)
-
-    similarity_metric = ((max_length - levenshtein_distance) / max_length)
+    if max_length > 0:
+        similarity_metric = ((max_length - levenshtein_distance) / max_length)
+    else:
+        similarity_metric = 1
     return similarity_metric
 
 
@@ -608,7 +635,8 @@ def calculate_tweet_parameters(tweets):
         count += 1
         if "retweeted_status" in tweet:
             if tweet["retweeted_status"]:
-                is_retweet_count += 1
+                if tweet["retweeted_status"] != '0':
+                    is_retweet_count += 1
 
         urls_count += tweet["text"].count("http")
         user_mentions_count += tweet["text"].count("@")
@@ -617,7 +645,8 @@ def calculate_tweet_parameters(tweets):
         retweet_count += int(tweet["retweet_count"])
         if "possibly_sensitive" in tweet:
             if tweet["possibly_sensitive"]:
-                is_sensitive_count += 1
+                if tweet["possibly_sensitive"] != "NULL":
+                    is_sensitive_count += 1
 
     return is_retweet_count / count, urls_count / count, user_mentions_count / count, hashtag_count / count, favorite_count / count, retweet_count / count, is_sensitive_count
 

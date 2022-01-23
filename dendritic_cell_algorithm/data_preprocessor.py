@@ -20,10 +20,14 @@ def cresci_csv_to_json(path):
 
     """
     # csv.field_size_limit(2147483647)
-    csvfileusers = open(f'{path}users.csv', 'r', encoding="cp850", errors="replace")
-    csvfiletweets = open(f'{path}tweets-2.csv', 'r', encoding="cp850", errors="replace")
-    jsonfileusers = open(f'{path}users.json', 'w', encoding='cp850', errors="replace")
-    jsonfiletweets = open(f'{path}tweets.json', 'w', encoding='cp850', errors="replace")
+    csvfileusers1 = open(f'{path}users-1.csv', 'r', encoding="cp850", errors="replace")
+    csvfileusers2 = open(f'{path}users-2.csv', 'r', encoding="cp850", errors="replace")
+    csvfiletweets1 = open(f'{path}tweets-1.csv', 'r', encoding="cp850", errors="replace")
+    csvfiletweets2 = open(f'{path}tweets-2.csv', 'r', encoding="cp850", errors="replace")
+    jsonfileusers1 = open(f'{path}users-1.json', 'w', encoding='cp850', errors="replace")
+    jsonfileusers2 = open(f'{path}users-2.json', 'w', encoding='cp850', errors="replace")
+    jsonfiletweets1 = open(f'{path}tweets-1.json', 'w', encoding='cp850', errors="replace")
+    jsonfiletweets2 = open(f'{path}tweets-2.json', 'w', encoding='cp850', errors="replace")
 
     fieldnames1 = (
         "id", "name", "screen_name", "statuses_count", "followers_count", "friends_count", "favourites_count",
@@ -39,17 +43,29 @@ def cresci_csv_to_json(path):
         "following",
         "created_at", "timestamp", "crawled_at", "updated")
 
-    reader = csv.DictReader(csvfileusers, fieldnames1)
+    reader = csv.DictReader(csvfileusers1, fieldnames1)
 
-    userObj = {'users': []}
+    userObj1 = {'users': []}
 
     for row in reader:
-        userObj['users'].append(row)
+        userObj1['users'].append(row)
         # print(row)
 
-    jsonfileusers.write(json.dumps(userObj, ensure_ascii=False, indent=4))
-    csvfileusers.close()
-    jsonfileusers.close()
+    jsonfileusers1.write(json.dumps(userObj1, ensure_ascii=False, indent=4))
+    csvfileusers1.close()
+    jsonfileusers1.close()
+
+    reader = csv.DictReader(csvfileusers2, fieldnames1)
+
+    userObj2 = {'users': []}
+
+    for row in reader:
+        userObj2['users'].append(row)
+        # print(row)
+
+    jsonfileusers2.write(json.dumps(userObj2, ensure_ascii=False, indent=4))
+    csvfileusers2.close()
+    jsonfileusers2.close()
 
     fieldnames2 = ("id", "text", "source", "user_id", "truncated", "in_reply_to_status_id", "in_reply_to_user_id",
                    "in_reply_to_screen_name", "retweeted_status_id", "geo", "place", "contributors", "retweet_count",
@@ -57,33 +73,76 @@ def cresci_csv_to_json(path):
                    "num_urls", "num_mentions", "created_at", "timestamp", "crawled_at", "updated")
 
 
-    reader = csv.DictReader(csvfiletweets, fieldnames2)
+    reader = csv.DictReader(csvfiletweets1, fieldnames2)
 
-    tweetsObj = {'tweets': []}
+    tweetsObj1 = {'tweets': []}
+
     try:
         for row in reader:
-            tweetsObj['tweets'].append(row)
+            tweetsObj1['tweets'].append(row)
             print(row["id"])
     except csv.Error as e:
-        sys.exit('file %s, line %d: %s' % (csvfiletweets, reader.line_num, e))
+        sys.exit('file %s, line %d: %s' % (csvfiletweets1, reader.line_num, e))
+
+    reader = csv.DictReader(csvfiletweets2, fieldnames2)
+
+    tweetsObj2 = {'tweets': []}
+
+    try:
+        for row in reader:
+            tweetsObj2['tweets'].append(row)
+            print(row["id"])
+    except csv.Error as e:
+        sys.exit('file %s, line %d: %s' % (csvfiletweets2, reader.line_num, e))
 
 
-    jsonfiletweets.write(json.dumps(tweetsObj, ensure_ascii=False, indent=4))
-    csvfiletweets.close()
-    jsonfiletweets.close()
+    jsonfiletweets1.write(json.dumps(tweetsObj1, ensure_ascii=False, indent=4))
+    csvfiletweets1.close()
+    jsonfiletweets1.close()
 
-    for d in userObj["users"]:
+    jsonfiletweets2.write(json.dumps(tweetsObj2, ensure_ascii=False, indent=4))
+    csvfiletweets2.close()
+    jsonfiletweets2.close()
+
+    for d in userObj1["users"]:
         d["tweets"] = []
 
-    for data_item in userObj["users"]:
+    for data_item in userObj1["users"]:
         # print(data_item['id'], data_item['name'])
-        for tweet in tweetsObj["tweets"]:
+        for tweet in tweetsObj1["tweets"]:
+            print(tweet['user_id'])
+            if tweet['user_id'] == data_item['id']:
+                data_item["tweets"].append(tweet)
+                # print(f'Time: {tweet["timestamp"]}, text: {tweet["text"]}')
+        for tweet in tweetsObj2["tweets"]:
+            print(tweet['user_id'])
             if tweet['user_id'] == data_item['id']:
                 data_item["tweets"].append(tweet)
                 # print(f'Time: {tweet["timestamp"]}, text: {tweet["text"]}')
 
-    with open(f'{path}result.json', "w", encoding='cp850') as outfile:
-        outfile.write(json.dumps(userObj, ensure_ascii=False, indent=4))
+    with open(f'{path}result-1.json', "w", encoding='cp850') as outfile:
+        outfile.write(json.dumps(userObj1, ensure_ascii=False, indent=4))
+
+
+
+    for d in userObj2["users"]:
+        d["tweets"] = []
+
+    for data_item in userObj2["users"]:
+        # print(data_item['id'], data_item['name'])
+        for tweet in tweetsObj1["tweets"]:
+            print(tweet['user_id'])
+            if tweet['user_id'] == data_item['id']:
+                data_item["tweets"].append(tweet)
+                # print(f'Time: {tweet["timestamp"]}, text: {tweet["text"]}')
+        for tweet in tweetsObj2["tweets"]:
+            print(tweet['user_id'])
+            if tweet['user_id'] == data_item['id']:
+                data_item["tweets"].append(tweet)
+                # print(f'Time: {tweet["timestamp"]}, text: {tweet["text"]}')
+
+    with open(f'{path}result-2.json', "w", encoding='cp850') as outfile:
+        outfile.write(json.dumps(userObj2, ensure_ascii=False, indent=4))
 
 
 def collect_from_twitter(keyword, user_count, tweet_count):
