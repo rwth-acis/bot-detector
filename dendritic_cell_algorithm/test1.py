@@ -16,7 +16,6 @@ def random_in_bounds(min_value, max_value):
 
 if __name__ == "__main__":
     start = time.time()
-    load_dotenv()
     logging.getLogger().setLevel(logging.INFO)
     # =========================== INITIALIZE ANTIGENS ====================================
     """    
@@ -42,7 +41,7 @@ if __name__ == "__main__":
     pp = pprint.PrettyPrinter(indent=4, sort_dicts=False)
 
     # JSON file
-    f = open('../datasets/twibot-2020/dev.json', "r", encoding="cp850")
+    f = open('../datasets/twibot-2020/data_sample.json', "r", encoding="cp850")
     # f = open('../datasets/cresci-2017/traditional_spambots1_sample.json', "r", encoding="cp850")
 
     # Reading from file

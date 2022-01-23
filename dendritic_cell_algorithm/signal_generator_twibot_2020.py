@@ -12,6 +12,8 @@ from datetime import date, datetime
 import operator
 import logging
 
+from dotenv import load_dotenv
+
 
 class Signals:
     def __init__(self):
@@ -46,6 +48,8 @@ class Signals:
         self._is_bot_probability = 0
 
         self._parameters = {}
+        load_dotenv(dotenv_path="var.env")
+
 
     def get_pamp(self):
         return self._pamp

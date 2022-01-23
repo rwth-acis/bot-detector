@@ -1,5 +1,4 @@
-{
-   "users":[
+[
       {
          "ID":"17461978",
          "profile":{
@@ -249,7 +248,8 @@
             "Politics",
             "Bussiness",
             "Entertainment"
-         ]
+         ],
+         "label": "1"
       },
       {
          "ID":"1297437077403885568",
@@ -313,7 +313,8 @@
          },
          "domain":[
             "Politics"
-         ]
+         ],
+         "label": "1"
       },
       {
          "ID":"17685258",
@@ -589,7 +590,8 @@
             "Politics",
             "Entertainment",
             "Sports"
-         ]
+         ],
+         "label": "0"
       },
       {
          "ID":"15750898",
@@ -863,7 +865,7 @@
          },
          "domain":[
             "Politics"
-         ]
+         ],
+         "label": "1"
       }
-   ]
-}
+]
