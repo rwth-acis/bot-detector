@@ -118,17 +118,17 @@ if __name__ == "__main__":
             dc = DendriticCell(str(dc_count))
             dc_array.append(dc)
 
-    print("antigens: ")
-    print([str(item) for item in antigen_array])
-    print("DCells: ")
-    print([str(item) for item in dc_array])
+    logging.info("antigens: ")
+    logging.info([str(item) for item in antigen_array])
+    logging.info("DCells: ")
+    logging.info([str(item) for item in dc_array])
 
     # ======================= END: Save results to file ==================================
     end = time.time()
-    print(end - start)
+    logging.info(end - start)
     result["time"] = str(int((end - start)/60)) + ":" + str(int((end - start) - 60*int((end - start)/60)))
     jsonStr = json.dumps(result, indent=4)
-    print(jsonStr)
+    logging.info(jsonStr)
 
     """with open('result1.json', 'w') as outfile:
             outfile.write(jsonStr)"""

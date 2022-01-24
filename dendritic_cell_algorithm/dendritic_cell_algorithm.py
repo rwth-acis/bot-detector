@@ -59,7 +59,7 @@ def dc_algorithm_cresci_2017(path):
 
             logging.info(user["id"])
             logging.info(s.get_k())
-            new_antigen = Antigen(user["id"], user["screen_name"], s.get_k(), s.get_csm(), 5,
+            new_antigen = Antigen(user["id"], {"screen_name": user["screen_name"], "parameters": s.get_parameters()}, s.get_k(), s.get_csm(), 5,
                                   antigen_array, result, class_label="Normal")
             antigen_array.append(new_antigen)
         else:
@@ -178,10 +178,10 @@ def dc_algorithm_twibot_2020(path):
             logging.info(user["ID"])
             logging.info(s.get_k())
             if user["label"] == "1":
-                new_antigen = Antigen(user["ID"], user["profile"]["screen_name"], s.get_k(), s.get_csm(), 10,
+                new_antigen = Antigen(user["ID"], {"screen_name": user["profile"]["screen_name"][:-1], "parameters": s.get_parameters()}, s.get_k(), s.get_csm(), 10,
                                       antigen_array, result, class_label="Anomaly")
             else:
-                new_antigen = Antigen(user["ID"], user["profile"]["screen_name"], s.get_k(), s.get_csm(), 10,
+                new_antigen = Antigen(user["ID"], {"screen_name": user["profile"]["screen_name"][:-1], "parameters": s.get_parameters()}, s.get_k(), s.get_csm(), 10,
                                       antigen_array, result, class_label="Normal")
             antigen_array.append(new_antigen)
         else:

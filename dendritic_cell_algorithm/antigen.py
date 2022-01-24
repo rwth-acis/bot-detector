@@ -39,12 +39,12 @@ class Antigen:
             if classified_correctly:
                 self.result.setdefault("classified_correctly_count", 0)
                 self.result["classified_correctly_count"] += 1
-            self.result[self.id] = 'Antigen {5} :: {0} / {1} = {2} -> {3} ' \
-                                   ':: correct: {4} '.format(number_of_mdc,
-                                                             self.number_of_migrated_cells,
-                                                             mcav, ans,
-                                                             classified_correctly,
-                                                             self.id)
+            self.result[self.id] = {"mature_rate": '{0} / {1} = {2} -> {3}'.format(number_of_mdc,
+                                                                                   self.number_of_migrated_cells,
+                                                                                   mcav, ans),
+                                    "correct": classified_correctly,
+                                    "parameters": self.value["parameters"],
+                                    "screen_name": self.value["screen_name"]}
 
         try:
             self.array.remove(self)

@@ -9,9 +9,15 @@ from signal_generator_cresci_2017 import Signals
 
 from data_preprocessor import cresci_csv_to_json
 from data_preprocessor import collect_from_twitter
+from dendritic_cell_algorithm import dc_algorithm_cresci_2017
 
-cresci_csv_to_json('../datasets/cresci-2017/genuine_accounts.csv/')
-# collect_from_twitter("covid19", 5, 5)
+from dendritic_cell_algorithm import dc_algorithm_twibot_2020
+
+logging.getLogger().setLevel(logging.INFO)
+dc_algorithm_twibot_2020("../datasets/twibot-2020/data_sample.json")
+
+"""cresci_csv_to_json('../datasets/cresci-2017/genuine_accounts.csv/')
+# collect_from_twitter("covid19", 5, 5)"""
 
 
 
