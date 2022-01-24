@@ -6,7 +6,8 @@ import pprint
 from dotenv import load_dotenv
 from dendritic_cell import DendriticCell
 from antigen import Antigen
-from signal_generator_cresci_2017 import Signals
+from signal_generator_cresci_2017 import Signals as Signals_cresci_2017
+from signal_generator_twibot_2020 import Signals as Signals_twibot_2020
 
 
 def random_in_bounds(min_value, max_value):
@@ -48,7 +49,7 @@ def dc_algorithm_cresci_2017(path):
     for user in data['users']:
         logging.info(user)
         if len(user["tweets"]) >= 0:
-            s = Signals()
+            s = Signals_cresci_2017()
             s.generate_signals(int(user["friends_count"]), int(user["statuses_count"]), int(user["followers_count"]),
                                int(user["verified"]) if (str(user["verified"]) != "NULL" and str(user["verified"]) != "") else False,
                                int(user["default_profile"]) if (str(user["default_profile"]) != "NULL" and str(user["default_profile"]) != "") else False,
@@ -165,7 +166,7 @@ def dc_algorithm_twibot_2020(path):
         if user["tweet"] is None:
             user["tweet"] = []
         if len(user["tweet"]) >= 0:
-            s = Signals()
+            s = Signals_twibot_2020()
             s.generate_signals(int(user["profile"]["friends_count"][:-1]), int(user["profile"]["statuses_count"][:-1]),
                                int(user["profile"]["followers_count"][:-1]),
                                True if (user["profile"]["verified"] == "True ") else False,
