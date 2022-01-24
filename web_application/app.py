@@ -81,9 +81,9 @@ def result():
                 if user["user"]["location"]:
                     try:
                         location = geo_locator.geocode(user["user"]["location"])
-                        print(location)
+                        logging.info(location)
                         if location is None:
-                            print("try to add loc")
+                            logging.info("try to add loc")
                             col.update_one({"_id": user["_id"]}, {'$set': {'coordinates': ""}})
                     except Exception as e:
                         continue
@@ -105,7 +105,7 @@ def result():
                                               icon=folium.Icon(color='green')).add_to(
                                     folium_map)
 
-                        print("try to add loc")
+                        logging.info("try to add loc")
                         col.update_one({"_id": user["_id"]},
                                        {'$set': {'coordinates': [location.latitude, location.longitude]}})
             if user["signals"]["is_bot_probability"] >= 50:
@@ -130,7 +130,7 @@ def result():
                                positive_count2=positive_count2, neutral_count2=neutral_count2)
     except Exception as e:
         # return dumps({'error': str(e)})
-        print(e)
+        logging.info(e)
 
 
 @app.route('/covid')
@@ -149,30 +149,30 @@ def covid():
     tweets = tweepy.Cursor(api.search_tweets, q="#covid19", lang="en", tweet_mode='extended').items(20)
 
     for tweet in tweets:
-        # print("created_at: ", tweet.created_at, ", text: ", tweet.retweeted_status.full_text, ", user: user_id: ",tweet.user.id, ", user_name: ", tweet.user.name, ", followers_count: ", tweet.user.followers_count)
+        # logging.info("created_at: ", tweet.created_at, ", text: ", tweet.retweeted_status.full_text, ", user: user_id: ",tweet.user.id, ", user_name: ", tweet.user.name, ", followers_count: ", tweet.user.followers_count)
         userObj = {}
         user = api.get_user(screen_name=tweet.user.screen_name)._json
         user.pop('status', None)
         userObj["user"] = user
         userObj["found_tweet"] = tweet._json
 
-        print("sentiment!")
+        logging.info("sentiment!")
         analyzer = SentimentIntensityAnalyzer()
         tweet_modified = remove_user_mentions(remove_urls(copy.deepcopy(userObj["found_tweet"])))
         sentence = tweet_modified["full_text"]
         sentiment = analyzer.polarity_scores(sentence)
-        print(sentence)
-        print(sentiment['compound'])
+        logging.info(sentence)
+        logging.info(sentiment['compound'])
         if sentiment['compound'] >= 0.1:
-            print("Positive")
+            logging.info("Positive")
             userObj["found_tweet"]["sentiment"] = "positive"
 
         elif sentiment['compound'] <= - 0.2:
-            print("Negative")
+            logging.info("Negative")
             userObj["found_tweet"]["sentiment"] = "negative"
 
         else:
-            print("Neutral")
+            logging.info("Neutral")
             userObj["found_tweet"]["sentiment"] = "positive"
 
         userObj["tweets"] = []
@@ -198,7 +198,7 @@ def covid():
                                      user["description"],
                                      userObj["tweets"])
 
-        print(new_signals.get_parameters())
+        logging.info(new_signals.get_parameters())
         userObj["signals"] = new_signals.get_parameters()
         col.insert_one(dict(userObj))
 
@@ -209,10 +209,10 @@ def covid():
 def delete():
     users = col.find()
     for user in users:
-        print("check!")
-        print(user["_id"])
+        logging.info("check!")
+        logging.info(user["_id"])
         if user["signals"]["k"] < 30:
-            print("delete!")
+            logging.info("delete!")
             col.delete_one({"_id": user["_id"]})
     return "OK!"
 
@@ -221,7 +221,7 @@ def delete():
 def recalculate():
     users = col.find()
     for user in users:
-        print("recalculate!")
+        logging.info("recalculate!")
         new_signals = Signals()
         new_signals.generate_signals(user["user"]["friends_count"], user["user"]["statuses_count"],
                                      user["user"]["followers_count"],
@@ -242,25 +242,25 @@ def recalculate():
 def calculate_sentiment():
     users = col.find()
     for user in users:
-        print("sentiment!")
+        logging.info("sentiment!")
         analyzer = SentimentIntensityAnalyzer()
         tweet = remove_user_mentions(remove_urls(user["found_tweet"]))
         sentence = tweet["full_text"]
         sentiment = analyzer.polarity_scores(sentence)
-        print(sentence)
-        print(sentiment['compound'])
+        logging.info(sentence)
+        logging.info(sentiment['compound'])
         if sentiment['compound'] >= 0.1:
-            print("Positive")
+            logging.info("Positive")
             col.update_one({"_id": user["_id"]},
                            {'$set': {'found_tweet.sentiment': "positive"}})
 
         elif sentiment['compound'] <= - 0.2:
-            print("Negative")
+            logging.info("Negative")
             col.update_one({"_id": user["_id"]},
                            {'$set': {'found_tweet.sentiment': "negative"}})
 
         else:
-            print("Neutral")
+            logging.info("Neutral")
             col.update_one({"_id": user["_id"]},
                            {'$set': {'found_tweet.sentiment': "neutral"}})
     return "OK!"
@@ -342,7 +342,7 @@ def user_check(screen_name):
         userObj["user"] = user
 
         userObj["tweets"] = []
-        print(screen_name)
+        logging.info(screen_name)
         tweets_raw = api.user_timeline(screen_name=screen_name,
                                        # max 200 tweets
                                        count=20,
@@ -350,7 +350,7 @@ def user_check(screen_name):
                                        # Necessary to keep full_text
                                        tweet_mode='extended'
                                        )
-        print(tweets_raw)
+        logging.info(tweets_raw)
         for fulltweet in tweets_raw:
             tw = fulltweet._json
             tw.pop('user', None)
@@ -367,7 +367,7 @@ def user_check(screen_name):
                                      user["description"],
                                      userObj["tweets"])
 
-        print(new_signals.get_parameters())
+        logging.info(new_signals.get_parameters())
         userObj["signals"] = new_signals.get_parameters()
 
         return render_template('user-check.html', blank=False, exception=False, tweetArr=json.dumps(userObj["tweets"]), user=userObj)

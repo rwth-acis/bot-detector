@@ -28,17 +28,17 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 analyzer = SentimentIntensityAnalyzer()
 sentence = "The food was bad!"
 sentiment = analyzer.polarity_scores(sentence)
-print(sentence)
-print(sentiment['compound'])
+logging.info(sentence)
+logging.info(sentiment['compound'])
 
 if sentiment['compound'] >= 0.05:
-    print("Positive")
+    logging.info("Positive")
 
 elif sentiment['compound'] <= - 0.05:
-    print("Negative")
+    logging.info("Negative")
 
 else:
-    print("Neutral")
+    logging.info("Neutral")
     """
 
 """pp = pprint.PrettyPrinter(indent=4, sort_dicts=False)
@@ -51,7 +51,7 @@ data = json.loads(f.read())"""
 # Iterating through the json
 # list
 """for user in data['users']:
-    print(user["default_profile"])
+    logging.info(user["default_profile"])
     s = Signals()
     s.generate_signals(int(user["friends_count"]), int(user["statuses_count"]), int(user["followers_count"]),
                        user["verified"] if (str(user["verified"]) == "NULL" and str(user["verified"]) == "") else False,
@@ -69,7 +69,7 @@ logging.getLogger().setLevel(logging.DEBUG)
 logging.info('%s sec', str(int((end - start)/60)) + ":" + str(int((end - start) - int((end - start)/60))))
 
 os.environ['AAA'] = 'aaa'
-print(os.environ['AAA'])
+logging.info(os.environ['AAA'])
 os.environ['AAA'] = 'bbb'
-print(os.environ['AAA'])
+logging.info(os.environ['AAA'])
 """

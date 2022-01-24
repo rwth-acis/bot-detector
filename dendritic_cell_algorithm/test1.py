@@ -32,8 +32,8 @@ if __name__ == "__main__":
                               antigen_array, result, class_label="Anomaly")
         antigen_array.append(new_antigen)
 
-    print("antigen_array")
-    print([str(item) for item in antigen_array])
+    logging.info("antigen_array")
+    logging.info([str(item) for item in antigen_array])
     """
     antigen_array = []
     result = {"classified_count": 0, "classified_correctly_count": 0, "time": 0}
@@ -50,7 +50,7 @@ if __name__ == "__main__":
     # Iterating through the json
     # list
     for user in data:
-        print(user)
+        logging.info(user)
         if user["tweet"] is None:
             user["tweet"] = []
         if len(user["tweet"]) >= 0:
@@ -63,8 +63,8 @@ if __name__ == "__main__":
                                user["profile"]["created_at"][:-1], user["profile"]["name"][:-1],
                                user["profile"]["screen_name"][:-1], user["profile"]["description"][:-1], user["tweet"])
 
-            print(user["ID"])
-            print(s.get_k())
+            logging.info(user["ID"])
+            logging.info(s.get_k())
             if user["label"] == "1":
                 new_antigen = Antigen(user["ID"], user["profile"]["screen_name"], s.get_k(), s.get_csm(), 10,
                                       antigen_array, result, class_label="Anomaly")
@@ -73,8 +73,8 @@ if __name__ == "__main__":
                                       antigen_array, result, class_label="Normal")
             antigen_array.append(new_antigen)
         else:
-            print(user["ID"])
-            print("not enough tweets")
+            logging.info(user["ID"])
+            logging.info("not enough tweets")
 
     # =========================== INITIALIZE DCs ====================================
 
@@ -83,17 +83,17 @@ if __name__ == "__main__":
         dc = DendriticCell(str(i))
         dc_array.append(dc)
 
-    print("dc_array")
-    print([str(item) for item in dc_array])
+    logging.info("dc_array")
+    logging.info([str(item) for item in dc_array])
 
     # =========================== DC ALGORITHM =======================================
 
     dc_count = len(dc_array)
     for antigen in antigen_array[:]:
-        print(antigen)
+        logging.info(antigen)
         for i in range(antigen.number_of_copies):
             cell_random = int(random_in_bounds(0, (len(dc_array) - 1)))
-            print("expose cell {0} to antigen {1}".format(int(dc_array[cell_random].id), int(antigen.id)))
+            logging.info("expose cell {0} to antigen {1}".format(int(dc_array[cell_random].id), int(antigen.id)))
             cell, status = dc_array[cell_random].expose_cell(antigen)
 
             if status == 1:
@@ -102,15 +102,15 @@ if __name__ == "__main__":
                 dc = DendriticCell(str(dc_count))
                 dc_array.append(dc)
 
-    print("antigens: ")
-    print([str(item) for item in antigen_array])
-    print("DCells: ")
-    print([str(item) for item in dc_array])
+    logging.info("antigens: ")
+    logging.info([str(item) for item in antigen_array])
+    logging.info("DCells: ")
+    logging.info([str(item) for item in dc_array])
 
     # ======================= END: Force all cells to migrate ==================================
     last_antigen = Antigen(str("last"), "last", 0, 400, 20, antigen_array, {})
     for dcell in dc_array[:]:
-        print("expose cell {0} to antigen {1}".format(dcell.id, last_antigen.id))
+        logging.info("expose cell {0} to antigen {1}".format(dcell.id, last_antigen.id))
         cell, status = dcell.expose_cell(last_antigen)
         if status == 1:
             dc_count += 1

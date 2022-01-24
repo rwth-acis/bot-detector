@@ -1,3 +1,6 @@
+import logging
+
+
 class Antigen:
     def __init__(self, id, value, k, cms, number_of_copies, array=[], result={}, class_label="unknown"):
         self.id = id
@@ -10,8 +13,6 @@ class Antigen:
         self.collected_by = {}
         self.array = array
         self.result = result
-
-
 
     def can_be_classified(self):
         if self.number_of_copies == self.number_of_migrated_cells:
@@ -26,15 +27,15 @@ class Antigen:
                 number_of_mdc += self.collected_by[id]["count"]
         mcav = 0 if number_of_mdc == 0 else number_of_mdc / self.number_of_migrated_cells
         ans = "Anomaly" if (mcav >= 0.4) else "Normal"
-        print('{0} / {1} = {2} -> {3} :: Antigen {4}'.format(number_of_mdc, self.number_of_migrated_cells,
-                                                             mcav, ans, self.id))
+        logging.info('{0} / {1} = {2} -> {3} :: Antigen {4}'.format(number_of_mdc, self.number_of_migrated_cells,
+                                                                    mcav, ans, self.id))
         self.result.setdefault("classified_count", 0)
         self.result["classified_count"] += 1
         classified_correctly = None
         if self.class_label != "unknown":
             classified_correctly = (self.class_label == ans)
-            print("_______________________CORRECT?!_______________________")
-            print(classified_correctly)
+            logging.info("_______________________CORRECT?!_______________________")
+            logging.info(classified_correctly)
             if classified_correctly:
                 self.result.setdefault("classified_correctly_count", 0)
                 self.result["classified_correctly_count"] += 1
@@ -47,11 +48,11 @@ class Antigen:
 
         try:
             self.array.remove(self)
-            print("remove")
+            logging.info("remove")
         except Exception as e:
-            print("did not remove")
+            logging.info("did not remove")
 
-        print(self)
+        logging.info(self)
         return ans, classified_correctly
 
     def update_number_of_migrated_cells(self, count):

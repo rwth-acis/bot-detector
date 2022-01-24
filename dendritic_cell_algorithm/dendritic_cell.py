@@ -1,3 +1,6 @@
+import logging
+
+
 class DendriticCell:
     def __init__(self, id):
         self.id = id
@@ -23,7 +26,7 @@ class DendriticCell:
             self.class_label = "Anomaly" if (self.k > 0) else "Normal"
             for id in self.antigens:
                 self.antigens[id]["antigen"].update_number_of_migrated_cells(self.antigens[id]["count"])
-            print("migrate!")
+            logging.info("migrate!")
             return self, 1
 
         else:

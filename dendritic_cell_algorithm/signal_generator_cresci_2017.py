@@ -475,7 +475,7 @@ def average_tweet_similarity(tweets):
             j += 1
         i += 1
     avg_tweet_similarity = avg_tweet_similarity / count
-    print(f"average tweet similarity: {avg_tweet_similarity}")
+    logging.info(f"average tweet similarity: {avg_tweet_similarity}")
     return avg_tweet_similarity
 
 
@@ -547,7 +547,7 @@ def tweeting_time_entropy(tweets):
             datetime.strptime(tweet["timestamp"].replace(" +0000", ""),
                               '%Y-%m-%d %X'))  # Mon Dec 13 04:16:58 +0000 2021
     res = scipy.stats.entropy(calculate_probability(created_at, 1), base=2)
-    print(f"entropy: {res}")
+    logging.info(f"entropy: {res}")
     return float(res)
 
 
@@ -566,7 +566,7 @@ def calculate_small_intervals(tweets):
             small_intervals_count += 1;
         i += 1
 
-    print(f"small_intervals_count: {small_intervals_count}")
+    logging.info(f"small_intervals_count: {small_intervals_count}")
     return small_intervals_count
 
 
@@ -579,32 +579,32 @@ def calculate_probability(created_at, measuring_interval):
         intervals.append(int((created_at[i] - created_at[i + 1]).total_seconds() / 60 * 4))
         # intervals_seconds.append(int((created_at[i] - created_at[i + 1]).total_seconds()))
         i += 1
-    print(intervals)
-    # print(intervals_seconds)
+    logging.info(intervals)
+    # logging.info(intervals_seconds)
     max_interval = max(intervals)
     min_interval = min(intervals)
     if max_interval == min_interval:
-        print("max=min")
+        logging.info("max=min")
         return [1]
     start = int(math.floor(min_interval / measuring_interval) * measuring_interval)
-    print("start")
-    print(start)
+    logging.info("start")
+    logging.info(start)
     end = int(math.ceil(max_interval / measuring_interval) * measuring_interval)
-    print("end")
-    print(end)
+    logging.info("end")
+    logging.info(end)
     count = int((end - start) / measuring_interval) + 1
     if count == 0:
-        print("count=0")
+        logging.info("count=0")
         return [1]
-    print("count")
-    print(count)
+    logging.info("count")
+    logging.info(count)
     probability = [0] * count
     for time in intervals:
-        print(f'probability[{int((time - start) / measuring_interval)}]')
+        logging.info(f'probability[{int((time - start) / measuring_interval)}]')
         probability[int((time - start) / measuring_interval)] += 1
-        print(f'OK! probability[{int((time - start) / measuring_interval)}]')
+        logging.info(f'OK! probability[{int((time - start) / measuring_interval)}]')
 
-    print([i / len(intervals) for i in probability if i != 0])
+    logging.info([i / len(intervals) for i in probability if i != 0])
     return [i / len(intervals) for i in probability if i != 0]
 
 

@@ -8,6 +8,7 @@ import csv
 import json
 import pandas as pd
 import datetime
+import logging
 
 
 def cresci_csv_to_json(path):
@@ -49,7 +50,7 @@ def cresci_csv_to_json(path):
 
     for row in reader:
         userObj1['users'].append(row)
-        # print(row)
+        # logging.info(row)
 
     jsonfileusers1.write(json.dumps(userObj1, ensure_ascii=False, indent=4))
     csvfileusers1.close()
@@ -61,7 +62,7 @@ def cresci_csv_to_json(path):
 
     for row in reader:
         userObj2['users'].append(row)
-        # print(row)
+        # logging.info(row)
 
     jsonfileusers2.write(json.dumps(userObj2, ensure_ascii=False, indent=4))
     csvfileusers2.close()
@@ -80,7 +81,7 @@ def cresci_csv_to_json(path):
     try:
         for row in reader:
             tweetsObj1['tweets'].append(row)
-            print(row["id"])
+            logging.info(row["id"])
     except csv.Error as e:
         sys.exit('file %s, line %d: %s' % (csvfiletweets1, reader.line_num, e))
 
@@ -91,7 +92,7 @@ def cresci_csv_to_json(path):
     try:
         for row in reader:
             tweetsObj2['tweets'].append(row)
-            print(row["id"])
+            logging.info(row["id"])
     except csv.Error as e:
         sys.exit('file %s, line %d: %s' % (csvfiletweets2, reader.line_num, e))
 
@@ -108,17 +109,17 @@ def cresci_csv_to_json(path):
         d["tweets"] = []
 
     for data_item in userObj1["users"]:
-        # print(data_item['id'], data_item['name'])
+        # logging.info(data_item['id'], data_item['name'])
         for tweet in tweetsObj1["tweets"]:
-            print(tweet['user_id'])
+            logging.info(tweet['user_id'])
             if tweet['user_id'] == data_item['id']:
                 data_item["tweets"].append(tweet)
-                # print(f'Time: {tweet["timestamp"]}, text: {tweet["text"]}')
+                # logging.info(f'Time: {tweet["timestamp"]}, text: {tweet["text"]}')
         for tweet in tweetsObj2["tweets"]:
-            print(tweet['user_id'])
+            logging.info(tweet['user_id'])
             if tweet['user_id'] == data_item['id']:
                 data_item["tweets"].append(tweet)
-                # print(f'Time: {tweet["timestamp"]}, text: {tweet["text"]}')
+                # logging.info(f'Time: {tweet["timestamp"]}, text: {tweet["text"]}')
 
     with open(f'{path}result-1.json', "w", encoding='cp850') as outfile:
         outfile.write(json.dumps(userObj1, ensure_ascii=False, indent=4))
@@ -129,17 +130,17 @@ def cresci_csv_to_json(path):
         d["tweets"] = []
 
     for data_item in userObj2["users"]:
-        # print(data_item['id'], data_item['name'])
+        # logging.info(data_item['id'], data_item['name'])
         for tweet in tweetsObj1["tweets"]:
-            print(tweet['user_id'])
+            logging.info(tweet['user_id'])
             if tweet['user_id'] == data_item['id']:
                 data_item["tweets"].append(tweet)
-                # print(f'Time: {tweet["timestamp"]}, text: {tweet["text"]}')
+                # logging.info(f'Time: {tweet["timestamp"]}, text: {tweet["text"]}')
         for tweet in tweetsObj2["tweets"]:
-            print(tweet['user_id'])
+            logging.info(tweet['user_id'])
             if tweet['user_id'] == data_item['id']:
                 data_item["tweets"].append(tweet)
-                # print(f'Time: {tweet["timestamp"]}, text: {tweet["text"]}')
+                # logging.info(f'Time: {tweet["timestamp"]}, text: {tweet["text"]}')
 
     with open(f'{path}result-2.json', "w", encoding='cp850') as outfile:
         outfile.write(json.dumps(userObj2, ensure_ascii=False, indent=4))
@@ -179,7 +180,7 @@ def collect_from_twitter(keyword, user_count, tweet_count):
     final_info_for_json = {"users": []}
 
     for tweet in tweets:
-        # print("created_at: ", tweet.created_at, ", text: ", tweet.retweeted_status.full_text, ", user: user_id: ",tweet.user.id, ", user_name: ", tweet.user.name, ", followers_count: ", tweet.user.followers_count)
+        # logging.info("created_at: ", tweet.created_at, ", text: ", tweet.retweeted_status.full_text, ", user: user_id: ",tweet.user.id, ", user_name: ", tweet.user.name, ", followers_count: ", tweet.user.followers_count)
         userObj = {}
         user = api.get_user(screen_name=tweet.user.screen_name)._json
         user.pop('status', None)
