@@ -13,13 +13,25 @@ from dendritic_cell_algorithm import dc_algorithm_cresci_2017
 
 from dendritic_cell_algorithm import dc_algorithm_twibot_2020
 
-logging.getLogger().setLevel(logging.INFO)
-dc_algorithm_twibot_2020("../datasets/twibot-2020/data_sample.json")
+import numpy as np
+from geneticalgorithm import geneticalgorithm as ga
+
+
+def f(X):
+    return 1000 - X[0] - X[1] - X[2] - X[3] - X[4]
+
+
+varbound = np.array([[0.5, 1.5], [1, 10], [1, 10], [1, 10], [0, 1]])
+vartype = np.array([['real'], ['int'], ['int'], ['int'], ['int']])
+model = ga(function=f, dimension=5, variable_type_mixed=vartype, variable_boundaries=varbound)
+
+model.run()
+
+"""logging.getLogger().setLevel(logging.INFO)
+dc_algorithm_twibot_2020("../datasets/twibot-2020/data_sample.json")"""
 
 """cresci_csv_to_json('../datasets/cresci-2017/genuine_accounts.csv/')
 # collect_from_twitter("covid19", 5, 5)"""
-
-
 
 """csvfile = open('../datasets/cresci-2017/social_spambots_1.csv/tweets.csv', 'r', errors="replace").readlines()
 filename = 1
