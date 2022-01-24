@@ -15,7 +15,7 @@ def random_in_bounds(min_value, max_value):
     return min_value + (max_value - min_value) * rd
 
 
-def dc_algorithm_cresci_2017(path):
+def dc_algorithm_cresci_2017(path, label):
     start = time.time()
     load_dotenv()
     # =========================== INITIALIZE ANTIGENS ====================================
@@ -60,7 +60,7 @@ def dc_algorithm_cresci_2017(path):
             logging.info(user["id"])
             logging.info(s.get_k())
             new_antigen = Antigen(user["id"], {"screen_name": user["screen_name"], "parameters": s.get_parameters()}, s.get_k(), s.get_csm(), 5,
-                                  antigen_array, result, class_label="Normal")
+                                  antigen_array, result, class_label=label)
             antigen_array.append(new_antigen)
         else:
             logging.info(user["id"])
