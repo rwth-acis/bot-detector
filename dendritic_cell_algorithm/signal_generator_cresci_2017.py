@@ -4,7 +4,8 @@ import re
 import os
 from math import log2
 
-import enchant
+#import enchant
+from Levenshtein import distance
 import nltk
 import json
 import scipy.stats
@@ -532,7 +533,7 @@ def replace_user_mentions(tweets):
 def similarity(string1, string2):
     max_length = max(len(string1), len(string2))
     # levenshtein_distance = nltk.edit_distance(string1, string2)
-    levenshtein_distance = enchant.utils.levenshtein(string1, string2)
+    levenshtein_distance = distance(string1, string2)
     if max_length > 0:
         similarity_metric = ((max_length - levenshtein_distance) / max_length)
     else:
