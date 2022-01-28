@@ -169,41 +169,38 @@ def dc_algorithm_twibot_2020(path):
     data = json.loads(f.read())
 
     # Iterating through the json
-    c = 0
     for user in data:
-        c = c + 1
-        if c % 2 == 0:
-            logging.info(user)
-            if user["tweet"] is None:
-                user["tweet"] = []
-            if len(user["tweet"]) >= 0:
-                s = Signals_twibot_2020()
-                s.generate_signals(int(user["profile"]["friends_count"][:-1]),
-                                   int(user["profile"]["statuses_count"][:-1]),
-                                   int(user["profile"]["followers_count"][:-1]),
-                                   True if (user["profile"]["verified"] == "True ") else False,
-                                   True if (user["profile"]["default_profile"] == "True ") else False,
-                                   True if (user["profile"]["default_profile_image"] == "True ") else False,
-                                   user["profile"]["created_at"][:-1], user["profile"]["name"][:-1],
-                                   user["profile"]["screen_name"][:-1], user["profile"]["description"][:-1],
-                                   user["tweet"])
+        logging.info(user)
+        if user["tweet"] is None:
+            user["tweet"] = []
+        if len(user["tweet"]) >= 0:
+            s = Signals_twibot_2020()
+            s.generate_signals(int(user["profile"]["friends_count"][:-1]),
+                               int(user["profile"]["statuses_count"][:-1]),
+                               int(user["profile"]["followers_count"][:-1]),
+                               True if (user["profile"]["verified"] == "True ") else False,
+                               True if (user["profile"]["default_profile"] == "True ") else False,
+                               True if (user["profile"]["default_profile_image"] == "True ") else False,
+                               user["profile"]["created_at"][:-1], user["profile"]["name"][:-1],
+                               user["profile"]["screen_name"][:-1], user["profile"]["description"][:-1],
+                               user["tweet"])
 
-                logging.info(user["ID"])
-                logging.info(s.get_k())
-                if user["label"] == "1":
-                    new_antigen = Antigen(user["ID"], {"screen_name": user["profile"]["screen_name"][:-1],
-                                                       "parameters": s.get_parameters()}, s.get_k_bot(), s.get_csm(),
-                                          10,
-                                          antigen_array, result, class_label="Anomaly")
-                else:
-                    new_antigen = Antigen(user["ID"], {"screen_name": user["profile"]["screen_name"][:-1],
-                                                       "parameters": s.get_parameters()}, s.get_k_bot(), s.get_csm(),
-                                          10,
-                                          antigen_array, result, class_label="Normal")
-                antigen_array.append(new_antigen)
+            logging.info(user["ID"])
+            logging.info(s.get_k())
+            if user["label"] == "1":
+                new_antigen = Antigen(user["ID"], {"screen_name": user["profile"]["screen_name"][:-1],
+                                                   "parameters": s.get_parameters()}, s.get_k_bot(), s.get_csm(),
+                                      10,
+                                      antigen_array, result, class_label="Anomaly")
             else:
-                logging.info(user["ID"])
-                logging.info("not enough tweets")
+                new_antigen = Antigen(user["ID"], {"screen_name": user["profile"]["screen_name"][:-1],
+                                                   "parameters": s.get_parameters()}, s.get_k_bot(), s.get_csm(),
+                                      10,
+                                      antigen_array, result, class_label="Normal")
+            antigen_array.append(new_antigen)
+        else:
+            logging.info(user["ID"])
+            logging.info("not enough tweets")
 
     # =========================== INITIALIZE DCs ====================================
 
