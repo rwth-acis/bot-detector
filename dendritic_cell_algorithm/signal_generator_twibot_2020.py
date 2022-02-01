@@ -569,7 +569,10 @@ def determine_signal_strength(value, comparison_sign, threshold, interval):
            '==': operator.eq}
     signal = 0
     if ops[comparison_sign](value, threshold):
-        signal = 1 + int(abs(threshold - value) / interval)
+        if interval == 0:
+            signal = 1
+        else:
+            signal = 1 + int(abs(threshold - value) / interval)
 
     return signal
 

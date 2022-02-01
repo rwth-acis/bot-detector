@@ -19,7 +19,13 @@ from dendritic_cell_algorithm import dc_algorithm_twibot_2020
 import numpy as np
 from geneticalgorithm import geneticalgorithm as ga
 from dendritic_cell_algorithm import dc_algorithm_cresci_2017 as dca17
-from dendritic_cell_algorithm import dc_algorithm_twibot_2020 as dca20
+from dendritic_cell_algorithm import dc_algorithm_twibot_2020_test as dca20
+
+# JSON file
+f = open("../datasets/twibot-2020/test.json", "r", encoding="cp850")
+
+# Reading from file
+data = json.loads(f.read())
 
 
 def f(X):
@@ -83,17 +89,17 @@ def f(X):
     # os.environ['SS_THRESHOLD_TIME_ENTROPY'] = str(X[42])
 
     # 16 - 8 =8
-    os.environ['PAMP_THRESHOLD_AVG_TWEET_SIMILARITY'] = str(X[24])
-    os.environ['PAMP_INTERVAL_AVG_TWEET_SIMILARITY'] = str(X[25])
-    os.environ['SS_THRESHOLD_AVG_TWEET_SIMILARITY'] = str(X[26])
-    os.environ['SS_INTERVAL_AVG_TWEET_SIMILARITY'] = str(X[27])
+    os.environ['PAMP_THRESHOLD_AVG_TWEET_SIMILARITY'] = str(round(X[24], 2))
+    os.environ['PAMP_INTERVAL_AVG_TWEET_SIMILARITY'] = str(round(X[25], 2))
+    os.environ['SS_THRESHOLD_AVG_TWEET_SIMILARITY'] = str(round(X[26], 2))
+    os.environ['SS_INTERVAL_AVG_TWEET_SIMILARITY'] = str(round(X[27], 2))
     # os.environ['PAMP_INTERVAL_SMALL_INTERVAL'] = str(X[47])
     # os.environ['PAMP_INTERVAL_TIME_ENTROPY'] = str(X[48])
     # os.environ['SS_INTERVAL_TIME_ENTROPY'] = str(X[49])
-    os.environ['DS_THRESHOLD_BASIC_RATIO'] = str(X[28])
-    os.environ['DS_INTERVAL_BASIC_RATIO'] = str(X[29])
-    os.environ['SS_THRESHOLD_BASIC_RATIO'] = str(X[30])
-    os.environ['SS_INTERVAL_BASIC_RATIO'] = str(X[31])
+    os.environ['DS_THRESHOLD_BASIC_RATIO'] = str(round(X[28], 2))
+    os.environ['DS_INTERVAL_BASIC_RATIO'] = str(round(X[29], 2))
+    os.environ['SS_THRESHOLD_BASIC_RATIO'] = str(round(X[30], 2))
+    os.environ['SS_INTERVAL_BASIC_RATIO'] = str(round(X[31], 2))
     # os.environ['DS_INTERVAL_HASHTAG_TWEET_RATIO'] = str(X[54])
     # os.environ['SS_THRESHOLD_HASHTAG_TWEET_RATIO'] = str(X[55])
     # os.environ['SS_INTERVAL_HASHTAG_TWEET_RATIO'] = str(X[56])
@@ -101,7 +107,7 @@ def f(X):
     # os.environ['DS_INTERVAL_AVERAGE_FAVORITE_COUNT'] = str(X[58])
 
     print(str(os.environ)[2912:])
-    result = dca20("../datasets/twibot-2020/test.json")
+    result = dca20(data, 20)
     res = json.loads(result)
 
     classified_count = res.pop("classified_count")
@@ -121,6 +127,7 @@ def f(X):
 
 vartype = np.concatenate((np.full((41, 1), 'int'), np.full((18, 1), 'real')),
                          axis=0)"""
+
 load_dotenv()
 
 varbound = np.concatenate((np.full((19, 2), [1, 10]), np.full((4, 2), [5, 40]),
@@ -131,9 +138,21 @@ varbound = np.concatenate((np.full((19, 2), [1, 10]), np.full((4, 2), [5, 40]),
 vartype = np.concatenate((np.full((24, 1), 'int'), np.full((8, 1), 'real')),
                          axis=0)
 
-model = ga(function=f, dimension=32, variable_type_mixed=vartype, variable_boundaries=varbound, function_timeout=36000)
+algorithm_param = {'max_num_iteration': 100,
+                   'population_size': 10,
+                   'mutation_probability': 0.1,
+                   'elit_ratio': 0.01,
+                   'crossover_probability': 0.5,
+                   'parents_portion': 0.3,
+                   'crossover_type': 'uniform',
+                   'max_iteration_without_improv': 50}
+
+model = ga(function=f, dimension=32, variable_type_mixed=vartype, variable_boundaries=varbound, function_timeout=36000,
+           algorithm_parameters=algorithm_param)
 
 model.run()
+
+
 
 """logging.getLogger().setLevel(logging.INFO)
 dc_algorithm_twibot_2020("../datasets/twibot-2020/data_sample.json")"""

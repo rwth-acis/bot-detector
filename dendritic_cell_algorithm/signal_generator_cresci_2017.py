@@ -106,14 +106,14 @@ class Signals:
         return self._cms_bad_intentions
 
     def update_csm(self):
-        self._cms = float(os.environ['W_PAMP_CSM']) * self._pamp + int(
+        self._cms = float(os.environ['W_PAMP_CSM']) * self._pamp + float(
             os.environ['W_DS_CSM']) * self._danger_signal + float(os.environ[
                                                                       'W_SS_CSM']) * self._safe_signal
-        self._cms_bot = float(os.environ['W_PAMP_CSM']) * self._pamp_bot + int(
+        self._cms_bot = float(os.environ['W_PAMP_CSM']) * self._pamp_bot + float(
             os.environ['W_DS_CSM']) * self._danger_signal_bot + \
                         float(os.environ['W_SS_CSM']) * self._safe_signal_bot
         self._cms_bad_intentions = float(os.environ['W_PAMP_CSM']) * self._pamp_bad_intentions + float(os.environ[
-                                                                                                           'W_DS_CSM']) * self._danger_signal_bad_intentions + int(
+                                                                                                           'W_DS_CSM']) * self._danger_signal_bad_intentions + float(
             os.environ['W_SS_CSM']) * self._safe_signal_bad_intentions
         logging.info(f"CMS: {self._cms}")
         logging.info(f"CMS_bot: {self._cms_bot}")
@@ -129,14 +129,14 @@ class Signals:
         return self._mDC_bad_intentions
 
     def update_mDC(self):
-        self._mDC = max(float(os.environ['W_PAMP_MDC']) * self._pamp + int(
+        self._mDC = max(float(os.environ['W_PAMP_MDC']) * self._pamp + float(
             os.environ['W_DS_MDC']) * self._danger_signal + float(os.environ[
                                                                       'W_SS_MDC']) * self._safe_signal, 0)
-        self._mDC_bot = max(float(os.environ['W_PAMP_MDC']) * self._pamp_bot + int(
+        self._mDC_bot = max(float(os.environ['W_PAMP_MDC']) * self._pamp_bot + float(
             os.environ['W_DS_MDC']) * self._danger_signal_bot + \
                             float(os.environ['W_SS_MDC']) * self._safe_signal_bot, 0)
-        self._mDC_bad_intentions = max(float(os.environ['W_PAMP_MDC']) * self._pamp_bad_intentions + int(
-            os.environ['W_DS_MDC']) * self._danger_signal_bad_intentions + int(
+        self._mDC_bad_intentions = max(float(os.environ['W_PAMP_MDC']) * self._pamp_bad_intentions + float(
+            os.environ['W_DS_MDC']) * self._danger_signal_bad_intentions + float(
             os.environ['W_SS_MDC']) * self._safe_signal_bad_intentions, 0)
         logging.info(f"mDC: {self._mDC}")
         logging.info(f"mDC_bot: {self._mDC_bot}")
@@ -203,22 +203,22 @@ class Signals:
         if len(tweets) > 20:
             tweets = tweets[:20]
         logging.info("Check default_profile")
-        self.increase_danger_signal(float(os.environ["DEFAULT_PROFILE_DS_MULTIPLIER"]) * int(default_profile), True,
+        self.increase_danger_signal(float(os.environ["DEFAULT_PROFILE_DS_MULTIPLIER"]) * float(default_profile), True,
                                     False,
                                     "default_profile")
-        self.increase_safe_signal(float(os.environ["DEFAULT_PROFILE_SS_MULTIPLIER"]) * (1 - int(default_profile)), True,
+        self.increase_safe_signal(float(os.environ["DEFAULT_PROFILE_SS_MULTIPLIER"]) * (1 - float(default_profile)), True,
                                   False,
                                   "default_profile")
 
         logging.info("Check default_profile_image")
         self.increase_danger_signal(
-            float(os.environ["DEFAULT_PROFILE_IMAGE_DS_MULTIPLIER"]) * int(default_profile_image),
+            float(os.environ["DEFAULT_PROFILE_IMAGE_DS_MULTIPLIER"]) * float(default_profile_image),
             True, False, "default_profile_image")
         self.increase_safe_signal(
-            float(os.environ["DEFAULT_PROFILE_IMAGE_SS_MULTIPLIER"]) * (1 - int(default_profile_image)),
+            float(os.environ["DEFAULT_PROFILE_IMAGE_SS_MULTIPLIER"]) * (1 - float(default_profile_image)),
             True, False, "default_profile_image")
 
-        self.increase_safe_signal(float(os.environ['VERIFIED_SS_MULTIPLIER']) * int(verified), False, True, "verified")
+        self.increase_safe_signal(float(os.environ['VERIFIED_SS_MULTIPLIER']) * float(verified), False, True, "verified")
 
         if len(tweets) > 1:
             avg_tweet_similarity = average_tweet_similarity(tweets)  # nltk.edit_distance()
@@ -369,7 +369,7 @@ class Signals:
 
         identifies_itself_as_bot = contains_bot_info(description)
         self.increase_safe_signal(
-            float(os.environ["SS_MULTIPLIER_IDENTIFIES_ITSELF_AS_BOT"]) * int(identifies_itself_as_bot),
+            float(os.environ["SS_MULTIPLIER_IDENTIFIES_ITSELF_AS_BOT"]) * float(identifies_itself_as_bot),
             False, True, "identifies_itself_as_bot")
 
         if friends_count > 0:
@@ -617,7 +617,10 @@ def determine_signal_strength(value, comparison_sign, threshold, interval):
            '==': operator.eq}
     signal = 0
     if ops[comparison_sign](value, threshold):
-        signal = 1 + int(abs(threshold - value) / interval)
+        if interval == 0:
+            signal = 1
+        else:
+            signal = 1 + int(abs(threshold - value) / interval)
 
     return signal
 
