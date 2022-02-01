@@ -401,7 +401,7 @@ class Signals:
         self.update_mDC()
         self.update_smDC()
         self.update_k()
-        self.recalculate_probabilities(identifies_itself_as_bot)
+
 
         self.update_parameters("cms", self._cms)
         self.update_parameters("mDC", self._mDC)
@@ -417,6 +417,8 @@ class Signals:
         self.update_parameters("mDC_bad_intentions", self._mDC_bad_intentions)
         self.update_parameters("smDC_bad_intentions", self._smDC_bad_intentions)
         self.update_parameters("k_bad_intentions", self._k_bad_intentions)
+
+        self.recalculate_probabilities(identifies_itself_as_bot)
 
         self.update_parameters("is_bot_probability", self._is_bot_probability)
         self.update_parameters("intentions_are_bad_probability", self._intentions_are_bad_probability)
@@ -437,6 +439,7 @@ class Signals:
         self.update_parameters("followers_friends_ratio", followers_friends_ratio)
         self.update_parameters("statuses_growth_rate", statuses_growth_rate)
         self.update_parameters("friends_growth_rate", friends_growth_rate)
+
 
 
 def average_tweet_similarity(tweets):
