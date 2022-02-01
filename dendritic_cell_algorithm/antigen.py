@@ -1,8 +1,9 @@
+import json
 import logging
 
 
 class Antigen:
-    def __init__(self, id, value, k, cms, number_of_copies, array=[], result={}, class_label="unknown"):
+    def __init__(self, id, value, k, cms, number_of_copies, array=[], result={}, send_info_to_mongodb=None, class_label="unknown"):
         self.id = id
         self.value = value
         self.k = k
@@ -13,6 +14,7 @@ class Antigen:
         self.collected_by = {}
         self.array = array
         self.result = result
+        self.send_info_to_mongodb = send_info_to_mongodb
 
     def can_be_classified(self):
         if self.number_of_copies == self.number_of_migrated_cells:
@@ -26,12 +28,14 @@ class Antigen:
             if self.collected_by[id]["cell"].class_label == "Anomaly":
                 number_of_mdc += self.collected_by[id]["count"]
         mcav = 0 if number_of_mdc == 0 else number_of_mdc / self.number_of_migrated_cells
-        ans = "Anomaly" if (mcav >= 0.4) else "Normal"
+        ans = "Anomaly" if (mcav > 0.5) else "Normal"
         logging.info('{0} / {1} = {2} -> {3} :: Antigen {4}'.format(number_of_mdc, self.number_of_migrated_cells,
                                                                     mcav, ans, self.id))
         self.result.setdefault("classified_count", 0)
         self.result["classified_count"] += 1
         classified_correctly = None
+        if self.send_info_to_mongodb is not None and ans == "Anomaly":
+            self.send_info_to_mongodb.insert_one(self.value)
         if self.class_label != "unknown":
             classified_correctly = (self.class_label == ans)
             logging.info("_______________________CORRECT?!_______________________")

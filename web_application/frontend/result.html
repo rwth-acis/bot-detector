@@ -73,10 +73,15 @@
                 {% endif %}
 
                 {% if user["found_tweet"]["truncated"] %}
+                {% if "retweeted_status" in user["found_tweet"] %}
                 <td class="text">{{user["found_tweet"]["retweeted_status"]["full_text"]}}</td>
                 {% else %}
                 <td class="text"><div class="created-at">{{user["found_tweet"]["created_at"]}}</div>{{user["found_tweet"]["full_text"]}}</td>
                 {% endif %}
+                {% else %}
+                <td class="text"><div class="created-at">{{user["found_tweet"]["created_at"]}}</div>{{user["found_tweet"]["full_text"]}}</td>
+                {% endif %}
+
 
 
 
@@ -124,7 +129,7 @@
                 {% endif %}
 
 
-                <td><a href="{{app_url}}/user/{{user['_id']}}" class="btn btn-info">Get more information</a></td>
+                <td><a href="{{app_url}}/{{ collection }}/user/{{user['_id']}}" class="btn btn-info">Get more information</a></td>
 
             </tr>
             {% endfor %}

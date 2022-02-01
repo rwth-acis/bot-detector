@@ -3,6 +3,8 @@ import json
 import os
 from json import dumps
 import logging
+import uuid
+
 
 import tweepy as tweepy
 from flask import Flask, render_template, url_for, request
@@ -20,6 +22,13 @@ from dotenv import load_dotenv
 from dendritic_cell_algorithm.signal_generator import Signals, remove_urls, remove_user_mentions
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
+from python_kafka.SignalGenerator import startSignalGenerator
+from python_kafka.TweetsLoader import startTweetsLoader
+from python_kafka.BotDetector import startBotDetector
+import multiprocessing
+
+from confluent_kafka import Producer
+
 load_dotenv()
 logging.getLogger().setLevel(logging.INFO)
 
@@ -34,7 +43,104 @@ col = db["Users"]
 
 @app.route("/")
 def home():
+
     return render_template("base.html", app_url=os.environ['APP_URL'])
+
+
+@app.route('/result/<id>')
+def resultid(id):
+    col1 = db[str(id)]
+    users = col1.find()
+    try:
+        folium_map = folium.Map(location=[0, 0], zoom_start=2)
+
+        geo_locator = Nominatim(user_agent="findBots")
+
+        negative_count1 = 0
+        positive_count1 = 0
+        neutral_count1 = 0
+        negative_count2 = 0
+        positive_count2 = 0
+        neutral_count2 = 0
+
+        for user in users:
+            #print(user)
+            if "coordinates" in user:
+                if user["coordinates"]:
+                    if user["signals"]["is_bot_probability"] >= 50:
+                        folium.Marker(user["coordinates"], popup="@" + user["user"]["screen_name"],
+                                      icon=folium.Icon(color='red')).add_to(
+                            folium_map)
+                    else:
+                        if user["signals"]["is_bot_probability"] >= 30:
+                            folium.Marker(user["coordinates"], popup="@" + user["user"]["screen_name"],
+                                          icon=folium.Icon(color='orange')).add_to(
+                                folium_map)
+                        else:
+                            folium.Marker(user["coordinates"], popup="@" + user["user"]["screen_name"],
+                                          icon=folium.Icon(color='green')).add_to(
+                                folium_map)
+            else:
+                if user["user"]["location"]:
+                    try:
+                        location = geo_locator.geocode(user["user"]["location"])
+                        logging.info(location)
+                        if location is None:
+                            logging.info("try to add loc")
+                            col1.update_one({"_id": user["_id"]}, {'$set': {'coordinates': ""}})
+                    except Exception as e:
+                        continue
+                    if location:
+                        if user["signals"]["is_bot_probability"] >= 50:
+                            folium.Marker([location.latitude, location.longitude],
+                                          popup="@" + user["user"]["screen_name"],
+                                          icon=folium.Icon(color='red')).add_to(
+                                folium_map)
+                        else:
+                            if user["signals"]["is_bot_probability"] >= 30:
+                                folium.Marker([location.latitude, location.longitude],
+                                              popup="@" + user["user"]["screen_name"],
+                                              icon=folium.Icon(color='orange')).add_to(
+                                    folium_map)
+                            else:
+                                folium.Marker([location.latitude, location.longitude],
+                                              popup="@" + user["user"]["screen_name"],
+                                              icon=folium.Icon(color='green')).add_to(
+                                    folium_map)
+
+                        logging.info("try to add loc")
+                        col1.update_one({"_id": user["_id"]},
+                                       {'$set': {'coordinates': [location.latitude, location.longitude]}})
+            if user["signals"]["is_bot_probability"] >= 50:
+                if user["found_tweet"]["sentiment"] == "negative":
+                    negative_count2 += 1
+                if user["found_tweet"]["sentiment"] == "positive":
+                    positive_count2 += 1
+                if user["found_tweet"]["sentiment"] == "neutral":
+                    neutral_count2 += 1
+            else:
+                if user["found_tweet"]["sentiment"] == "negative":
+                    negative_count1 += 1
+                if user["found_tweet"]["sentiment"] == "positive":
+                    positive_count1 += 1
+                if user["found_tweet"]["sentiment"] == "neutral":
+                    neutral_count1 += 1
+
+        return render_template('result.html', users=col1.find(), folium_map=Markup(folium_map._repr_html_()),
+                               app_url=os.environ['APP_URL'],
+                               negative_count1=negative_count1, positive_count1=positive_count1,
+                               neutral_count1=neutral_count1, negative_count2=negative_count2,
+                               positive_count2=positive_count2, neutral_count2=neutral_count2,
+                               collection=str(id))
+    except Exception as e:
+        # return dumps({'error': str(e)})
+        logging.info(e)
+
+
+
+
+
+
 
 @app.route("/table")
 def table():
@@ -46,6 +152,23 @@ def about():
     return render_template("index.html", app_url=os.environ['APP_URL'])
 
 
+@app.route("/part-result", methods=['post', 'get'])
+def part_result():
+    if request.method == 'POST':
+        keywords = request.form.get('keywords').split(", ")
+        id = uuid.uuid4()
+        logging.info(id)
+        col1 = db[str(id)]
+        print(col1)
+        p1 = multiprocessing.Process(name='p1', target=startTweetsLoader, args=(keywords, 'localhost:9091', str(id), "set0", 50,))
+        p2 = multiprocessing.Process(name='p2', target=startSignalGenerator, args=('localhost:9091', 'test1-id', 'earliest', str(id), 'localhost:9091', (str(id)+"-signals"),))
+        p3 = multiprocessing.Process(name='p3', target=startBotDetector, args=('localhost:9091', 'test1-id', 'earliest', (str(id)+"-signals"), 'localhost:9091', str(id),))
+        p1.start()
+        p2.start()
+        p3.start()
+    return redirect((os.environ['APP_URL'])+"/result/"+str(id))
+
+"""
 @app.route('/result')
 def result():
     users = col.find()
@@ -131,7 +254,7 @@ def result():
     except Exception as e:
         # return dumps({'error': str(e)})
         logging.info(e)
-
+"""
 
 @app.route('/covid')
 def covid():
@@ -370,14 +493,17 @@ def user_check(screen_name):
         logging.info(new_signals.get_parameters())
         userObj["signals"] = new_signals.get_parameters()
 
-        return render_template('user-check.html', blank=False, exception=False, tweetArr=json.dumps(userObj["tweets"]), user=userObj)
+        return render_template('user-check.html', blank=False, exception=False, tweetArr=json.dumps(userObj["tweets"]),
+                               user=userObj)
     except Exception as e:
         # return dumps({'error': str(e)})
         return render_template('user-check.html', blank=True, exception=True)
 
-@app.route('/user/<id>')
-def user(id):
+
+@app.route('/<collection>/user/<id>')
+def user(collection, id):
     try:
+        col = db[collection]
         user_found = col.find_one(ObjectId(id))
         if user_found:
             return render_template('user.html', tweetArr=json.dumps(user_found["tweets"]), user=user_found,

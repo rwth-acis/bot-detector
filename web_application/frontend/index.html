@@ -8,11 +8,11 @@
 {% block content %}
         <div class="form-style-10">
             <h1>Detect Bots Now!<span>Enter required parameters and start searching for malicious bots!</span></h1>
-            <form action='{{app_url}}/result'>
+            <form action='{{app_url}}/part-result' method="POST">
                 <div class="section"><span>1</span>Tweets Parameters</div>
                 <div class="inner-wrap">
                     <h2>Specify the area where you want to detect the activity of malicious bots:</h2>
-                    <label>Enter keywords and/or hashtags separated by commas:<input type="text" name="field1" /></label>
+                    <label>Enter keywords and/or hashtags separated by commas:<input type="text" name="keywords" /></label>
                     <div class="areaParameters">
             
                         <label><input type="radio"

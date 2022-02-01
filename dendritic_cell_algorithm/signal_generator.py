@@ -472,36 +472,63 @@ def average_tweet_similarity(tweets):
 
 def replace_urls(tweets):
     for tweet in tweets:
-        i = 0
-        while i < len(tweet["entities"]["urls"]):
-            tweet["full_text"] = tweet["full_text"].replace(tweet["entities"]["urls"][i]["url"],
-                                                            tweet["entities"]["urls"][i]["expanded_url"])
-            i += 1
+        if "full_text" in tweet:
+            i = 0
+            while i < len(tweet["entities"]["urls"]):
+                tweet["full_text"] = tweet["full_text"].replace(tweet["entities"]["urls"][i]["url"],
+                                                                tweet["entities"]["urls"][i]["expanded_url"])
+                i += 1
+        else:
+            i = 0
+            while i < len(tweet["entities"]["urls"]):
+                tweet["text"] = tweet["text"].replace(tweet["entities"]["urls"][i]["url"],
+                                                                tweet["entities"]["urls"][i]["expanded_url"])
+                i += 1
+
     return tweets
 
 
 def remove_urls(tweet):
-    i = 0
-    while i < len(tweet["entities"]["urls"]):
-        tweet["full_text"] = tweet["full_text"].replace(tweet["entities"]["urls"][i]["url"], "")
-        i += 1
+    if "full_text" in tweet:
+        i = 0
+        while i < len(tweet["entities"]["urls"]):
+            tweet["full_text"] = tweet["full_text"].replace(tweet["entities"]["urls"][i]["url"], "")
+            i += 1
+    else:
+        i = 0
+        while i < len(tweet["entities"]["urls"]):
+            tweet["text"] = tweet["text"].replace(tweet["entities"]["urls"][i]["url"], "")
+            i += 1
+
     return tweet
 
 
 def remove_user_mentions(tweet):
-    i = 0
-    while i < len(tweet["entities"]["user_mentions"]):
-        tweet["full_text"] = tweet["full_text"].replace(tweet["entities"]["user_mentions"][i]["screen_name"], "")
-        i += 1
+    if "full_text" in tweet:
+        i = 0
+        while i < len(tweet["entities"]["user_mentions"]):
+            tweet["full_text"] = tweet["full_text"].replace(tweet["entities"]["user_mentions"][i]["screen_name"], "")
+            i += 1
+    else:
+        i = 0
+        while i < len(tweet["entities"]["user_mentions"]):
+            tweet["text"] = tweet["text"].replace(tweet["entities"]["user_mentions"][i]["screen_name"], "")
+            i += 1
     return tweet
 
 
 def replace_user_mentions(tweets):
     for tweet in tweets:
-        i = 0
-        while i < len(tweet["entities"]["user_mentions"]):
-            tweet["full_text"] = tweet["full_text"].replace(tweet["entities"]["user_mentions"][i]["screen_name"], "")
-            i += 1
+        if "full_text" in tweet:
+            i = 0
+            while i < len(tweet["entities"]["user_mentions"]):
+                tweet["full_text"] = tweet["full_text"].replace(tweet["entities"]["user_mentions"][i]["screen_name"], "")
+                i += 1
+        else:
+            i = 0
+            while i < len(tweet["entities"]["user_mentions"]):
+                tweet["text"] = tweet["text"].replace(tweet["entities"]["user_mentions"][i]["screen_name"], "")
+                i += 1
     return tweets
 
 
