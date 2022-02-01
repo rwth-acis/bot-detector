@@ -5,7 +5,6 @@ from json import dumps
 import logging
 import uuid
 
-
 import tweepy as tweepy
 from flask import Flask, render_template, url_for, request
 from flask_pymongo import PyMongo
@@ -43,7 +42,6 @@ col = db["Users"]
 
 @app.route("/")
 def home():
-
     return render_template("base.html", app_url=os.environ['APP_URL'])
 
 
@@ -64,7 +62,7 @@ def resultid(id):
         neutral_count2 = 0
 
         for user in users:
-            #print(user)
+            # print(user)
             if "coordinates" in user:
                 if user["coordinates"]:
                     if user["signals"]["is_bot_probability"] >= 50:
@@ -110,7 +108,7 @@ def resultid(id):
 
                         logging.info("try to add loc")
                         col1.update_one({"_id": user["_id"]},
-                                       {'$set': {'coordinates': [location.latitude, location.longitude]}})
+                                        {'$set': {'coordinates': [location.latitude, location.longitude]}})
             if user["signals"]["is_bot_probability"] >= 50:
                 if user["found_tweet"]["sentiment"] == "negative":
                     negative_count2 += 1
@@ -137,11 +135,6 @@ def resultid(id):
         logging.info(e)
 
 
-
-
-
-
-
 @app.route("/table")
 def table():
     return render_template("table.html")
@@ -160,13 +153,17 @@ def part_result():
         logging.info(id)
         col1 = db[str(id)]
         print(col1)
-        p1 = multiprocessing.Process(name='p1', target=startTweetsLoader, args=(keywords, 'localhost:9091', str(id), "set0", 50,))
-        p2 = multiprocessing.Process(name='p2', target=startSignalGenerator, args=('localhost:9091', 'test1-id', 'earliest', str(id), 'localhost:9091', (str(id)+"-signals"),))
-        p3 = multiprocessing.Process(name='p3', target=startBotDetector, args=('localhost:9091', 'test1-id', 'earliest', (str(id)+"-signals"), 'localhost:9091', str(id),))
+        p1 = multiprocessing.Process(name='p1', target=startTweetsLoader,
+                                     args=(keywords, 'localhost:9091', str(id), "set0", 50,))
+        p2 = multiprocessing.Process(name='p2', target=startSignalGenerator, args=(
+        'localhost:9091', 'test1-id', 'earliest', str(id), 'localhost:9091', (str(id) + "-signals"),))
+        p3 = multiprocessing.Process(name='p3', target=startBotDetector, args=(
+        'localhost:9091', 'test1-id', 'earliest', (str(id) + "-signals"), 'localhost:9091', str(id),))
         p1.start()
         p2.start()
         p3.start()
-    return redirect((os.environ['APP_URL'])+"/result/"+str(id))
+    return redirect((os.environ['APP_URL']) + "/result/" + str(id))
+
 
 """
 @app.route('/result')
@@ -255,6 +252,7 @@ def result():
         # return dumps({'error': str(e)})
         logging.info(e)
 """
+
 
 @app.route('/covid')
 def covid():
