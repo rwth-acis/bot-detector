@@ -4,7 +4,6 @@ import os
 from tweepy.streaming import Stream as StreamListener
 from tweepy import OAuthHandler
 from tweepy import Stream
-from kafka import KafkaProducer
 import json
 from dotenv import load_dotenv
 
