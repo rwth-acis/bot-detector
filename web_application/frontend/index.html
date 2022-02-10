@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 {% block title %}Form{% endblock %}
 {% block html_head %}
-
+<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/themes/smoothness/jquery-ui.css" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js" crossorigin="anonymous" referrerpolicy="no-referrer" ></script>
+<script src="{{ url_for('static', filename='form.js') }}"></script>
 {% endblock %}
 
 
@@ -29,28 +31,28 @@
                    <div class="areaParameters">
             
                         <label><input type="radio"
-                         name="areaParameters2" value="only"> Only check tweets that contain a URL</label>
+                         name="areaParameters2" value="only" onclick="valueCheckLinks()"> Only check tweets that contain a URL</label>
 
                         
                         <label><input type="radio"
-                         name="areaParameters2" value="do-not"> Do not check tweets that contain URLs</label>
+                         name="areaParameters2" value="do-not" onclick="valueCheckLinks()"> Do not check tweets that contain URLs</label>
 
                        
                         <label><input type="radio"
-                         name="areaParameters2" value="all"  checked> Check all</label>
+                         name="areaParameters2" value="all" onclick="valueCheckLinks()"  checked> Check all</label>
                    </div>
                    <div class="areaParameters">
             
                         <label><input type="radio"
-                         name="areaParameters3" value="only"> Only check tweets that contain media (e.g. photos or videos)</label>
+                         name="areaParameters3" value="only"  onclick="valueCheckMedia()"> Only check tweets that contain media (e.g. photos or videos)</label>
 
                         
                         <label><input type="radio"
-                         name="areaParameters3" value="do-not"> Do not check tweets that contain media (e.g. photos or videos)</label>
+                         name="areaParameters3" value="do-not"  onclick="valueCheckMedia()"> Do not check tweets that contain media (e.g. photos or videos)</label>
 
                        
                         <label><input type="radio"
-                         name="areaParameters3" value="all"  checked> Check all</label>
+                         name="areaParameters3" value="all" onclick="valueCheckMedia()"  checked> Check all</label>
                    </div>
                 </div>
 
@@ -60,23 +62,24 @@
                     <div class="areaParameters">
             
                         <label><input type="radio"
-                         name="SearchParameters1" id="seven-days"  onclick="valueCheck()"> Check tweets from the last 7 days</label>
+                         name="SearchParameters1" id="seven-days" value="seven-days"  onclick="valueCheck()"> Check tweets from the last 7 days</label>
 
                         
                         <label><input type="radio"
-                         name="SearchParameters1" id="real-time" onclick="valueCheck()" checked> Check the real-time stream of public tweets</label>
+                         name="SearchParameters1" id="real-time" value="real-time" onclick="valueCheck()" checked> Check the real-time stream of public tweets</label>
 
                        
                         <label><input type="radio"
-                         name="SearchParameters1" id="time-period" onclick="valueCheck()"> Another period of time:</label>
+                         name="SearchParameters1" id="time-period" value="time-period" onclick="valueCheck()"> Another period of time:</label>
                          <div id="time-periods">
-                             <label>Start Date:<input type="date" id="start-date" /></label>
-                             <label>End date:<input type="date" id="end-date" /></label> 
+                             <label>Start Date:<input type="date" id="start-date" name="start-date" min="2022-04-01" max="2022-04-12"/></label>
+                             <label>End date:<input type="date" id="end-date" name="end-date" min="2022-04-01" max="2022-04-12"/></label>
+
                          </div>
                          
                    </div>
                    <div class="areaParameters">
-                   <label>Maximum number of users to be checked:<input type="text" placeholder="500" /></label>
+                   <label>Maximum number of users to be checked:<input type="text" name="limit" value="100" /></label>
                    </div>
                 </div>
 

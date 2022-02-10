@@ -7,6 +7,8 @@ import tweepy
 from confluent_kafka import Consumer, Producer
 import sys
 
+from dotenv import load_dotenv
+from geopy import Nominatim
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 from dendritic_cell_algorithm.signal_generator import remove_user_mentions, remove_urls, Signals
@@ -24,7 +26,9 @@ def delivery_report(err, msg):
 
 
 def startSignalGenerator(consumer_servers, consumer_group_id, consumer_offset, consumer_topic, producer_servers,
-                         producer_topic):
+                         producer_topic,
+                         consumer_key=None, consumer_secret=None, access_token=None,
+                         access_token_secret=None, bearer=None):
     c = Consumer({
         'bootstrap.servers': consumer_servers,
         'group.id': consumer_group_id,
@@ -64,25 +68,40 @@ def startSignalGenerator(consumer_servers, consumer_group_id, consumer_offset, c
                                                                       msg.key().decode('utf-8')))
 
         tweet = json.loads(msg.value())
+        tweet["created_at"] = tweet["created_at"].replace(" +0000", "")
+
         if not "full_text" in tweet:
             tweet["full_text"] = tweet["text"]
 
         ##############################################################################
 
-        consumer_key = os.environ['CONSUMER_KEY']
-        consumer_secret = os.environ['CONSUMER_SECRET']
-        access_token = os.environ['ACCESS_TOKEN']
-        access_token_secret = os.environ['ACCESS_TOKEN_SECRET']
+        if bearer is not None:
+            auth = tweepy.OAuth2BearerHandler(bearer)
+        else:
+            auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+            auth.set_access_token(access_token, access_token_secret)
 
-        auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-        auth.set_access_token(access_token, access_token_secret)
-        api = tweepy.API(auth, wait_on_rate_limit=True)
+        api = tweepy.API(auth, retry_count=3, timeout=100000, wait_on_rate_limit=True)
 
         userObj = {}
         user = api.get_user(screen_name=tweet["user"]["screen_name"])._json
         user.pop('status', None)
         userObj["user"] = user
         userObj["found_tweet"] = tweet
+
+        geo_locator = Nominatim(user_agent="findBots")
+        if userObj["user"]["location"]:
+            try:
+                location = geo_locator.geocode(userObj["user"]["location"])
+                logging.info(location)
+                if location is None:
+                    logging.info("try to add loc")
+                    userObj["coordinates"] = ""
+            except Exception as e:
+                continue
+            if location:
+                logging.info("try to add loc")
+                userObj["coordinates"] = [location.latitude, location.longitude]
 
         logging.info("sentiment!")
         analyzer = SentimentIntensityAnalyzer()
@@ -112,6 +131,25 @@ def startSignalGenerator(consumer_servers, consumer_group_id, consumer_offset, c
                                            tweet_mode='extended'
                                            ):
             tw = fulltweet._json
+
+            logging.info("sentiment!")
+            analyzer = SentimentIntensityAnalyzer()
+            tweet_modified = remove_user_mentions(remove_urls(copy.deepcopy(tw)))
+            sentence = tweet_modified["full_text"]
+            sentiment = analyzer.polarity_scores(sentence)
+            logging.info(sentence)
+            logging.info(sentiment['compound'])
+            if sentiment['compound'] >= 0.1:
+                logging.info("Positive")
+                tw["sentiment"] = "positive"
+
+            elif sentiment['compound'] <= - 0.2:
+                logging.info("Negative")
+                tw["sentiment"] = "negative"
+
+            else:
+                logging.info("Neutral")
+                tw["sentiment"] = "positive"
             tw.pop('user', None)
             userObj["tweets"].append(tw)
 

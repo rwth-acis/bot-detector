@@ -6,7 +6,7 @@ import random
 import pymongo
 from confluent_kafka import Consumer, Producer
 import sys
-#from dendritic_cell_algorithm import dc_algorithm
+# from dendritic_cell_algorithm import dc_algorithm
 from dendritic_cell_algorithm.antigen import Antigen
 from dendritic_cell_algorithm.dendritic_cell import DendriticCell
 from dendritic_cell_algorithm.dendritic_cell_algorithm import random_in_bounds
@@ -24,7 +24,8 @@ def delivery_report(err, msg):
         sys.stdout.flush()
 
 
-def startBotDetector(consumer_servers, consumer_group_id, consumer_offset, consumer_topic, producer_servers, collection_name):
+def startBotDetector(consumer_servers, consumer_group_id, consumer_offset, consumer_topic, producer_servers,
+                     collection_name):
     random.seed(10)
     c = Consumer({
         'bootstrap.servers': consumer_servers,
@@ -38,19 +39,29 @@ def startBotDetector(consumer_servers, consumer_group_id, consumer_offset, consu
     if consumer_topic in server_topics:
         c.subscribe([consumer_topic])
     else:
-        producer.produce(consumer_topic, key="INFO", value=("Create topic "+ consumer_topic), callback=delivery_report)
+        producer.produce(consumer_topic, key="INFO", value=("Create topic " + consumer_topic), callback=delivery_report)
         producer.flush()
         c.subscribe([consumer_topic])
 
-    client = pymongo.MongoClient(os.environ['DATABASE_URL'])
-    db = client["TwitterData"]
-    col1 = db[collection_name]
+    if int(os.environ['USE_DATABASE_SERVICE']):
+        print("use db service")
+        client = pymongo.MongoClient(os.environ['DATABASE_SERVICE'], int(os.environ['DATABASE_PORT']),
+                                     username=os.environ['DATABASE_USERNAME'],
+                                     password=os.environ['DATABASE_PASSWORD'])
+    else:
+        print("don't use db service")
+        client = pymongo.MongoClient(os.environ['DATABASE_URL'])
 
+    try:
+        db = client["TwitterData"]
+        col1 = db[collection_name]
+    except AttributeError as error:
+        print(error)
 
     antigen_array = []
     result = {"classified_count": 0, "classified_correctly_count": 0, "time": 0}
     dc_array = []
-    for i in range(200):
+    for i in range(50):
         dc = DendriticCell(str(i))
         dc_array.append(dc)
 
@@ -81,7 +92,8 @@ def startBotDetector(consumer_servers, consumer_group_id, consumer_offset, consu
             else:
                 continue
 
-        print('BotDetector: Received message: {0}  |  {1}'.format(msg.value().decode('utf-8')[:50], msg.key().decode('utf-8')))
+        print('BotDetector: Received message: {0}  |  {1}'.format(msg.value().decode('utf-8')[:50],
+                                                                  msg.key().decode('utf-8')))
 
         user = json.loads(msg.value())
 
@@ -102,10 +114,7 @@ def startBotDetector(consumer_servers, consumer_group_id, consumer_offset, consu
                 dc = DendriticCell(str(dc_count))
                 dc_array.append(dc)
 
-
-
-        #col1.insert_one(user)
-        print("BotDetector: Send "+str(msg.value())[:50])
-
+        # col1.insert_one(user)
+        print("BotDetector: Send " + str(msg.value())[:50])
 
     c.close()

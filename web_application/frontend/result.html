@@ -3,41 +3,94 @@
 {% block title %}Result{% endblock %}
 
 {% block html_head %}
+<!--<meta http-equiv="refresh" content="10">-->
     <script src="https://d3js.org/d3.v7.min.js"></script>
 
-<!---->
-<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.css" />
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.13/css/dataTables.jqueryui.css" />
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.2.4/css/buttons.jqueryui.css" />
+    <!---->
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.13/css/dataTables.jqueryui.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.2.4/css/buttons.jqueryui.css" />
 
-<script type="text/javascript" src="https://code.jquery.com/jquery-2.2.4.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.js"></script>
-<script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.js"></script>
-<script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
-<script type="text/javascript" src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.js"></script>
-<script type="text/javascript" src="https://cdn.datatables.net/1.10.13/js/dataTables.jqueryui.js"></script>
-<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.4/js/dataTables.buttons.js"></script>
-<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.4/js/buttons.jqueryui.js"></script>
-<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.4/js/buttons.colVis.js"></script>
-<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.4/js/buttons.flash.js"></script>
-<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.4/js/buttons.html5.js"></script>
-<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.4/js/buttons.print.js"></script>
- <!--   -->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.2.4.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.13/js/dataTables.jqueryui.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.4/js/dataTables.buttons.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.4/js/buttons.jqueryui.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.4/js/buttons.colVis.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.4/js/buttons.flash.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.4/js/buttons.html5.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.4/js/buttons.print.js"></script>
+     <!--   -->
 
     <script src="https://cdn.anychart.com/releases/8.10.0/js/anychart-core.min.js"></script>
     <script src="https://cdn.anychart.com/releases/8.10.0/js/anychart-pie.min.js"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='table_page.css') }}">
 
-<link rel="stylesheet" href="{{ url_for('static', filename='jQuery-plugin-progressbar.css') }}">
-<script src="{{ url_for('static', filename='jQuery-plugin-progressbar.js') }}"></script>
+
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='jQuery-plugin-progressbar.css') }}">
+    <script src="{{ url_for('static', filename='jQuery-plugin-progressbar.js') }}"></script>
 
 {% endblock %}
 
 
 {% block content %}
 
-    <div class="title-section">Users who posted tweets and retweets with #covid19:</div>
+    <div class="title-section">
+        <p>Detection result for the following parameters:</p>
+        <div>
+        <p>&bull; Keywords: {{parameters["keywords"]}}</p>
+        {% if parameters["areaParameters1"] == "do-not" %}
+        <p>&bull; Do not check retweets</p>
+        {% endif %}
+        {% if parameters["areaParameters1"] == "only" %}
+        <p>&bull; Only check retweets</p>
+        {% endif %}
+
+        {% if parameters["areaParameters2"] == "do-not" %}
+        <p>&bull; Do not check tweets that contain URLs</p>
+        {% endif %}
+        {% if parameters["areaParameters2"] == "only" %}
+        <p>&bull; Only check tweets that contain a URL</p>
+        {% endif %}
+
+        {% if parameters["areaParameters3"] == "do-not" %}
+        <p>&bull; Do not check tweets that contain media (e.g. photos or videos)</p>
+        {% endif %}
+        {% if parameters["areaParameters3"] == "only" %}
+        <p>&bull; Only check tweets that contain media (e.g. photos or videos)</p>
+        {% endif %}
+
+
+        {% if parameters["SearchParameters1"] == "real-time" %}
+        <p>&bull; Check the real-time stream of public tweets</p>
+        {% endif %}
+        {% if parameters["SearchParameters1"] == "time-period" %}
+        <p>&bull; Check tweets from {{parameters["start_date"]}} - {{parameters["end_date"]}}</p>
+        {% endif %}
+        {% if parameters["SearchParameters1"] == "seven-days" %}
+        <p>&bull; Check tweets from the last 7 days</p>
+        {% endif %}
+        </div>
+
+
+    </div>
+    {% if ready_count < 100 %}
+    <button class="btn btn-info reload-btn" onclick="myStopFunction()">Stop reloading the page</button>
+
+    <div class="progress progress-md prog" style="height: 30px;">
+        <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated" role="progressbar"  style="width: {{ready_count}}%" aria-valuenow="{{ready_count}}" aria-valuemin="0" aria-valuemax="100" data-percent='{{ready_count}}' data-duration="1" >{{ready_count}}%</div>
+    </div>
+    {% else %}
+    <div class="progress progress-md prog" style="height: 30px;">
+        <div class="progress-bar bg-primary progress-bar-striped" role="progressbar"  style="width: {{ready_count}}%" aria-valuenow="{{ready_count}}" aria-valuemin="0" aria-valuemax="100" data-percent='{{ready_count}}' data-duration="1" >100%</div>
+    </div>
+    {% endif %}
+
 
     <div id="scroll1" style="overflow-x:scroll;">
         <div></div>
@@ -145,7 +198,19 @@
     <div id="chart-container2">
     </div>
     <script>
+            var myTimeout=setTimeout(function() {
+            console.log("")
+                    }, 1000);
+            function myStopFunction() {
+                console.log("stop");
+                clearTimeout(myTimeout);
+            }
             $(document).ready(function(){
+                if({{ready_count}}<100){
+                    myTimeout = setTimeout(function() {
+                       location.reload();
+                    }, 10000);
+                }
                 $(".progress-bar").loading();
                 $('#main-table').DataTable({
                     dom: 'lBfrtip',

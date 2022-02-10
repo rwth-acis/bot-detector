@@ -1,10 +1,12 @@
 import copy
 import json
 import os
+import datetime
 from json import dumps
 import logging
 import uuid
 
+import dat as dat
 import tweepy as tweepy
 from flask import Flask, render_template, url_for, request
 from flask_pymongo import PyMongo
@@ -23,6 +25,7 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 from python_kafka.SignalGenerator import startSignalGenerator
 from python_kafka.TweetsLoader import startTweetsLoader
+from python_kafka.TweetsLoaderWithParameters import startTweetsLoaderWithParameters
 from python_kafka.BotDetector import startBotDetector
 import multiprocessing
 
@@ -35,24 +38,38 @@ app = Flask(__name__, template_folder='frontend')
 
 app.static_folder = 'frontend/static'
 
-client = pymongo.MongoClient(os.environ['DATABASE_URL'])
-db = client["TwitterData"]
-col = db["Users"]
+if int(os.environ['USE_DATABASE_SERVICE']):
+    print("use db service")
+    client = pymongo.MongoClient(os.environ['DATABASE_SERVICE'], int(os.environ['DATABASE_PORT']),
+                                 username=os.environ['DATABASE_USERNAME'],
+                                 password=os.environ['DATABASE_PASSWORD'])
+else:
+    print("don't use db service")
+    client = pymongo.MongoClient(os.environ['DATABASE_URL'])
 
 
-@app.route("/")
+try:
+    db = client["TwitterData"]
+    col = db["Users1"]
+except AttributeError as error:
+    print(error)
+
+
+@app.route(os.environ['APP_URL_PATH'])
 def home():
     return render_template("base.html", app_url=os.environ['APP_URL'])
 
 
-@app.route('/result/<id>')
+@app.route(os.environ['APP_URL_PATH']+'result/<id>')
 def resultid(id):
     col1 = db[str(id)]
     users = col1.find()
+    col2 = db["Requests"]
+    parameters = col2.find_one({"collection": str(id)})
+    print(parameters)
+    ready_count = 0
     try:
         folium_map = folium.Map(location=[0, 0], zoom_start=2)
-
-        geo_locator = Nominatim(user_agent="findBots")
 
         negative_count1 = 0
         positive_count1 = 0
@@ -62,6 +79,7 @@ def resultid(id):
         neutral_count2 = 0
 
         for user in users:
+            ready_count += 1
             # print(user)
             if "coordinates" in user:
                 if user["coordinates"]:
@@ -78,91 +96,230 @@ def resultid(id):
                             folium.Marker(user["coordinates"], popup="@" + user["user"]["screen_name"],
                                           icon=folium.Icon(color='green')).add_to(
                                 folium_map)
-            else:
-                if user["user"]["location"]:
-                    try:
-                        location = geo_locator.geocode(user["user"]["location"])
-                        logging.info(location)
-                        if location is None:
-                            logging.info("try to add loc")
-                            col1.update_one({"_id": user["_id"]}, {'$set': {'coordinates': ""}})
-                    except Exception as e:
-                        continue
-                    if location:
-                        if user["signals"]["is_bot_probability"] >= 50:
-                            folium.Marker([location.latitude, location.longitude],
-                                          popup="@" + user["user"]["screen_name"],
-                                          icon=folium.Icon(color='red')).add_to(
-                                folium_map)
-                        else:
-                            if user["signals"]["is_bot_probability"] >= 30:
-                                folium.Marker([location.latitude, location.longitude],
-                                              popup="@" + user["user"]["screen_name"],
-                                              icon=folium.Icon(color='orange')).add_to(
-                                    folium_map)
-                            else:
-                                folium.Marker([location.latitude, location.longitude],
-                                              popup="@" + user["user"]["screen_name"],
-                                              icon=folium.Icon(color='green')).add_to(
-                                    folium_map)
 
-                        logging.info("try to add loc")
-                        col1.update_one({"_id": user["_id"]},
-                                        {'$set': {'coordinates': [location.latitude, location.longitude]}})
             if user["signals"]["is_bot_probability"] >= 50:
-                if user["found_tweet"]["sentiment"] == "negative":
-                    negative_count2 += 1
-                if user["found_tweet"]["sentiment"] == "positive":
-                    positive_count2 += 1
-                if user["found_tweet"]["sentiment"] == "neutral":
-                    neutral_count2 += 1
-            else:
                 if user["found_tweet"]["sentiment"] == "negative":
                     negative_count1 += 1
                 if user["found_tweet"]["sentiment"] == "positive":
                     positive_count1 += 1
                 if user["found_tweet"]["sentiment"] == "neutral":
                     neutral_count1 += 1
+            else:
+                if user["found_tweet"]["sentiment"] == "negative":
+                    negative_count2 += 1
+                if user["found_tweet"]["sentiment"] == "positive":
+                    positive_count2 += 1
+                if user["found_tweet"]["sentiment"] == "neutral":
+                    neutral_count2 += 1
 
+        print(parameters["limit"])
+        print("_______________")
+        ready_count = int(ready_count / (int(parameters["limit"]) - int(parameters["limit"] ) / 10 - 2) * 100)
+        print(ready_count)
         return render_template('result.html', users=col1.find(), folium_map=Markup(folium_map._repr_html_()),
                                app_url=os.environ['APP_URL'],
                                negative_count1=negative_count1, positive_count1=positive_count1,
                                neutral_count1=neutral_count1, negative_count2=negative_count2,
                                positive_count2=positive_count2, neutral_count2=neutral_count2,
-                               collection=str(id))
+                               collection=str(id), parameters=parameters, ready_count=ready_count)
     except Exception as e:
         # return dumps({'error': str(e)})
         logging.info(e)
 
 
-@app.route("/table")
+@app.route(os.environ['APP_URL_PATH']+"table")
 def table():
     return render_template("table.html")
 
 
-@app.route("/index")
+@app.route(os.environ['APP_URL_PATH']+"index")
 def about():
     return render_template("index.html", app_url=os.environ['APP_URL'])
 
 
-@app.route("/part-result", methods=['post', 'get'])
+@app.route(os.environ['APP_URL_PATH']+"part-result", methods=['post', 'get'])
 def part_result():
     if request.method == 'POST':
-        keywords = request.form.get('keywords').split(", ")
         id = uuid.uuid4()
         logging.info(id)
+
+        # ________________________________________________________
+        # _______________________PARAMETERS_______________________
+        # ________________________________________________________
+
+        keywords = request.form.get('keywords')
+        print(keywords)
+        limit = request.form.get('limit')
+        print(limit)
+        areaParameters1 = request.form.get('areaParameters1')
+        print(areaParameters1)
+        areaParameters2 = request.form.get('areaParameters2')
+        print(areaParameters2)
+        areaParameters3 = request.form.get('areaParameters3')
+        print(areaParameters3)
+        SearchParameters1 = request.form.get('SearchParameters1')
+        print(SearchParameters1)
+        start_date = request.form.get('start-date')
+        end_date = request.form.get('end-date')
+
+        if SearchParameters1 == "time-period":
+            if not start_date:
+                start_date = datetime.datetime.date(datetime.datetime.now() - datetime.timedelta(days=7)).strftime(
+                    "%Y-%m-%d")
+            if not end_date:
+                end_date = datetime.datetime.date(datetime.datetime.now()).strftime("%Y-%m-%d")
+
+        if SearchParameters1 == "seven-days":
+            start_date = datetime.datetime.date(datetime.datetime.now() - datetime.timedelta(days=7)).strftime(
+                "%Y-%m-%d")
+            end_date = datetime.datetime.date(datetime.datetime.now()).strftime("%Y-%m-%d")
+
+        if (start_date > end_date) and SearchParameters1 == "time-period":
+            date = start_date
+            start_date = end_date
+            end_date = date
+
+        if (start_date == end_date) and SearchParameters1 == "time-period":
+            end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d")
+            end_date = datetime.datetime.date(end_date + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+
+        print(start_date)
+        print(end_date)
+        print(int(int(limit) + int(limit) / 10 + 2))
+        parameters = {
+            "collection": str(id),
+            "keywords": keywords,
+            "limit": str(int(int(limit) + int(limit) / 10 + 2)),
+            "areaParameters1": areaParameters1,
+            "areaParameters2": areaParameters2,
+            "areaParameters3": areaParameters3,
+            "SearchParameters1": SearchParameters1,
+            "start_date": start_date,
+            "end_date": end_date
+        }
+
         col1 = db[str(id)]
-        print(col1)
-        p1 = multiprocessing.Process(name='p1', target=startTweetsLoader,
-                                     args=(keywords, 'localhost:9091', str(id), "set0", 50,))
-        p2 = multiprocessing.Process(name='p2', target=startSignalGenerator, args=(
-        'localhost:9091', 'test1-id', 'earliest', str(id), 'localhost:9091', (str(id) + "-signals"),))
+        col2 = db["Requests"]
+        col2.insert_one(parameters)
+
+        # ___________________________________________________________
+        # ______________________END_PARAMETERS_______________________
+        # ___________________________________________________________
+
+        consumer_key = os.environ['CONSUMER_KEY']
+        consumer_secret = os.environ['CONSUMER_SECRET']
+        access_token = os.environ['ACCESS_TOKEN']
+        access_token_secret = os.environ['ACCESS_TOKEN_SECRET']
+        bearer = os.environ['BEARER']
+        use_bearer = int(os.environ['USE_BEARER'])
+
+        if use_bearer:
+            print("use_bearer")
+            p1 = multiprocessing.Process(name='p1', target=startTweetsLoaderWithParameters,
+                                         args=(keywords, 'kafka.milki-psy.dbis.rwth-aachen.de:31039', str(id), "set0",
+                                               parameters, None, None, None, None, bearer,))
+        else:
+            print("don't use_bearer")
+            p1 = multiprocessing.Process(name='p1', target=startTweetsLoaderWithParameters,
+                                         args=(keywords, 'kafka.milki-psy.dbis.rwth-aachen.de:31039', str(id), "set0",
+                                               parameters, consumer_key, consumer_secret, access_token, access_token_secret, None,))
+        if use_bearer:
+            print("use_bearer")
+            p2 = multiprocessing.Process(name='p2', target=startSignalGenerator, args=(
+                'kafka.milki-psy.dbis.rwth-aachen.de:31039', 'test1-id', 'earliest', str(id),
+                'kafka.milki-psy.dbis.rwth-aachen.de:31039', (str(id) + "-signals"),
+                None, None, None, None, bearer,))
+        else:
+            print("don't use_bearer")
+            p2 = multiprocessing.Process(name='p2', target=startSignalGenerator, args=(
+                'kafka.milki-psy.dbis.rwth-aachen.de:31039', 'test1-id', 'earliest', str(id),
+                'kafka.milki-psy.dbis.rwth-aachen.de:31039', (str(id) + "-signals"),
+                consumer_key, consumer_secret, access_token, access_token_secret, None,))
+
         p3 = multiprocessing.Process(name='p3', target=startBotDetector, args=(
-        'localhost:9091', 'test1-id', 'earliest', (str(id) + "-signals"), 'localhost:9091', str(id),))
+            'kafka.milki-psy.dbis.rwth-aachen.de:31039', 'test1-id', 'earliest', (str(id) + "-signals"),
+            'kafka.milki-psy.dbis.rwth-aachen.de:31039', str(id),))
         p1.start()
         p2.start()
         p3.start()
     return redirect((os.environ['APP_URL']) + "/result/" + str(id))
+
+
+@app.route(os.environ['APP_URL_PATH']+'user-check/<screen_name>', methods=['post', 'get'])
+def user_check(screen_name):
+    if request.method == 'POST':
+        screen_name = request.form.get('screen-name').replace("@", "")
+    if screen_name == "form":
+        return render_template('user-check.html', blank=True, exception=False)
+
+    consumer_key = os.environ['CONSUMER_KEY']
+    consumer_secret = os.environ['CONSUMER_SECRET']
+    access_token = os.environ['ACCESS_TOKEN']
+    access_token_secret = os.environ['ACCESS_TOKEN_SECRET']
+
+    auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+    auth.set_access_token(access_token, access_token_secret)
+    api = tweepy.API(auth, wait_on_rate_limit=True)
+
+    userObj = {}
+    try:
+        user = api.get_user(screen_name=screen_name)._json
+        user.pop('status', None)
+        userObj["user"] = user
+
+        userObj["tweets"] = []
+        logging.info(screen_name)
+        tweets_raw = api.user_timeline(screen_name=screen_name,
+                                       # max 200 tweets
+                                       count=20,
+                                       include_rts=False,
+                                       # Necessary to keep full_text
+                                       tweet_mode='extended'
+                                       )
+        logging.info(tweets_raw)
+        for fulltweet in tweets_raw:
+            tw = fulltweet._json
+            tw.pop('user', None)
+            userObj["tweets"].append(tw)
+
+        new_signals = Signals()
+        # friends_count, followers_count, verified, default_profile, default_profile_image, created_at, name,
+        # screen_name, description, tweets
+        new_signals.generate_signals(user["friends_count"], user["statuses_count"], user["followers_count"],
+                                     user["verified"],
+                                     user["default_profile"],
+                                     user["default_profile_image"], user["created_at"], user["name"],
+                                     user["screen_name"],
+                                     user["description"],
+                                     userObj["tweets"])
+
+        logging.info(new_signals.get_parameters())
+        userObj["signals"] = new_signals.get_parameters()
+
+        return render_template('user-check.html', blank=False, exception=False, tweetArr=json.dumps(userObj["tweets"]),
+                               user=userObj)
+    except Exception as e:
+        # return dumps({'error': str(e)})
+        return render_template('user-check.html', blank=True, exception=True)
+
+
+@app.route(os.environ['APP_URL_PATH']+'<collection>/user/<id>')
+def user(collection, id):
+    try:
+        col = db[collection]
+        user_found = col.find_one(ObjectId(id))
+        if user_found:
+            return render_template('user.html', tweetArr=json.dumps(user_found["tweets"]), user=user_found,
+                                   tweet=json.dumps(user_found["found_tweet"]))
+        else:
+            return render_template('404.html')
+    except Exception as e:
+        return render_template('404.html')
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
 
 
 """
@@ -251,7 +408,7 @@ def result():
     except Exception as e:
         # return dumps({'error': str(e)})
         logging.info(e)
-"""
+
 
 
 @app.route('/covid')
@@ -413,11 +570,11 @@ def recalc(id):
         tw = fulltweet._json
         tw.pop('user', None)
 
-        """
+        """"""
         col.update_one({"_id": user["_id"]},
                        {'$pull': {'tweets': {'id': tw["id"]}}}
                        )
-        """
+        """"""
 
         col.update_one({"_id": user["_id"]},
                        {'$addToSet': {'tweets': tw}})
@@ -438,84 +595,7 @@ def recalc(id):
                    {'$set': {'signals': new_signals.get_parameters()}})
 
     return redirect(os.environ['APP_URL'] + "/user/" + id)
-
-
-@app.route('/user-check/<screen_name>', methods=['post', 'get'])
-def user_check(screen_name):
-    if request.method == 'POST':
-        screen_name = request.form.get('screen-name').replace("@", "")
-    if screen_name == "form":
-        return render_template('user-check.html', blank=True, exception=False)
-
-    consumer_key = os.environ['CONSUMER_KEY']
-    consumer_secret = os.environ['CONSUMER_SECRET']
-    access_token = os.environ['ACCESS_TOKEN']
-    access_token_secret = os.environ['ACCESS_TOKEN_SECRET']
-
-    auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-    auth.set_access_token(access_token, access_token_secret)
-    api = tweepy.API(auth, wait_on_rate_limit=True)
-
-    userObj = {}
-    try:
-        user = api.get_user(screen_name=screen_name)._json
-        user.pop('status', None)
-        userObj["user"] = user
-
-        userObj["tweets"] = []
-        logging.info(screen_name)
-        tweets_raw = api.user_timeline(screen_name=screen_name,
-                                       # max 200 tweets
-                                       count=20,
-                                       include_rts=False,
-                                       # Necessary to keep full_text
-                                       tweet_mode='extended'
-                                       )
-        logging.info(tweets_raw)
-        for fulltweet in tweets_raw:
-            tw = fulltweet._json
-            tw.pop('user', None)
-            userObj["tweets"].append(tw)
-
-        new_signals = Signals()
-        # friends_count, followers_count, verified, default_profile, default_profile_image, created_at, name,
-        # screen_name, description, tweets
-        new_signals.generate_signals(user["friends_count"], user["statuses_count"], user["followers_count"],
-                                     user["verified"],
-                                     user["default_profile"],
-                                     user["default_profile_image"], user["created_at"], user["name"],
-                                     user["screen_name"],
-                                     user["description"],
-                                     userObj["tweets"])
-
-        logging.info(new_signals.get_parameters())
-        userObj["signals"] = new_signals.get_parameters()
-
-        return render_template('user-check.html', blank=False, exception=False, tweetArr=json.dumps(userObj["tweets"]),
-                               user=userObj)
-    except Exception as e:
-        # return dumps({'error': str(e)})
-        return render_template('user-check.html', blank=True, exception=True)
-
-
-@app.route('/<collection>/user/<id>')
-def user(collection, id):
-    try:
-        col = db[collection]
-        user_found = col.find_one(ObjectId(id))
-        if user_found:
-            return render_template('user.html', tweetArr=json.dumps(user_found["tweets"]), user=user_found,
-                                   tweet=json.dumps(user_found["found_tweet"]))
-        else:
-            return render_template('404.html')
-    except Exception as e:
-        return render_template('404.html')
-
-
-@app.errorhandler(404)
-def page_not_found(e):
-    return render_template('404.html'), 404
-
+"""
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0')
