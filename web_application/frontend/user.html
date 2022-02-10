@@ -4,16 +4,16 @@
 <link href="https://fonts.googleapis.com/css?family=Asap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
 <link href="http://www.jqueryscript.net/css/jquerysctipttop.css" rel="stylesheet" type="text/css">
-<link rel="stylesheet" href="{{ url_for('static', filename='jQuery-plugin-progressbar.css') }}">
+<link rel="stylesheet" href="{{ app_url_path }}{{ url_for('static', filename='jQuery-plugin-progressbar.css') }}">
 <script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
-<script src="{{ url_for('static', filename='jQuery-plugin-progressbar.js') }}"></script>
+<script src="{{ app_url_path }}{{ url_for('static', filename='jQuery-plugin-progressbar.js') }}"></script>
 
-<link rel="stylesheet" href="{{ url_for('static', filename='tweets.css') }}">
+<link rel="stylesheet" href="{{ app_url_path }}{{ url_for('static', filename='tweets.css') }}">
 
 
 <script src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
-<script src="{{ url_for('static', filename='tweet_to_html.js') }}"></script>
-<script src="{{ url_for('static', filename='user.js') }}"></script>
+<script src="{{ app_url_path }}{{ url_for('static', filename='tweet_to_html.js') }}"></script>
+<script src="{{ app_url_path }}{{ url_for('static', filename='user.js') }}"></script>
 
 {% endblock %}
 
@@ -403,7 +403,7 @@
 
 
 <div class="recent-tweets">
-    <a href="{{app_url}}/recalculate/{{user['_id']}}" class="btn btn-info">Update info</a>
+    <a href="{{app_url}}/recalculate/{{collection}}/{{user['_id']}}" class="btn btn-info">Update info</a>
     <h1>Latest Tweets:</h1>
     {% if tweetArr == "[]" %}
     <p style="background: #f1f1f1; padding: 20px; font-size: 13px;">Failed to get the latest tweets</p>

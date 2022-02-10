@@ -28,12 +28,12 @@
 
     <script src="https://cdn.anychart.com/releases/8.10.0/js/anychart-core.min.js"></script>
     <script src="https://cdn.anychart.com/releases/8.10.0/js/anychart-pie.min.js"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='table_page.css') }}">
+    <link rel="stylesheet" href="{{ app_url_path }}{{ url_for('static', filename='table_page.css') }}">
 
 
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='jQuery-plugin-progressbar.css') }}">
-    <script src="{{ url_for('static', filename='jQuery-plugin-progressbar.js') }}"></script>
+    <link rel="stylesheet" href="{{ app_url_path }}{{ url_for('static', filename='jQuery-plugin-progressbar.css') }}">
+    <script src="{{ app_url_path }}{{ url_for('static', filename='jQuery-plugin-progressbar.js') }}"></script>
 
 {% endblock %}
 

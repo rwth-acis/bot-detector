@@ -4,19 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width; initial-scale=1.0;">
     <title>{% block title %}{% endblock %} - BotDetector</title>
-    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='/images/favicon.png') }}">
+    <link rel="icon" type="image/x-icon" href="{{ app_url_path }}{{ url_for('static', filename='/images/favicon.png') }}">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link href='https://fonts.googleapis.com/css?family=Bitter' rel='stylesheet' type='text/css'>
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='main_style.css') }}">
+    <link rel="stylesheet" href="{{ app_url_path }}{{ url_for('static', filename='main_style.css') }}">
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script src="{{ app_url_path }}{{ url_for('static', filename='script.js') }}"></script>
     {% block html_head %}{% endblock %}
 </head>
 <body>
 <nav>
     <ul>
-        <a id="icon" href="{{app_url}}/"><div id="div-nav-logo"><img id="nav-logo" src="{{ url_for('static', filename='/images/favicon.png') }}" alt="logo"></div></a>
+        <a id="icon" href="{{app_url}}/"><div id="div-nav-logo"><img id="nav-logo" src="{{ app_url_path }}{{ url_for('static', filename='/images/favicon.png') }}" alt="logo"></div></a>
         <i id = "burger" class="fa fa-bars" onclick="displaymenu();"></i>
         <li><a href="{{app_url}}/">Home</a></li>
         <li><a href="{{app_url}}/index">Request form</a></li>
@@ -28,7 +28,7 @@
 <div id="body-content">
     {% block content %}
 
-    <div id="big-bird" style="background-image: url('{{ url_for('static', filename='images/bird-bot.png') }}');">
+    <div id="big-bird" style="background-image: url('{{ app_url_path }}{{ url_for('static', filename='images/bird-bot.png') }}');">
         <h1>Detect Bots Now!</h1>
         <h2>Enter required parameters <br>and start searching for malicious bots</h2>
         <a href="{{app_url}}/index" class="start-btn">Start</a>
@@ -41,7 +41,7 @@
 </div>
 
     <footer>
-        <a href="{{app_url}}/"><div id="div-footer-logo"><img id="footer-logo" src="{{ url_for('static', filename='/images/favicon.png') }}" alt="logo"></div></a>
+        <a href="{{app_url}}/"><div id="div-footer-logo"><img id="footer-logo" src="{{ app_url_path }}{{ url_for('static', filename='/images/favicon.png') }}" alt="logo"></div></a>
         <p>Bot Icon made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></p>
         <p>&copy; 2022 Copyright: <a href="{{app_url}}/">BotDetector</a></p>
         <address><i class="fa fa-map-marker" style="font-size:16px; color: white;"></i> &nbsp; Aachen, Germany</address>

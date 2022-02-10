@@ -6,9 +6,8 @@ from json import dumps
 import logging
 import uuid
 
-import dat as dat
-import tweepy as tweepy
-from flask import Flask, render_template, url_for, request
+import tweepy
+from flask import Flask, render_template, url_for, request, send_from_directory
 from flask_pymongo import PyMongo
 import folium
 from geopy.exc import GeocoderTimedOut
@@ -47,7 +46,6 @@ else:
     print("don't use db service")
     client = pymongo.MongoClient(os.environ['DATABASE_URL'])
 
-
 try:
     db = client["TwitterData"]
     col = db["Users1"]
@@ -55,12 +53,22 @@ except AttributeError as error:
     print(error)
 
 
+@app.route(os.environ['APP_URL_PATH'] + "static/images/<image_name>")
+def static_dir(image_name):
+    return send_from_directory("frontend/static/images", image_name)
+
+
+@app.route(os.environ['APP_URL_PATH'] + 'static/<path:path>')
+def send_js(path):
+    return send_from_directory("frontend/static/", path)
+
+
 @app.route(os.environ['APP_URL_PATH'])
 def home():
-    return render_template("base.html", app_url=os.environ['APP_URL'])
+    return render_template("base.html", app_url=os.environ['APP_URL'], app_url_path=os.environ['APP_URL_PATH'][:-1])
 
 
-@app.route(os.environ['APP_URL_PATH']+'result/<id>')
+@app.route(os.environ['APP_URL_PATH'] + 'result/<id>')
 def resultid(id):
     col1 = db[str(id)]
     users = col1.find()
@@ -114,30 +122,32 @@ def resultid(id):
 
         print(parameters["limit"])
         print("_______________")
-        ready_count = int(ready_count / (int(parameters["limit"]) - int(parameters["limit"] ) / 10 - 2) * 100)
+        ready_count = int(ready_count / (int(parameters["limit"]) - int(parameters["limit"]) / 10 - 2) * 100)
         print(ready_count)
         return render_template('result.html', users=col1.find(), folium_map=Markup(folium_map._repr_html_()),
                                app_url=os.environ['APP_URL'],
                                negative_count1=negative_count1, positive_count1=positive_count1,
                                neutral_count1=neutral_count1, negative_count2=negative_count2,
                                positive_count2=positive_count2, neutral_count2=neutral_count2,
-                               collection=str(id), parameters=parameters, ready_count=ready_count)
+                               collection=str(id), parameters=parameters, ready_count=ready_count,
+                               app_url_path=os.environ['APP_URL_PATH'][:-1])
     except Exception as e:
         # return dumps({'error': str(e)})
         logging.info(e)
 
 
-@app.route(os.environ['APP_URL_PATH']+"table")
+@app.route(os.environ['APP_URL_PATH'] + "table")
 def table():
-    return render_template("table.html")
+    return render_template("table.html", app_url=os.environ['APP_URL'], app_url_path=os.environ['APP_URL_PATH'][:-1])
 
 
-@app.route(os.environ['APP_URL_PATH']+"index")
+@app.route(os.environ['APP_URL_PATH'] + "index")
 def about():
-    return render_template("index.html", app_url=os.environ['APP_URL'])
+    return render_template("index.html", app_url=os.environ['APP_URL'],
+                           app_url_path=os.environ['APP_URL_PATH'][:-1])
 
 
-@app.route(os.environ['APP_URL_PATH']+"part-result", methods=['post', 'get'])
+@app.route(os.environ['APP_URL_PATH'] + "part-result", methods=['post', 'get'])
 def part_result():
     if request.method == 'POST':
         id = uuid.uuid4()
@@ -222,7 +232,8 @@ def part_result():
             print("don't use_bearer")
             p1 = multiprocessing.Process(name='p1', target=startTweetsLoaderWithParameters,
                                          args=(keywords, 'kafka.milki-psy.dbis.rwth-aachen.de:31039', str(id), "set0",
-                                               parameters, consumer_key, consumer_secret, access_token, access_token_secret, None,))
+                                               parameters, consumer_key, consumer_secret, access_token,
+                                               access_token_secret, None,))
         if use_bearer:
             print("use_bearer")
             p2 = multiprocessing.Process(name='p2', target=startSignalGenerator, args=(
@@ -245,21 +256,29 @@ def part_result():
     return redirect((os.environ['APP_URL']) + "/result/" + str(id))
 
 
-@app.route(os.environ['APP_URL_PATH']+'user-check/<screen_name>', methods=['post', 'get'])
+@app.route(os.environ['APP_URL_PATH'] + 'user-check/<screen_name>', methods=['post', 'get'])
 def user_check(screen_name):
     if request.method == 'POST':
         screen_name = request.form.get('screen-name').replace("@", "")
     if screen_name == "form":
-        return render_template('user-check.html', blank=True, exception=False)
+        return render_template('user-check.html', blank=True, exception=False,
+                               app_url=os.environ['APP_URL'],
+                               app_url_path=os.environ['APP_URL_PATH'][:-1])
 
     consumer_key = os.environ['CONSUMER_KEY']
     consumer_secret = os.environ['CONSUMER_SECRET']
     access_token = os.environ['ACCESS_TOKEN']
     access_token_secret = os.environ['ACCESS_TOKEN_SECRET']
+    bearer = os.environ['BEARER']
+    use_bearer = int(os.environ['USE_BEARER'])
 
-    auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-    auth.set_access_token(access_token, access_token_secret)
-    api = tweepy.API(auth, wait_on_rate_limit=True)
+    if use_bearer:
+        auth = tweepy.OAuth2BearerHandler(bearer)
+    else:
+        auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+        auth.set_access_token(access_token, access_token_secret)
+
+    api = tweepy.API(auth, retry_count=3, timeout=100000, wait_on_rate_limit=True)
 
     userObj = {}
     try:
@@ -297,29 +316,99 @@ def user_check(screen_name):
         userObj["signals"] = new_signals.get_parameters()
 
         return render_template('user-check.html', blank=False, exception=False, tweetArr=json.dumps(userObj["tweets"]),
-                               user=userObj)
+                               user=userObj,
+                               app_url=os.environ['APP_URL'],
+                               app_url_path=os.environ['APP_URL_PATH'][:-1])
     except Exception as e:
         # return dumps({'error': str(e)})
-        return render_template('user-check.html', blank=True, exception=True)
+        return render_template('user-check.html', blank=True, exception=True,
+                               app_url=os.environ['APP_URL'],
+                               app_url_path=os.environ['APP_URL_PATH'][:-1])
 
 
-@app.route(os.environ['APP_URL_PATH']+'<collection>/user/<id>')
+@app.route(os.environ['APP_URL_PATH'] + '<collection>/user/<id>')
 def user(collection, id):
     try:
         col = db[collection]
         user_found = col.find_one(ObjectId(id))
         if user_found:
             return render_template('user.html', tweetArr=json.dumps(user_found["tweets"]), user=user_found,
-                                   tweet=json.dumps(user_found["found_tweet"]))
+                                   tweet=json.dumps(user_found["found_tweet"]),
+                                   app_url=os.environ['APP_URL'],
+                                   app_url_path=os.environ['APP_URL_PATH'][:-1],
+                                   collection=collection)
         else:
-            return render_template('404.html')
+            return render_template('404.html', app_url=os.environ['APP_URL'],
+                                   app_url_path=os.environ['APP_URL_PATH'][:-1])
     except Exception as e:
-        return render_template('404.html')
+        return render_template('404.html', app_url=os.environ['APP_URL'],
+                               app_url_path=os.environ['APP_URL_PATH'][:-1])
+
+
+@app.route(os.environ['APP_URL_PATH'] + 'recalculate/<collection>/<id>')
+def recalc(collection, id):
+    consumer_key = os.environ['CONSUMER_KEY']
+    consumer_secret = os.environ['CONSUMER_SECRET']
+    access_token = os.environ['ACCESS_TOKEN']
+    access_token_secret = os.environ['ACCESS_TOKEN_SECRET']
+    bearer = os.environ['BEARER']
+    use_bearer = int(os.environ['USE_BEARER'])
+
+    if use_bearer:
+        auth = tweepy.OAuth2BearerHandler(bearer)
+    else:
+        auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+        auth.set_access_token(access_token, access_token_secret)
+
+    api = tweepy.API(auth, retry_count=3, timeout=100000, wait_on_rate_limit=True)
+
+    col1 = db[collection]
+
+    user = col1.find_one(ObjectId(id))
+
+    col1.update_one({"_id": user["_id"]},
+                    {'$set': {'tweets': []}})
+
+    for fulltweet in api.user_timeline(user_id=user["user"]["id"],
+                                       # max 200 tweets
+                                       count=20,
+                                       include_rts=False,
+                                       # Necessary to keep full_text
+                                       tweet_mode='extended'
+                                       ):
+        tw = fulltweet._json
+        tw.pop('user', None)
+
+        """"""
+        col1.update_one({"_id": user["_id"]},
+                        {'$pull': {'tweets': {'id': tw["id"]}}}
+                        )
+        """"""
+
+        col1.update_one({"_id": user["_id"]},
+                        {'$addToSet': {'tweets': tw}})
+
+    user = col1.find_one(ObjectId(id))
+    new_signals = Signals()
+    new_signals.generate_signals(user["user"]["friends_count"], user["user"]["statuses_count"],
+                                 user["user"]["followers_count"],
+                                 user["user"]["verified"],
+                                 user["user"]["default_profile"],
+                                 user["user"]["default_profile_image"],
+                                 user["user"]["created_at"],
+                                 user["user"]["name"],
+                                 user["user"]["screen_name"],
+                                 user["user"]["description"],
+                                 user["tweets"])
+    col1.update_one({"_id": user["_id"]},
+                    {'$set': {'signals': new_signals.get_parameters()}})
+
+    return redirect(os.environ['APP_URL'] + "/" + collection + "/user/" + id)
 
 
 @app.errorhandler(404)
 def page_not_found(e):
-    return render_template('404.html'), 404
+    return render_template('404.html', app_url=os.environ['APP_URL'], app_url_path=os.environ['APP_URL_PATH'][:-1]), 404
 
 
 """

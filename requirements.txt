@@ -17,6 +17,7 @@ pymongo==4.0.1
 python-dotenv==0.19.2
 python_Levenshtein==0.12.2
 scipy==1.7.2
-tweepy==4.1.0
+tweepy==4.5.0
 vaderSentiment==3.3.2
+uuid==1.30
 Werkzeug==2.0.2

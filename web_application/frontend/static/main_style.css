@@ -439,6 +439,7 @@ nav a:hover{
    background-color: #15131e;
    background-position: bottom;
    background-image: url('/static/images/big-bird-bot.png') !important;
+   background-image: url('/bot-detector/static/images/big-bird-bot.png') !important;
 
   }
 

@@ -1,5 +1,3 @@
-import pprint
-
 from confluent_kafka import Producer
 
 import os
