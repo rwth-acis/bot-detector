@@ -65,7 +65,9 @@ def send_js(path):
 
 @app.route(os.environ['APP_URL_PATH'])
 def home():
-    return render_template("base.html", app_url=os.environ['APP_URL'], app_url_path=os.environ['APP_URL_PATH'][:-1])
+    return render_template("base.html", app_url=os.environ['APP_URL'],
+                           app_url_path=os.environ['APP_URL_PATH'][:-1],
+                           example_db=os.environ['EXAMPLE_DB'])
 
 
 @app.route(os.environ['APP_URL_PATH'] + 'result/<id>')
@@ -130,7 +132,8 @@ def resultid(id):
                                neutral_count1=neutral_count1, negative_count2=negative_count2,
                                positive_count2=positive_count2, neutral_count2=neutral_count2,
                                collection=str(id), parameters=parameters, ready_count=ready_count,
-                               app_url_path=os.environ['APP_URL_PATH'][:-1])
+                               app_url_path=os.environ['APP_URL_PATH'][:-1],
+                               example_db=os.environ['EXAMPLE_DB'])
     except Exception as e:
         # return dumps({'error': str(e)})
         logging.info(e)
@@ -138,13 +141,16 @@ def resultid(id):
 
 @app.route(os.environ['APP_URL_PATH'] + "table")
 def table():
-    return render_template("table.html", app_url=os.environ['APP_URL'], app_url_path=os.environ['APP_URL_PATH'][:-1])
+    return render_template("table.html", app_url=os.environ['APP_URL'],
+                           app_url_path=os.environ['APP_URL_PATH'][:-1],
+                           example_db=os.environ['EXAMPLE_DB'])
 
 
 @app.route(os.environ['APP_URL_PATH'] + "index")
 def about():
     return render_template("index.html", app_url=os.environ['APP_URL'],
-                           app_url_path=os.environ['APP_URL_PATH'][:-1])
+                           app_url_path=os.environ['APP_URL_PATH'][:-1],
+                           example_db=os.environ['EXAMPLE_DB'])
 
 
 @app.route(os.environ['APP_URL_PATH'] + "part-result", methods=['post', 'get'])
@@ -263,7 +269,8 @@ def user_check(screen_name):
     if screen_name == "form":
         return render_template('user-check.html', blank=True, exception=False,
                                app_url=os.environ['APP_URL'],
-                               app_url_path=os.environ['APP_URL_PATH'][:-1])
+                               app_url_path=os.environ['APP_URL_PATH'][:-1],
+                               example_db=os.environ['EXAMPLE_DB'])
 
     consumer_key = os.environ['CONSUMER_KEY']
     consumer_secret = os.environ['CONSUMER_SECRET']
@@ -318,12 +325,14 @@ def user_check(screen_name):
         return render_template('user-check.html', blank=False, exception=False, tweetArr=json.dumps(userObj["tweets"]),
                                user=userObj,
                                app_url=os.environ['APP_URL'],
-                               app_url_path=os.environ['APP_URL_PATH'][:-1])
+                               app_url_path=os.environ['APP_URL_PATH'][:-1],
+                               example_db=os.environ['EXAMPLE_DB'])
     except Exception as e:
         # return dumps({'error': str(e)})
         return render_template('user-check.html', blank=True, exception=True,
                                app_url=os.environ['APP_URL'],
-                               app_url_path=os.environ['APP_URL_PATH'][:-1])
+                               app_url_path=os.environ['APP_URL_PATH'][:-1],
+                               example_db=os.environ['EXAMPLE_DB'])
 
 
 @app.route(os.environ['APP_URL_PATH'] + '<collection>/user/<id>')
@@ -336,13 +345,16 @@ def user(collection, id):
                                    tweet=json.dumps(user_found["found_tweet"]),
                                    app_url=os.environ['APP_URL'],
                                    app_url_path=os.environ['APP_URL_PATH'][:-1],
-                                   collection=collection)
+                                   collection=collection,
+                                   example_db=os.environ['EXAMPLE_DB'])
         else:
             return render_template('404.html', app_url=os.environ['APP_URL'],
-                                   app_url_path=os.environ['APP_URL_PATH'][:-1])
+                                   app_url_path=os.environ['APP_URL_PATH'][:-1],
+                                   example_db=os.environ['EXAMPLE_DB'])
     except Exception as e:
         return render_template('404.html', app_url=os.environ['APP_URL'],
-                               app_url_path=os.environ['APP_URL_PATH'][:-1])
+                               app_url_path=os.environ['APP_URL_PATH'][:-1],
+                               example_db=os.environ['EXAMPLE_DB'])
 
 
 @app.route(os.environ['APP_URL_PATH'] + 'recalculate/<collection>/<id>')
@@ -408,7 +420,9 @@ def recalc(collection, id):
 
 @app.errorhandler(404)
 def page_not_found(e):
-    return render_template('404.html', app_url=os.environ['APP_URL'], app_url_path=os.environ['APP_URL_PATH'][:-1]), 404
+    return render_template('404.html', app_url=os.environ['APP_URL'],
+                           app_url_path=os.environ['APP_URL_PATH'][:-1],
+                           example_db=os.environ['EXAMPLE_DB']), 404
 
 
 """
