@@ -1,5 +1,7 @@
 
 $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip();
+
         var today = new Date();
         var dd = today.getDate();
         var mm = today.getMonth() + 1; //January is 0!
@@ -49,4 +51,75 @@ function valueCheckLinks() {
 
     }
 
+}
+
+function hideBasic() {
+    var elementsHide = document.getElementsByClassName("hide-basic");
+    var elementsDisplay = document.getElementsByClassName("hide-advanced");
+
+    for (var i = 0; i < elementsHide.length; i++){
+        elementsHide[i].style.display = "none";
+    }
+
+    for (var i = 0; i < elementsDisplay.length; i++){
+        elementsDisplay[i].style.display = "block";
+    }
+
+    var elementsDisplay = document.getElementsByClassName("hide-real-time-span");
+    for (var i = 0; i < elementsDisplay.length; i++){
+        elementsDisplay[i].style.display = "inline";
+    }
+
+
+}
+
+function hideAdvanced() {
+    var elementsHide = document.getElementsByClassName("hide-advanced");
+    var elementsDisplay = document.getElementsByClassName("hide-basic");
+
+    for (var i = 0; i < elementsHide.length; i++){
+        elementsHide[i].style.display = "none";
+    }
+
+    for (var i = 0; i < elementsDisplay.length; i++){
+        elementsDisplay[i].style.display = "block";
+    }
+
+    searchOptionCheck();
+
+}
+
+
+function searchOptionCheck() {
+    if (document.getElementById('real-time').checked) {
+        var elementsHide = document.getElementsByClassName("hide-real-time");
+        for (var i = 0; i < elementsHide.length; i++){
+                elementsHide[i].style.display = "none";
+        }
+        var elementsDisplay = document.getElementsByClassName("show-real-time-span");
+        for (var i = 0; i < elementsDisplay.length; i++){
+            elementsDisplay[i].style.display = "inline";
+        }
+        var elementsHide = document.getElementsByClassName("hide-real-time-span");
+        for (var i = 0; i < elementsHide.length; i++){
+            elementsHide[i].style.display = "none";
+        }
+
+    }
+    else {
+        var elementsDisplay = document.getElementsByClassName("hide-real-time");
+        for (var i = 0; i < elementsDisplay.length; i++){
+            elementsDisplay[i].style.display = "block";
+        }
+        var elementsDisplay = document.getElementsByClassName("hide-real-time-span");
+        for (var i = 0; i < elementsDisplay.length; i++){
+            elementsDisplay[i].style.display = "inline";
+        }
+        var elementsHide = document.getElementsByClassName("show-real-time-span");
+        for (var i = 0; i < elementsHide.length; i++){
+            elementsHide[i].style.display = "none";
+        }
+
+
+   }
 }

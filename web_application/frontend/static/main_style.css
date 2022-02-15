@@ -11,8 +11,20 @@ body{
 
 #body-content{
  min-height: 85vh;
-
 }
+
+.hide-basic{
+    display: none;
+}
+
+.tooltip-inner {
+    max-width: 320px;
+    min-width: 320px;
+    /* If max-width does not work, try using width instead */
+    width: 320px;
+    text-align: left !important;
+}
+
 
 #big-bird{
  width: 100%;
@@ -92,10 +104,15 @@ span{
     -webkit-border-radius: 11px;
     -moz-border-radius: 11px;
 }
+
+#buttons-search-parameters{
+    margin-bottom: 15px;
+}
+
 .form-style-10 h1{
 	background: #006699;
 	padding: 20px 30px 15px 30px;
-	margin: -30px -30px 30px -30px;
+	margin: -30px -30px 15px -30px;
 	border-radius: 10px 10px 0 0;
 	-webkit-border-radius: 10px 10px 0 0;
 	-moz-border-radius: 10px 10px 0 0;

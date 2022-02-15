@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import random
+import uuid
 
 import pymongo
 from confluent_kafka import Consumer, Producer
@@ -55,15 +56,19 @@ def startBotDetector(consumer_servers, consumer_group_id, consumer_offset, consu
     try:
         db = client["TwitterData"]
         col1 = db[collection_name]
+        request_col = db["Requests"]
     except AttributeError as error:
         print(error)
 
     antigen_array = []
+    antigen_id_array = []
     result = {"classified_count": 0, "classified_correctly_count": 0, "time": 0}
     dc_array = []
     for i in range(50):
         dc = DendriticCell(str(i))
         dc_array.append(dc)
+
+    dc_count = len(dc_array)
 
     logging.info("dc_array")
     logging.info([str(item) for item in dc_array])
@@ -88,6 +93,8 @@ def startBotDetector(consumer_servers, consumer_group_id, consumer_offset, consu
                     if status == 1:
                         dc_count += 1
                         dc_array.remove(cell)
+                request_col.update_one({"collection": collection_name},
+                                       {'$set': {'completed': True}})
                 break
             else:
                 continue
@@ -97,12 +104,20 @@ def startBotDetector(consumer_servers, consumer_group_id, consumer_offset, consu
 
         user = json.loads(msg.value())
 
-        new_antigen = Antigen(user["user"]["id_str"], user, user["signals"]["k"], user["signals"]["cms"],
+        """new_antigen = Antigen(user["user"]["id_str"], user, user["signals"]["k"], user["signals"]["cms"],
                               10,
-                              antigen_array, send_info_to_mongodb=col1)
-        antigen_array.append(new_antigen)
+                              antigen_array, send_info_to_mongodb=col1)"""
+        if not user["found_tweet"]["id_str"] in antigen_id_array:
+            new_antigen = Antigen(uuid.uuid4(), user, user["signals"]["k"], user["signals"]["cms"],
+                                  10,
+                                  antigen_array, send_info_to_mongodb=col1)
+            antigen_array.append(new_antigen)
+            antigen_id_array.append(user["found_tweet"]["id_str"])
+        else:
+            print("already in array")
+            continue
 
-        dc_count = len(dc_array)
+
         for i in range(new_antigen.number_of_copies):
             cell_random = int(random_in_bounds(0, (len(dc_array) - 1)))
             logging.info("expose cell {0} to antigen {1}".format(int(dc_array[cell_random].id), int(new_antigen.id)))
@@ -115,6 +130,6 @@ def startBotDetector(consumer_servers, consumer_group_id, consumer_offset, consu
                 dc_array.append(dc)
 
         # col1.insert_one(user)
-        print("BotDetector: Send " + str(msg.value())[:50])
+        # print("BotDetector: Send " + str(msg.value())[:50])
 
     c.close()

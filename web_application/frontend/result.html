@@ -75,6 +75,15 @@
         {% if parameters["SearchParameters1"] == "seven-days" %}
         <p>&bull; Check tweets from the last 7 days</p>
         {% endif %}
+            {% if parameters["SearchParameters1"] == "recent" %}
+            <p>&bull; Check the most recent tweets</p>
+            {% endif %}
+            {% if parameters["SearchParameters1"] == "popular" %}
+            <p>&bull; Check the most popular tweets</p>
+            {% endif %}
+            {% if parameters["SearchParameters1"] == "mixed" %}
+            <p>&bull; Check both popular and most recent tweets</p>
+            {% endif %}
         </div>
 
 
@@ -85,6 +94,9 @@
     <div class="progress progress-md prog" style="height: 30px;">
         <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated" role="progressbar"  style="width: {{ready_count}}%" aria-valuenow="{{ready_count}}" aria-valuemin="0" aria-valuemax="100" data-percent='{{ready_count}}' data-duration="1" >{{ready_count}}%</div>
     </div>
+    {% if parameters["SearchParameters1"] == "real-time" %}
+    <p class="prog" style="font-size: 12px; text-align: center;">Checking the real-time stream of public tweets. Sometimes a query is too specific, and it can take several hours before the first results appear.</p>
+    {% endif %}
     {% else %}
     <div class="progress progress-md prog" style="height: 30px;">
         <div class="progress-bar bg-primary progress-bar-striped" role="progressbar"  style="width: {{ready_count}}%" aria-valuenow="{{ready_count}}" aria-valuemin="0" aria-valuemax="100" data-percent='{{ready_count}}' data-duration="1" >100%</div>
@@ -116,7 +128,7 @@
             {% for user in users %}
             <tr>
 
-                <td class="user"><a href='https://twitter.com/{{user["user"]["screen_name"]}}'>@{{user["user"]["screen_name"]}}</a> <br> ({{user["user"]["name"]}})</td>
+                <td class="user"><a href="{{app_url}}/{{ collection }}/user/{{user['_id']}}"><b>{{user["user"]["name"]}}</b></a><br><a href='https://twitter.com/{{user["user"]["screen_name"]}}'>(@{{user["user"]["screen_name"]}}<sup><i class="fa fa-external-link" aria-hidden="true" style="font-size: 8px; padding-bottom:4px;"></i></sup>)</a></td>
 
 
                 {% if user["signals"]["identifies_itself_as_bot"] == True %}
@@ -213,6 +225,7 @@
                 }
                 $(".progress-bar").loading();
                 $('#main-table').DataTable({
+                    stateSave: true,
                     dom: 'lBfrtip',
                     buttons: ['csv', 'excel',
                         {

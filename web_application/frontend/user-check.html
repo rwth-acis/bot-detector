@@ -1,17 +1,31 @@
 {% extends "base.html" %}
 {% block title %}User{% endblock %}
 {% block html_head %}
+<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script src=
+                "https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js">
+</script>
 <link href="https://fonts.googleapis.com/css?family=Asap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+<link href="http://www.jqueryscript.net/css/jquerysctipttop.css" rel="stylesheet" type="text/css">
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+
 <link rel="stylesheet" href="{{ app_url_path }}{{ url_for('static', filename='jQuery-plugin-progressbar.css') }}">
-<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+
 <script src="{{ app_url_path }}{{ url_for('static', filename='jQuery-plugin-progressbar.js') }}"></script>
+
+
 <link rel="stylesheet" href="{{ app_url_path }}{{ url_for('static', filename='tweets.css') }}">
 
 
 <script src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
+
+
 <script src="{{ app_url_path }}{{ url_for('static', filename='tweet_to_html.js') }}"></script>
 <script src="{{ app_url_path }}{{ url_for('static', filename='user.js') }}"></script>
+
 
 {% endblock %}
 
@@ -109,7 +123,11 @@
             {% endif %}
         </tr>
         <tr>
-            <th>Default profile</th>
+            <th>Default profile
+                <span data-toggle="tooltip" data-placement="top" data-html="true" title='<p style="font-size: 12px;">When true, indicates that the user has not altered the theme or background of their user profile.</p>' style="font-size: 12px;">
+                            <i class="fa fa-info-circle" aria-hidden="true"></i>
+                </span>
+            </th>
             {% if user["user"]["default_profile"] == True %}
             <td class="orange">{{user["user"]["default_profile"]}}</td>
             {% else %}
@@ -150,7 +168,11 @@
 
         </tr>
         <tr>
-            <th>Tweeting time entropy</th>
+            <th>Tweeting time entropy
+                <span data-toggle="tooltip" data-placement="top" data-html="true" title='<p style="font-size: 12px;">Time interval entropy is used to capture regularity of tweeting behavior which indicates automation.</p>' style="font-size: 12px;">
+                            <i class="fa fa-info-circle" aria-hidden="true"></i>
+                </span>
+            </th>
 
             {% if not(user["signals"]["time_entropy"] is none)%}
             {% if user["signals"]["time_entropy"] <= 1.8 %}
@@ -323,7 +345,11 @@
             {% endif %}
         </tr>
         <tr>
-            <th>Number of malicious URLs</th>
+            <th>Number of malicious URLs
+                <span data-toggle="tooltip" data-placement="top" data-html="true" title='<p style="font-size: 12px;">Number of URLs contained in tweets that may contain content or media identified as sensitive content.</p>' style="font-size: 12px;">
+                            <i class="fa fa-info-circle" aria-hidden="true"></i>
+                </span>
+            </th>
             {% if not(user["signals"]["is_sensitive_count"] is none) %}
             {% if user["signals"]["is_sensitive_count"] > 0 %}
             <td class="red">{{user["signals"]["is_sensitive_count"]}}</td>

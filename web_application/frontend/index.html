@@ -1,21 +1,88 @@
 {% extends "base.html" %}
 {% block title %}Form{% endblock %}
 {% block html_head %}
+<script src=
+                "https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js">
+</script>
 <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/themes/smoothness/jquery-ui.css" crossorigin="anonymous" referrerpolicy="no-referrer"/>
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js" crossorigin="anonymous" referrerpolicy="no-referrer" ></script>
 <script src="{{ app_url_path }}{{ url_for('static', filename='form.js') }}"></script>
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
 {% endblock %}
 
 
 {% block content %}
+
+
+
         <div class="form-style-10">
             <h1>Detect Bots Now!<span>Enter required parameters and start searching for malicious bots!</span></h1>
+
             <form action='{{app_url}}/part-result' method="POST">
-                <div class="section"><span>1</span>Tweets Parameters</div>
+                <div class="btn-group btn-group-toggle" id="buttons-search-parameters" data-toggle="buttons">
+                    <label class="btn btn-outline-success form-check-label active" onclick="hideBasic()">
+                        <input class="form-check-input" type="radio" name="requestOptions" value="basic" id="basic" autocomplete="off" checked>
+                        Basic request
+                    </label>
+                    <label class="btn btn-outline-danger form-check-label" onclick="hideAdvanced()">
+                        <input class="form-check-input" type="radio" name="requestOptions" value="advanced" id="advanced" autocomplete="off">
+                        Advanced request
+                    </label>
+
+                </div>
+
+                <div class="section hide-basic"><span>1</span>Search Parameters</div>
+                <div class="inner-wrap hide-basic">
+                    <h2>Select the data collection method and the number of users that you want to check:</h2>
+                    <div class="areaParameters">
+
+                        <label><input type="radio"
+                                      name="SearchParameters1" id="seven-days" value="seven-days"  onclick="valueCheck();searchOptionCheck();"> Check tweets from the last 7 days</label>
+
+
+
+                        <label><input type="radio"
+                                      name="SearchParameters1" id="time-period" value="time-period" onclick="valueCheck();searchOptionCheck();"> Another period of time:</label>
+                        <div id="time-periods">
+                            <label>Start Date:<input type="date" id="start-date" name="start-date" /></label>
+                            <label>End date:<input type="date" id="end-date" name="end-date" /></label>
+
+                        </div>
+                        <label><input type="radio"
+                                      name="SearchParameters1" id="recent" value="recent" onclick="valueCheck();searchOptionCheck();" > Check the most recent tweets</label>
+                        <label><input type="radio"
+                                      name="SearchParameters1" id="popular" value="popular" onclick="valueCheck();searchOptionCheck();" > Check the most popular tweets</label>
+                        <label><input type="radio"
+                                      name="SearchParameters1" id="mixed" value="mixed" onclick="valueCheck();searchOptionCheck();" checked> Check both popular and most recent tweets</label>
+
+
+                        <label><input type="radio"
+                                      name="SearchParameters1" id="real-time" value="real-time" onclick="valueCheck();searchOptionCheck();" > Check the real-time stream of public tweets</label>
+
+
+
+                    </div>
+                    <div class="areaParameters">
+                        <label>Maximum number of users to be checked:<input type="text" name="limit" value="200" /></label>
+                    </div>
+                </div>
+                <div class="section hide-advanced"><span>1</span>Tweets Parameters</div>
+                <div class="section hide-basic"><span>2</span>Tweets Parameters</div>
                 <div class="inner-wrap">
                     <h2>Specify the area where you want to detect the activity of malicious bots:</h2>
-                    <label>Enter keywords and/or hashtags separated by commas:<input type="text" name="keywords" /></label>
-                    <div class="areaParameters">
+                    <label>Enter keywords and/or hashtags separated by commas:
+
+                        <span class="hide-basic show-real-time-span" data-toggle="tooltip" data-placement="top" data-html="true" title="<p style='font-size: 12px;'>Enter a comma-separated list of phrases <br>(e.g. <mark><i>#covid PCR test, twitter</i></mark>). A phrase may be one or more terms separated by spaces, and a phrase will match if all of the terms in the phrase are present in the Tweet, regardless of order and ignoring case. You can think of commas as logical ORs, while spaces are equivalent to logical ANDs <br>(e.g. <mark><i>the twitter</i></mark> is <mark><i>the AND twitter</i></mark>, and <mark><i>the,twitter</i></mark> is <mark><i>the OR twitter</i></mark>).</p>" style="font-size: 12px;">
+                            <i class="fa fa-info-circle" aria-hidden="true"></i>
+                        </span>
+                        <span class="hide-real-time-span" data-toggle="tooltip" data-placement="top" data-html="true" title='<p style="font-size: 12px;">Enter a comma-separated list of phrases <br>(e.g. <mark><i>#covid PCR test, "I have covid"</i></mark>). <br>A phrase may be: <br>&bull; One or more terms separated by spaces, and a phrase will match if all of the terms in the phrase are present in the Tweet, regardless of order and ignoring case. You can think of commas as logical ORs, while spaces are equivalent to logical ANDs <br>(e.g. <mark><i>the twitter</i></mark> is <mark><i>the AND twitter</i></mark>, and <mark><i>the,twitter</i></mark> is <mark><i>the OR twitter</i></mark>). <br>&bull; Multiple terms enclosed in quotation marks <br>(e.g. <mark><i>"I have covid"</i></mark>). In this case, the phrase will match if the Tweet contains the exact phrase.</p>' style="font-size: 12px;">
+                            <i class="fa fa-info-circle" aria-hidden="true"></i>
+                        </span>
+
+                        <input type="text" name="keywords" /></label>
+                    <div class="areaParameters hide-basic hide-real-time">
             
                         <label><input type="radio"
                          name="areaParameters1" value="only"> Only check retweets</label>
@@ -28,7 +95,7 @@
                         <label><input type="radio"
                          name="areaParameters1" value="all"  checked> Check all</label>
                    </div>
-                   <div class="areaParameters">
+                   <div class="areaParameters hide-basic hide-real-time">
             
                         <label><input type="radio"
                          name="areaParameters2" value="only" onclick="valueCheckLinks()"> Only check tweets that contain a URL</label>
@@ -41,7 +108,7 @@
                         <label><input type="radio"
                          name="areaParameters2" value="all" onclick="valueCheckLinks()"  checked> Check all</label>
                    </div>
-                   <div class="areaParameters">
+                   <div class="areaParameters hide-basic hide-real-time">
             
                         <label><input type="radio"
                          name="areaParameters3" value="only"  onclick="valueCheckMedia()"> Only check tweets that contain media (e.g. photos or videos)</label>
@@ -56,32 +123,7 @@
                    </div>
                 </div>
 
-                <div class="section"><span>2</span>Search Parameters</div>
-                <div class="inner-wrap">
-                   <h2>Select the data collection method and the number of users that you want to check:</h2>
-                    <div class="areaParameters">
-            
-                        <label><input type="radio"
-                         name="SearchParameters1" id="seven-days" value="seven-days"  onclick="valueCheck()"> Check tweets from the last 7 days</label>
 
-                        
-                        <label><input type="radio"
-                         name="SearchParameters1" id="real-time" value="real-time" onclick="valueCheck()" checked> Check the real-time stream of public tweets</label>
-
-                       
-                        <label><input type="radio"
-                         name="SearchParameters1" id="time-period" value="time-period" onclick="valueCheck()"> Another period of time:</label>
-                         <div id="time-periods">
-                             <label>Start Date:<input type="date" id="start-date" name="start-date" min="2022-04-01" max="2022-04-12"/></label>
-                             <label>End date:<input type="date" id="end-date" name="end-date" min="2022-04-01" max="2022-04-12"/></label>
-
-                         </div>
-                         
-                   </div>
-                   <div class="areaParameters">
-                   <label>Maximum number of users to be checked:<input type="text" name="limit" value="100" /></label>
-                   </div>
-                </div>
 
                 <!--
                 <div class="section"><span>3</span>Twitter API Credentials</div>

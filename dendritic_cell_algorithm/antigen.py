@@ -36,6 +36,7 @@ class Antigen:
         classified_correctly = None
         if self.send_info_to_mongodb is not None:
             self.send_info_to_mongodb.insert_one(self.value)
+            print("BotDetector: Send " + str(self.value))
         if self.class_label != "unknown":
             classified_correctly = (self.class_label == ans)
             logging.info("_______________________CORRECT?!_______________________")

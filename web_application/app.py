@@ -124,7 +124,10 @@ def resultid(id):
 
         print(parameters["limit"])
         print("_______________")
-        ready_count = int(ready_count / (int(parameters["limit"]) - int(parameters["limit"]) / 10 - 2) * 100)
+        if not ("completed" in parameters):
+            ready_count = int(ready_count / (int(parameters["limit"])) * 100)
+        else:
+            ready_count = 100
         print(ready_count)
         return render_template('result.html', users=col1.find(), folium_map=Markup(folium_map._repr_html_()),
                                app_url=os.environ['APP_URL'],
@@ -177,6 +180,8 @@ def part_result():
         print(SearchParameters1)
         start_date = request.form.get('start-date')
         end_date = request.form.get('end-date')
+        requestOptions = request.form.get('requestOptions')
+        print(requestOptions)
 
         if SearchParameters1 == "time-period":
             if not start_date:
@@ -201,17 +206,41 @@ def part_result():
 
         print(start_date)
         print(end_date)
-        print(int(int(limit) + int(limit) / 10 + 2))
+
+        if requestOptions == "basic":
+            SearchParameters1 = "mixed"
+            print(SearchParameters1)
+            limit = 100
+            print(limit)
+            areaParameters1 = "all"
+            print(areaParameters1)
+            areaParameters2 = "all"
+            print(areaParameters2)
+            areaParameters3 = "all"
+            print(areaParameters3)
+
+        if SearchParameters1 == "real-time":
+            areaParameters1 = "all"
+            print(areaParameters1)
+            areaParameters2 = "all"
+            print(areaParameters2)
+            areaParameters3 = "all"
+            print(areaParameters3)
+
+
+
+
         parameters = {
             "collection": str(id),
             "keywords": keywords,
-            "limit": str(int(int(limit) + int(limit) / 10 + 2)),
+            "limit": limit,
             "areaParameters1": areaParameters1,
             "areaParameters2": areaParameters2,
             "areaParameters3": areaParameters3,
             "SearchParameters1": SearchParameters1,
             "start_date": start_date,
-            "end_date": end_date
+            "end_date": end_date,
+            "requestOptions": requestOptions
         }
 
         col1 = db[str(id)]
@@ -229,17 +258,23 @@ def part_result():
         bearer = os.environ['BEARER']
         use_bearer = int(os.environ['USE_BEARER'])
 
-        if use_bearer:
-            print("use_bearer")
-            p1 = multiprocessing.Process(name='p1', target=startTweetsLoaderWithParameters,
-                                         args=(keywords, 'kafka.milki-psy.dbis.rwth-aachen.de:31039', str(id), "set0",
-                                               parameters, None, None, None, None, bearer,))
-        else:
-            print("don't use_bearer")
-            p1 = multiprocessing.Process(name='p1', target=startTweetsLoaderWithParameters,
-                                         args=(keywords, 'kafka.milki-psy.dbis.rwth-aachen.de:31039', str(id), "set0",
+        if parameters["SearchParameters1"] == "real-time":
+            p1 = multiprocessing.Process(name='p1', target=startTweetsLoader,
+                                         args=(keywords, 'kafka.milki-psy.dbis.rwth-aachen.de:31039', str(id), "test1-id",
                                                parameters, consumer_key, consumer_secret, access_token,
-                                               access_token_secret, None,))
+                                               access_token_secret,))
+        else:
+            if use_bearer:
+                print("use_bearer")
+                p1 = multiprocessing.Process(name='p1', target=startTweetsLoaderWithParameters,
+                                             args=(keywords, 'kafka.milki-psy.dbis.rwth-aachen.de:31039', str(id), "test1-id",
+                                                   parameters, None, None, None, None, bearer,))
+            else:
+                print("don't use_bearer")
+                p1 = multiprocessing.Process(name='p1', target=startTweetsLoaderWithParameters,
+                                             args=(keywords, 'kafka.milki-psy.dbis.rwth-aachen.de:31039', str(id), "test1-id",
+                                                   parameters, consumer_key, consumer_secret, access_token,
+                                                   access_token_secret, None,))
         if use_bearer:
             print("use_bearer")
             p2 = multiprocessing.Process(name='p2', target=startSignalGenerator, args=(
@@ -701,4 +736,5 @@ def recalc(id):
 """
 
 if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0')
+    #app.run()
+    app.run(host='0.0.0.0')

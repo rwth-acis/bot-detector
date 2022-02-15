@@ -70,7 +70,12 @@ def startSignalGenerator(consumer_servers, consumer_group_id, consumer_offset, c
         tweet = json.loads(msg.value())
         tweet["created_at"] = tweet["created_at"].replace(" +0000", "")
 
-        if not "full_text" in tweet:
+        if "truncated" in tweet and "retweeted_status" in tweet:
+            if tweet["truncated"]:
+                tweet["text"] = tweet["retweeted_status"]["full_text"]
+                tweet["full_text"] = tweet["retweeted_status"]["full_text"]
+
+        if not ("full_text" in tweet):
             tweet["full_text"] = tweet["text"]
 
         ##############################################################################
