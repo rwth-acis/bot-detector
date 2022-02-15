@@ -323,6 +323,11 @@ table.dataTable tbody tr.even .created-at{
     .title-section{
         width: 98%;
     }
+    .prog{
+        width: 98%;
+        min-width: 200px;
+        max-width: 700px;
+    }
 
     #chart-container1, #chart-container2{
         width: 98%;
