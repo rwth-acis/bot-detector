@@ -453,6 +453,10 @@ nav a:hover{
 
   }
 
+  .app-info{
+    margin-bottom: 200px !important;
+  }
+
 
   #body-content{
    min-height: 85vh;
@@ -463,7 +467,7 @@ nav a:hover{
    width: 100%;
    margin: 4% auto;
    background-repeat: no-repeat;
-   height: 80vh;
+   height: 95vh;
    background-size: 100%;
    border: 1px solid white;
    background-color: #15131e;
@@ -577,4 +581,6 @@ nav a:hover{
 
 
 }
+
+
 
