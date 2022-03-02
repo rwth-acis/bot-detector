@@ -147,6 +147,23 @@ th{
     overflow: hidden;
     padding: 0px;
 }
+.prog .progress-bar div {
+   display: none;
+}
+
+.prog-with-text .progress-bar div{
+    display: none;
+}
+
+.prog-with-text .progress-bar span{
+    margin-top: 0px;
+    padding-top: 0px;
+    font-size: 6px;
+}
+
+.prog-with-text .progress-bar{
+    height: 100%;
+}
 
 .signals-table{
 
@@ -238,8 +255,41 @@ th{
 
 .orange{
  color: rgb(241, 90, 34);
- background:  rgba(241, 90, 34, 0.2);
+ background:  rgba(255, 227, 34, 0.3);
  text-align: center;
+}
+
+th.green{
+ color: green;
+ background:  rgba(102, 204, 153, 0.2);
+ text-align: left;
+}
+
+th.red{
+ color: red;
+ background:  rgba(215, 44, 44, 0.2);
+ text-align: left;
+}
+
+th.orange{
+ color: rgb(241, 90, 34);
+ background:  rgba(255, 227, 34, 0.3);
+ text-align: left;
+}
+
+th.green1{
+ background:  rgba(102, 204, 153, 0.2);
+ text-align: left;
+}
+
+th.red1{
+ background:  rgba(215, 44, 44, 0.2);
+ text-align: left;
+}
+
+th.orange1{
+ background:  rgba(255, 227, 34, 0.3);
+ text-align: left;
 }
 
 .div-orange{
@@ -285,6 +335,22 @@ th{
 .btn:hover, .btn-info:hover{
  background: #fff;
  color: #006699;
+}
+
+thead th, thead td{
+ border-bottom: solid 2px black;
+ color: black;
+}
+
+@media only screen and (max-width: 950px) {
+    #main-table-div{
+        width: 98%;
+        display: block;
+        margin: auto;
+        margin-top: 20px;
+    }
+
+
 }
 
 @media only screen and (max-width: 700px) {

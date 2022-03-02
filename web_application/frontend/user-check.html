@@ -44,6 +44,12 @@
                 </div>
                 <input type="text" name="screen-name" value="" required class="form-control" placeholder="Handle" aria-label="Handle" aria-describedby="basic-addon1" style="position: relative; -webkit-box-flex: 1; -ms-flex: 1 1 auto; flex: 1 1 auto; width: 1%; margin-bottom: 0; margin-top: 0px; padding: 3px;">
             </div>
+            <div class="alert alert-warning alert-dismissible fade show" role="alert" style="font-size: 10px; padding-top: 5px; padding-bottom: 5px; padding-left: 15px; padding-right: 40px; text-align: left;">
+                If the Twitter API rate limit is reached, it will not be possible to retrieve new data from the Tweeter API for some time (up to 15 minutes).
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="font-size: 14px; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-left: 5px;">
+                    <span aria-hidden="true" style="font-size: 14px;">&times;</span>
+                </button>
+            </div>
 
             <input type="submit" style="margin-top: 5px; font-size: 13px;" value="Submit">
         </div>
@@ -78,12 +84,13 @@
 <div id="main-table-div">
     <div id="div-main-table">
         <table id="main-table">
-
+            <thead>
             <tr>
                 <th>User</th>
                 <td class="user"><span id="screen-name-raw" style="display: none;">{{user["user"]["screen_name"]}}</span> <span id="screen-name"><a href='https://twitter.com/{{user["user"]["screen_name"]}}'>@{{user["user"]["screen_name"]}}</a></span> <br>  (<span id="name">{{user["user"]["name"]}}</span>)</td>
 
             </tr>
+            </thead>
             <tr>
                 <th>Created at</th>
                 <td id="created-at">{{user["user"]["created_at"]}}</td>
@@ -103,25 +110,29 @@
 </div>
 <div class="signals-table-div">
     <table class="signals-table">
+        <thead>
         <tr>
 
-            <th>Is a bot (probability)</th>
             {% if user["signals"]["is_bot_probability"] >= 50 %}
+            <th class="red">Is a bot (probability)</th>
             <td class="red">
                 <div class="progress-bar position" data-percent='{{user["signals"]["is_bot_probability"]}}' data-duration="800" data-color="white,red,red"></div>
             </td>
             {% else %}
             {% if user["signals"]["is_bot_probability"] >= 30 %}
+            <th class="orange">Is a bot (probability)</th>
             <td class="orange">
                 <div class="progress-bar position" data-percent='{{user["signals"]["is_bot_probability"]}}' data-duration="800" data-color="white,orange,orange"></div>
             </td>
             {% else %}
+            <th class="green">Is a bot (probability)</th>
             <td class="green">
                 <div class="progress-bar position" data-percent='{{user["signals"]["is_bot_probability"]}}' data-duration="800" data-color="white,green,green"></div>
             </td>
             {% endif %}
             {% endif %}
         </tr>
+        </thead>
         <tr>
             <th>Default profile
                 <span data-toggle="tooltip" data-placement="top" data-html="true" title='<p style="font-size: 12px;">When true, indicates that the user has not altered the theme or background of their user profile.</p>' style="font-size: 12px;">
@@ -167,36 +178,51 @@
 
 
         </tr>
+
         <tr>
+            {% if not(user["signals"]["time_entropy"] is none)%}
+            {% if user["signals"]["time_entropy"] <= 1.8 %}
+            <th colspan="2" class="red1">Tweeting time entropy
+                {% else %}
+                {% if user["signals"]["time_entropy"] <= 2.4 %}
+            <th colspan="2" class="orange1">Tweeting time entropy
+                {% else %}
+            <th colspan="2" class="green1">Tweeting time entropy
+                {% endif %}
+                {% endif %}
+
+                <span data-toggle="tooltip" data-placement="top" data-html="true" title='<p style="font-size: 12px;">Time interval entropy is used to capture regularity of tweeting behavior which indicates automation.</p>' style="font-size: 12px;">
+                            <i class="fa fa-info-circle" aria-hidden="true"></i>
+                </span>
+                <div class="progress prog" style="margin-top:5px;">
+                    <div class="progress-bar bg-danger prog" role="progressbar" style="width: 45%" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-warning prog" role="progressbar" style="width: 15%" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-success prog" role="progressbar" style="width: 40%" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="progress prog-with-text" style="height: 8px;">
+                    {% if user["signals"]["time_entropy"] <= 0.4 %}
+                    <div class="progress-bar bg-dark" role="progressbar" style='width: 10%;' aria-valuenow='10' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.2f}".format(user["signals"]["time_entropy"])}}</span></div>
+                    {% else %}
+                    <div class="progress-bar bg-dark" role="progressbar" style='width: {{"{:.0f}".format(100*user["signals"]["time_entropy"]/4)}}%;' aria-valuenow='{{"{:.0f}".format(100*user["signals"]["time_entropy"]/4)}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.2f}".format(user["signals"]["time_entropy"])}}</span></div>
+                    {% endif %}
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <div style="font-size: 8px; color: black;">Low</div>
+                    <div style="font-size: 8px; color: black;">High</div>
+                </div>
+            </th>
+            {% else %}
             <th>Tweeting time entropy
                 <span data-toggle="tooltip" data-placement="top" data-html="true" title='<p style="font-size: 12px;">Time interval entropy is used to capture regularity of tweeting behavior which indicates automation.</p>' style="font-size: 12px;">
                             <i class="fa fa-info-circle" aria-hidden="true"></i>
                 </span>
             </th>
-
-            {% if not(user["signals"]["time_entropy"] is none)%}
-            {% if user["signals"]["time_entropy"] <= 1.8 %}
-            <td class="red">
-                {{"{:.2f}".format(user["signals"]["time_entropy"])}}
-            </td>
-            {% else %}
-            {% if user["signals"]["time_entropy"] <= 2.4 %}
-            <td class="orange">
-                {{"{:.2f}".format(user["signals"]["time_entropy"])}}
-            </td>
-            {% else %}
-            <td class="green">
-                {{"{:.2f}".format(user["signals"]["time_entropy"])}}
-            </td>
-            {% endif %}
-            {% endif %}
-
-            {% else %}
             <td>-</td>
             {% endif %}
 
-
         </tr>
+
         <tr>
             <th>Number of time intervals between tweets that are < 10 sec</th>
             {% if not(user["signals"]["small_interval_between_tweets_count"] is none) %}
@@ -309,24 +335,29 @@
 </div>
 <div class="signals-table-div">
     <table class="signals-table">
+        <thead>
         <tr>
-            <th>Intentions are bad (probability)</th>
+
             {% if user["signals"]["intentions_are_bad_probability"] >= 50 %}
+            <th class="red">Intentions are bad (probability)</th>
             <td class="red">
                 <div class="progress-bar position" data-percent='{{user["signals"]["intentions_are_bad_probability"]}}' data-duration="800" data-color="white,red,red"></div>
             </td>
             {% else %}
             {% if user["signals"]["intentions_are_bad_probability"] >= 30 %}
+            <th class="orange">Intentions are bad (probability)</th>
             <td class="orange">
                 <div class="progress-bar position" data-percent='{{user["signals"]["intentions_are_bad_probability"]}}' data-duration="800" data-color="white,orange,orange"></div>
             </td>
             {% else %}
+            <th class="green">Intentions are bad (probability)</th>
             <td class="green">
                 <div class="progress-bar position" data-percent='{{user["signals"]["intentions_are_bad_probability"]}}' data-duration="800" data-color="white,green,green"></div>
             </td>
             {% endif %}
             {% endif %}
         </tr>
+        </thead>
         <th>Verified</th>
 
         {% if user["user"]["verified"] == False %}

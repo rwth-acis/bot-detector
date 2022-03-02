@@ -210,7 +210,7 @@ def part_result():
         if requestOptions == "basic":
             SearchParameters1 = "mixed"
             print(SearchParameters1)
-            limit = 100
+            limit = 20
             print(limit)
             areaParameters1 = "all"
             print(areaParameters1)
@@ -737,4 +737,4 @@ def recalc(id):
 
 if __name__ == "__main__":
     #app.run()
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', debug=True)

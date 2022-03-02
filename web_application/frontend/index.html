@@ -28,11 +28,11 @@
 
             <form action='{{app_url}}/part-result' method="POST">
                 <div class="btn-group btn-group-toggle" id="buttons-search-parameters" data-toggle="buttons">
-                    <label class="btn btn-outline-success form-check-label active" onclick="hideBasic()">
+                    <label class="btn btn-outline-info form-check-label active" onclick="hideBasic()">
                         <input class="form-check-input" type="radio" name="requestOptions" value="basic" id="basic" autocomplete="off" checked>
                         Basic request
                     </label>
-                    <label class="btn btn-outline-danger form-check-label" onclick="hideAdvanced()">
+                    <label class="btn btn-outline-dark form-check-label" onclick="hideAdvanced()">
                         <input class="form-check-input" type="radio" name="requestOptions" value="advanced" id="advanced" autocomplete="off">
                         Advanced request
                     </label>
@@ -71,7 +71,7 @@
 
                     </div>
                     <div class="areaParameters">
-                        <label>Maximum number of users to be checked:<input type="text" name="limit" value="200" /></label>
+                        <label>Maximum number of users to be checked:<input type="text" name="limit" value="50" /></label>
                     </div>
                 </div>
                 <div class="section hide-advanced"><span>1</span>Tweets Parameters</div>
@@ -127,6 +127,12 @@
                         <label><input type="radio"
                          name="areaParameters3" value="all" onclick="valueCheckMedia()"  checked> Check all</label>
                    </div>
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert" style="font-size: 10px; padding-top: 5px; padding-bottom: 5px; padding-left: 15px; padding-right: 40px;">
+                        If the Twitter API rate limit is reached, it will not be possible to retrieve new data from the Tweeter API for some time (up to 15 minutes).
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="font-size: 14px; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-left: 5px;">
+                            <span aria-hidden="true" style="font-size: 14px;">&times;</span>
+                        </button>
+                    </div>
                 </div>
 
 

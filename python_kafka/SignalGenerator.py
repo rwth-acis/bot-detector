@@ -115,7 +115,7 @@ def startSignalGenerator(consumer_servers, consumer_group_id, consumer_offset, c
         sentiment = analyzer.polarity_scores(sentence)
         logging.info(sentence)
         logging.info(sentiment['compound'])
-        if sentiment['compound'] >= 0.1:
+        if sentiment['compound'] >= 0.2:
             logging.info("Positive")
             userObj["found_tweet"]["sentiment"] = "positive"
 
@@ -125,12 +125,12 @@ def startSignalGenerator(consumer_servers, consumer_group_id, consumer_offset, c
 
         else:
             logging.info("Neutral")
-            userObj["found_tweet"]["sentiment"] = "positive"
+            userObj["found_tweet"]["sentiment"] = "neutral"
 
         userObj["tweets"] = []
         for fulltweet in api.user_timeline(screen_name=tweet["user"]["screen_name"],
                                            # max 200 tweets
-                                           count=10,
+                                           count=20,
                                            include_rts=False,
                                            # Necessary to keep full_text
                                            tweet_mode='extended'
