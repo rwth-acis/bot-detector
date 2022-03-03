@@ -24,7 +24,11 @@ function parseTweet(tweetObj) {
       tweetObj.text = tweetObj.full_text;
     }
   if (tweetObj.truncated) {
-    tweetObj.text = tweetObj.retweeted_status.full_text;
+    if (tweetObj.retweeted_status){
+            if (tweetObj.retweeted_status.full_text){
+                tweetObj.text = tweetObj.retweeted_status.full_text;
+            }
+    }
   }
 
   //Copying text value to a new property html. The final output will be set to this property
