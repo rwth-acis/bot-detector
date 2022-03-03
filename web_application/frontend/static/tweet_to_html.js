@@ -75,11 +75,15 @@ function parseFoundTweet(tweetObj) {
   //When extended_mode is enabled, the text property will be empty and the value of the html property will be set to the full_text value
   //Replace the text property because the property is used in other functions (i.e. processUrls)
   if (tweetObj.full_text) {
-      tweetObj.text = tweetObj.full_text;
+        tweetObj.text = tweetObj.full_text;
+      }
+    if (tweetObj.truncated) {
+      if (tweetObj.retweeted_status){
+              if (tweetObj.retweeted_status.full_text){
+                  tweetObj.text = tweetObj.retweeted_status.full_text;
+              }
+      }
     }
-  if (tweetObj.truncated) {
-    tweetObj.text = tweetObj.retweeted_status.full_text;
-  }
 
   //Copying text value to a new property html. The final output will be set to this property
   tweetObj.html = tweetObj.text;
