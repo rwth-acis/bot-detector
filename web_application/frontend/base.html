@@ -30,12 +30,19 @@
 
     <div id="big-bird" style="background-image: url('{{ app_url_path }}{{ url_for('static', filename='images/bird-bot.png') }}');">
         <h1>Detect Bots Now!</h1>
-        <h2>Enter required parameters <br>and start searching for malicious bots</h2>
-        <a href="{{app_url}}/index" class="start-btn">Start</a>
-        <h2 class="app-info" style="font-size:12px; color: white; margin-bottom: 5%; margin-top: 3%;">Using BotDetector, it is possible to check both an <a href="{{app_url}}/user-check/form">individual account</a> and a <a href="{{app_url}}/index">set of accounts</a> that have posted tweets containing user-defined keywords.
+        <h2>Start searching for malicious bots</h2>
+        <h2 class="app-info" >
+            Social bots can impersonate real users and manipulate social media discussions with the aim of spreading false information, supporting (or destroying) reputations, influencing opinions or manipulating markets.
             <br>
             <br>
-            BotDetector allows users to check not only if an account is a bot, but also its intentions, so it is possible, for example, to detect malicious bots.
+            In BotDetector, we propose a new method for the detection of malicious social bots on Twitter using Artificial Immune System based on the <a href="https://doi.org/10.1007/s10115-015-0891-y" class="link-not-btn">Dendritic Cell algorithm</a>.
+            <br>
+            <br>
+            BotDetector can check either <a href="{{app_url}}/user-check/form" class="btn btn-primary btn-sm link-btn" >individual accounts</a> or multiple user accounts that posted tweets containing <a href="{{app_url}}/index" class="btn btn-primary link-btn" >queried keywords</a>.
+            <br>
+            <br>
+            BotDetector allows users to check not only if an account is a bot, but also its intentions.
+            <br>This makes it possible, for example, to detect malicious bots.
         </h2>
         <div class="bottomright">
             <a href="https://www.motherjones.com/media/2018/08/how-to-identify-russian-bots-twitter/">Mother Jones illustration</a>

@@ -128,7 +128,7 @@
             {% for user in users %}
             <tr>
 
-                <td class="user"><a href="{{app_url}}/{{ collection }}/user/{{user['_id']}}"><b>{{user["user"]["name"]}}</b></a><br><a href='https://twitter.com/{{user["user"]["screen_name"]}}'>(@{{user["user"]["screen_name"]}}<sup><i class="fa fa-external-link" aria-hidden="true" style="font-size: 8px; padding-bottom:4px;"></i></sup>)</a></td>
+                <td class="user"><a href="{{app_url}}/{{ collection }}/user/{{user['_id']}}" target="_blank"><b>{{user["user"]["name"]}}</b></a><br><a href='https://twitter.com/{{user["user"]["screen_name"]}}' target="_blank">(@{{user["user"]["screen_name"]}}<sup><i class="fa fa-external-link" aria-hidden="true" style="font-size: 8px; padding-bottom:4px;"></i></sup>)</a></td>
 
 
                 {% if user["signals"]["identifies_itself_as_bot"] == True %}
@@ -194,7 +194,7 @@
                 {% endif %}
 
 
-                <td><a href="{{app_url}}/{{ collection }}/user/{{user['_id']}}" class="btn btn-info">Get more information</a></td>
+                <td><a href="{{app_url}}/{{ collection }}/user/{{user['_id']}}" class="btn btn-info" target="_blank">Get more information</a></td>
 
             </tr>
             {% endfor %}

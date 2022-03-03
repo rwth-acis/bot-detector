@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 {% block title %}User{% endblock %}
 {% block html_head %}
-<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 <script src=
                 "https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js">
 </script>
 <link href="https://fonts.googleapis.com/css?family=Asap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
-<link href="http://www.jqueryscript.net/css/jquerysctipttop.css" rel="stylesheet" type="text/css">
+<link href="https://www.jqueryscript.net/css/jquerysctipttop.css" rel="stylesheet" type="text/css">
 
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
@@ -42,7 +42,7 @@
         <thead>
         <tr>
             <th>User</th>
-            <td class="user"><span id="screen-name-raw" style="display: none;">{{user["user"]["screen_name"]}}</span> <span id="screen-name"><a href='https://twitter.com/{{user["user"]["screen_name"]}}'>@{{user["user"]["screen_name"]}}</a></span> <br>  (<span id="name">{{user["user"]["name"]}}</span>)</td>
+            <td class="user"><span id="screen-name-raw" style="display: none;">{{user["user"]["screen_name"]}}</span> <span id="screen-name"><a href='https://twitter.com/{{user["user"]["screen_name"]}}' target="_blank">@{{user["user"]["screen_name"]}}</a></span> <br>  (<span id="name">{{user["user"]["name"]}}</span>)</td>
 
         </tr>
         </thead>
@@ -113,73 +113,16 @@
             <td class="green">{{user["user"]["default_profile_image"]}}</td>
             {% endif %}
         </tr>
+
         <tr>
-            <th>Average tweet similarity</th>
-            {% if not(user["signals"]["avg_tweet_similarity"] is none) %}
-            {% if user["signals"]["avg_tweet_similarity"] >= 0.4 %}
-            <td class="red">
-                <div class="progress-bar position" data-ispercent="'false'"  data-percent='{{("{:.2f}".format(user["signals"]["avg_tweet_similarity"]))}}' data-duration="800" data-color="white,red,red"></div>
-            </td>
-            {% else %}
-            {% if user["signals"]["avg_tweet_similarity"] >= 0.25 %}
-            <td class="orange">
-                <div class="progress-bar position" data-ispercent="'false'" data-percent='{{("{:.2f}".format(user["signals"]["avg_tweet_similarity"]))}}' data-duration="800" data-color="white,orange,orange"></div>
-            </td>
-            {% else %}
-            <td class="green">
-                <div class="progress-bar position" data-ispercent="'false'"  data-percent='{{("{:.2f}".format(user["signals"]["avg_tweet_similarity"]))}}' data-duration="800" data-color="white,green,green"></div>
-            </td>
-            {% endif %}
-            {% endif %}
+            <th>Followers-to-friends ratio</th>
+            {% if not(user["signals"]["followers_friends_ratio"] is none) %}
+            <td>{{"{:.2f}".format(user["signals"]["followers_friends_ratio"])}}</td>
             {% else %}
             <td>-</td>
             {% endif %}
-
-
         </tr>
-        <tr>
-            {% if not(user["signals"]["time_entropy"] is none)%}
-            {% if user["signals"]["time_entropy"] <= 1.8 %}
-            <th colspan="2" class="red1">Tweeting time entropy
-                {% else %}
-                {% if user["signals"]["time_entropy"] <= 2.4 %}
-            <th colspan="2" class="orange1">Tweeting time entropy
-                {% else %}
-            <th colspan="2" class="green1">Tweeting time entropy
-                {% endif %}
-                {% endif %}
 
-                <span data-toggle="tooltip" data-placement="top" data-html="true" title='<p style="font-size: 12px;">Time interval entropy is used to capture regularity of tweeting behavior which indicates automation.</p>' style="font-size: 12px;">
-                            <i class="fa fa-info-circle" aria-hidden="true"></i>
-                </span>
-                <div class="progress prog" style="margin-top:5px;">
-                    <div class="progress-bar bg-danger prog" role="progressbar" style="width: 45%" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100"></div>
-                    <div class="progress-bar bg-warning prog" role="progressbar" style="width: 15%" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100"></div>
-                    <div class="progress-bar bg-success prog" role="progressbar" style="width: 40%" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"></div>
-                </div>
-                <div class="progress prog-with-text" style="height: 8px;">
-                    {% if user["signals"]["time_entropy"] <= 0.4 %}
-                    <div class="progress-bar bg-dark" role="progressbar" style='width: 10%;' aria-valuenow='10' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.2f}".format(user["signals"]["time_entropy"])}}</span></div>
-                    {% else %}
-                    <div class="progress-bar bg-dark" role="progressbar" style='width: {{"{:.0f}".format(100*user["signals"]["time_entropy"]/4)}}%;' aria-valuenow='{{"{:.0f}".format(100*user["signals"]["time_entropy"]/4)}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.2f}".format(user["signals"]["time_entropy"])}}</span></div>
-                    {% endif %}
-                </div>
-
-                <div class="d-flex justify-content-between">
-                    <div style="font-size: 8px; color: black;">Low</div>
-                    <div style="font-size: 8px; color: black;">High</div>
-                </div>
-            </th>
-            {% else %}
-            <th>Tweeting time entropy
-                <span data-toggle="tooltip" data-placement="top" data-html="true" title='<p style="font-size: 12px;">Time interval entropy is used to capture regularity of tweeting behavior which indicates automation.</p>' style="font-size: 12px;">
-                            <i class="fa fa-info-circle" aria-hidden="true"></i>
-                </span>
-            </th>
-            <td>-</td>
-            {% endif %}
-
-        </tr>
         <tr>
             <th>Number of time intervals between tweets that are < 10 sec</th>
             {% if not(user["signals"]["small_interval_between_tweets_count"] is none) %}
@@ -202,91 +145,317 @@
             <td>-</td>
             {% endif %}
         </tr>
+
         <tr>
-            <th>Retweet-to-tweet ratio</th>
-            {% if not(user["signals"]["retweet_tweet_ratio"] is none) %}
-            {% if user["signals"]["retweet_tweet_ratio"] >= 0.7 %}
-            <td class="orange">
-                <div class="progress-bar position" data-ispercent="'false'"  data-percent='{{"{:.2f}".format(user["signals"]["retweet_tweet_ratio"])}}' data-duration="800" data-color="white,red,red"></div>
-            </td>
+            {% if not(user["signals"]["time_entropy"] is none)%}
+            {% if user["signals"]["time_entropy"] <= 1.8 %}
+            <th colspan="2" class="red1">Tweeting time entropy
+                {% else %}
+                {% if user["signals"]["time_entropy"] <= 2.4 %}
+            <th colspan="2" class="orange1">Tweeting time entropy
+                {% else %}
+            <th colspan="2" class="green1">Tweeting time entropy
+                {% endif %}
+                {% endif %}
+
+                <span data-toggle="tooltip" data-placement="top" data-html="true" title='<p style="font-size: 12px;">Time interval entropy is used to capture regularity of tweeting behavior which indicates automation.</p>' style="font-size: 12px;">
+                            <i class="fa fa-info-circle" aria-hidden="true"></i>
+                </span>:
+                <div class="progress prog" style="margin-top:5px; height: 5px; border-radius:0;">
+                    <div class="progress-bar bg-danger prog" role="progressbar" style="width: 45%" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-warning prog" role="progressbar" style="width: 15%" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-success prog" role="progressbar" style="width: 40%" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="progress prog-with-text" style="height: 15px; border-radius:0;">
+                    {% if user["signals"]["time_entropy"] <= 0.4 %}
+                    <div class="progress-bar bg-danger" role="progressbar" style='width: 10%;' aria-valuenow='10' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.2f}".format(user["signals"]["time_entropy"])}}</span></div>
+                    {% else %}
+                    {% if user["signals"]["time_entropy"] <= 1.8 %}
+
+                    <div class="progress-bar bg-danger" role="progressbar" style='width: {{"{:.0f}".format(100*user["signals"]["time_entropy"]/4)}}%;' aria-valuenow='{{"{:.0f}".format(100*user["signals"]["time_entropy"]/4)}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.2f}".format(user["signals"]["time_entropy"])}}</span></div>
+
+                    {% else %}
+                    {% if user["signals"]["time_entropy"] <= 2.4 %}
+
+                    <div class="progress-bar bg-warning" role="progressbar" style='width: {{"{:.0f}".format(100*user["signals"]["time_entropy"]/4)}}%;' aria-valuenow='{{"{:.0f}".format(100*user["signals"]["time_entropy"]/4)}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.2f}".format(user["signals"]["time_entropy"])}}</span></div>
+
+                    {% else %}
+
+                    <div class="progress-bar bg-success" role="progressbar" style='width: {{"{:.0f}".format(100*user["signals"]["time_entropy"]/4)}}%;' aria-valuenow='{{"{:.0f}".format(100*user["signals"]["time_entropy"]/4)}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.2f}".format(user["signals"]["time_entropy"])}}</span></div>
+
+                    {% endif %}
+                    {% endif %}
+
+                    {% endif %}
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <div style="font-size: 8px; color: black;">Low</div>
+                    <div style="font-size: 8px; color: black;">High</div>
+                </div>
+            </th>
             {% else %}
-            <td class="green">
-                <div class="progress-bar position" data-ispercent="'false'"  data-percent='{{"{:.2f}".format(user["signals"]["retweet_tweet_ratio"])}}' data-duration="800" data-color="white,green,green"></div>
-            </td>
-            {% endif %}
-            {% else %}
+            <th>Tweeting time entropy
+                <span data-toggle="tooltip" data-placement="top" data-html="true" title='<p style="font-size: 12px;">Time interval entropy is used to capture regularity of tweeting behavior which indicates automation.</p>' style="font-size: 12px;">
+                            <i class="fa fa-info-circle" aria-hidden="true"></i>
+                </span>
+            </th>
             <td>-</td>
             {% endif %}
 
         </tr>
+
+
         <tr>
-            <th>Quote-to-tweet ratio</th>
+            {% if not(user["signals"]["avg_tweet_similarity"] is none) %}
+            {% if user["signals"]["avg_tweet_similarity"] >= 0.4 %}
+            <th colspan="2" class="red1">Average tweet similarity:
+                {% else %}
+                {% if user["signals"]["avg_tweet_similarity"] >= 0.25 %}
+            <th colspan="2" class="orange1">Average tweet similarity:
+                {% else %}
+            <th colspan="2" class="green1">Average tweet similarity:
+                {% endif %}
+                {% endif %}
+
+                <div class="progress prog" style="margin-top:5px; height: 5px; border-radius:0;">
+                    <div class="progress-bar bg-success prog" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-warning prog" role="progressbar" style="width: 15%" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-danger prog" role="progressbar" style="width: 60%" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="progress prog-with-text" style="height: 15px; border-radius:0;">
+                    {% if user["signals"]["avg_tweet_similarity"] <= 0.1 %}
+                    <div class="progress-bar bg-success" role="progressbar" style='width: 10%;' aria-valuenow='10' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.0f}".format(100*user["signals"]["avg_tweet_similarity"])}}%</span></div>
+                    {% else %}
+                    {% if user["signals"]["avg_tweet_similarity"] < 0.25 %}
+
+                    <div class="progress-bar bg-success" role="progressbar" style='width: {{"{:.0f}".format(100*user["signals"]["avg_tweet_similarity"])}}%;' aria-valuenow='{{"{:.0f}".format(100*user["signals"]["avg_tweet_similarity"])}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.0f}".format(100*user["signals"]["avg_tweet_similarity"])}}%</span></div>
+
+                    {% else %}
+                    {% if user["signals"]["avg_tweet_similarity"] < 0.4 %}
+
+                    <div class="progress-bar bg-warning" role="progressbar" style='width: {{"{:.0f}".format(100*user["signals"]["avg_tweet_similarity"])}}%;' aria-valuenow='{{"{:.0f}".format(100*user["signals"]["avg_tweet_similarity"])}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.0f}".format(100*user["signals"]["avg_tweet_similarity"])}}%</span></div>
+
+                    {% else %}
+
+                    <div class="progress-bar bg-danger" role="progressbar" style='width: {{"{:.0f}".format(100*user["signals"]["avg_tweet_similarity"])}}%;' aria-valuenow='{{"{:.0f}".format(100*user["signals"]["avg_tweet_similarity"])}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.0f}".format(100*user["signals"]["avg_tweet_similarity"])}}%</span></div>
+
+                    {% endif %}
+                    {% endif %}
+
+                    {% endif %}
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <div style="font-size: 8px; color: black;">0%</div>
+                    <div style="font-size: 8px; color: black;">100%</div>
+                </div>
+            </th>
+            {% else %}
+            <th>Average tweet similarity
+            </th>
+            <td>-</td>
+            {% endif %}
+
+        </tr>
+
+
+
+        <tr>
+            {% if not(user["signals"]["retweet_tweet_ratio"] is none) %}
+            {% if user["signals"]["retweet_tweet_ratio"] >= 0.7 %}
+
+            <th colspan="2" class="orange1">Retweet-to-tweet ratio:
+                {% else %}
+            <th colspan="2" class="green1">Retweet-to-tweet ratio:
+                {% endif %}
+
+
+                <div class="progress prog" style="margin-top:5px; height: 5px; border-radius:0;">
+                    <div class="progress-bar bg-success prog" role="progressbar" style="width: 70%" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-warning prog" role="progressbar" style="width: 30%" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="progress prog-with-text" style="height: 15px; border-radius:0;">
+                    {% if user["signals"]["retweet_tweet_ratio"] <= 0.1 %}
+                    <div class="progress-bar bg-success" role="progressbar" style='width: 10%;' aria-valuenow='10' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.2f}".format(user["signals"]["retweet_tweet_ratio"])}}</span></div>
+                    {% else %}
+                    {% if user["signals"]["retweet_tweet_ratio"] < 0.7 %}
+
+                    <div class="progress-bar bg-success" role="progressbar" style='width: {{"{:.0f}".format(100*user["signals"]["retweet_tweet_ratio"])}}%;' aria-valuenow='{{"{:.0f}".format(100*user["signals"]["retweet_tweet_ratio"])}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.2f}".format(user["signals"]["retweet_tweet_ratio"])}}</span></div>
+
+                    {% else %}
+
+                    <div class="progress-bar bg-warning" role="progressbar" style='width: {{"{:.0f}".format(100*user["signals"]["retweet_tweet_ratio"])}}%;' aria-valuenow='{{"{:.0f}".format(100*user["signals"]["retweet_tweet_ratio"])}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.2f}".format(user["signals"]["retweet_tweet_ratio"])}}</span></div>
+
+                    {% endif %}
+
+                    {% endif %}
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <div style="font-size: 8px; color: black;">0</div>
+                    <div style="font-size: 8px; color: black;">1</div>
+                </div>
+            </th>
+            {% else %}
+            <th>Retweet-to-tweet ratio
+            </th>
+            <td>-</td>
+            {% endif %}
+
+        </tr>
+
+
+        <tr>
             {% if not(user["signals"]["quote_tweet_ratio"] is none) %}
             {% if user["signals"]["quote_tweet_ratio"] >= 0.7 %}
-            <td class="orange">
-                <div class="progress-bar position" data-ispercent="'false'"  data-percent='{{"{:.2f}".format(user["signals"]["quote_tweet_ratio"])}}' data-duration="800" data-color="white,red,red"></div>
-            </td>
+
+            <th colspan="2" class="orange1">Quote-to-tweet ratio:
+                {% else %}
+            <th colspan="2" class="green1">Quote-to-tweet ratio:
+                {% endif %}
+
+
+                <div class="progress prog" style="margin-top:5px; height: 5px; border-radius:0;">
+                    <div class="progress-bar bg-success prog" role="progressbar" style="width: 70%" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-warning prog" role="progressbar" style="width: 30%" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="progress prog-with-text" style="height: 15px; border-radius:0;">
+                    {% if user["signals"]["quote_tweet_ratio"] <= 0.1 %}
+                    <div class="progress-bar bg-success" role="progressbar" style='width: 10%;' aria-valuenow='10' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.2f}".format(user["signals"]["quote_tweet_ratio"])}}</span></div>
+                    {% else %}
+                    {% if user["signals"]["quote_tweet_ratio"] < 0.7 %}
+
+                    <div class="progress-bar bg-success" role="progressbar" style='width: {{"{:.0f}".format(100*user["signals"]["quote_tweet_ratio"])}}%;' aria-valuenow='{{"{:.0f}".format(100*user["signals"]["quote_tweet_ratio"])}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.2f}".format(user["signals"]["quote_tweet_ratio"])}}</span></div>
+
+                    {% else %}
+
+                    <div class="progress-bar bg-warning" role="progressbar" style='width: {{"{:.0f}".format(100*user["signals"]["quote_tweet_ratio"])}}%;' aria-valuenow='{{"{:.0f}".format(100*user["signals"]["quote_tweet_ratio"])}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.2f}".format(user["signals"]["quote_tweet_ratio"])}}</span></div>
+
+                    {% endif %}
+
+                    {% endif %}
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <div style="font-size: 8px; color: black;">0</div>
+                    <div style="font-size: 8px; color: black;">1</div>
+                </div>
+            </th>
             {% else %}
-            <td class="green">
-                <div class="progress-bar position" data-ispercent="'false'"  data-percent='{{"{:.2f}".format(user["signals"]["quote_tweet_ratio"])}}' data-duration="800" data-color="white,green,green"></div>
-            </td>
-            {% endif %}
-            {% else %}
+            <th>Quote-to-tweet ratio
+            </th>
             <td>-</td>
             {% endif %}
+
         </tr>
+
         <tr>
-            <th>Followers friends ratio</th>
-            {% if not(user["signals"]["followers_friends_ratio"] is none) %}
-            <td>{{"{:.2f}".format(user["signals"]["followers_friends_ratio"])}}</td>
-            {% else %}
-            <td>-</td>
-            {% endif %}
-        </tr>
-        <tr>
-            <th>Friends growth rate <br>(friends per day)</th>
             {% if not(user["signals"]["friends_growth_rate"] is none) %}
             {% if user["signals"]["friends_growth_rate"] >= 10 %}
-            <td class="red">
-                {{"{:.2f}".format(user["signals"]["friends_growth_rate"])}}
-            </td>
+            <th colspan="2" class="red1">Friends growth rate (friends per day):
+                {% else %}
+                {% if user["signals"]["friends_growth_rate"] >= 5 %}
+            <th colspan="2" class="orange1">Friends growth rate (friends per day):
+                {% else %}
+            <th colspan="2" class="green1">Friends growth rate (friends per day):
+                {% endif %}
+                {% endif %}
+
+                <div class="progress prog" style="margin-top:5px; height: 5px; border-radius:0;">
+                    <div class="progress-bar bg-success prog" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-warning prog" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-danger prog" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="progress prog-with-text" style="height: 15px; border-radius:0;">
+                    {% if user["signals"]["friends_growth_rate"] <= 2 %}
+                    <div class="progress-bar bg-success" role="progressbar" style='width: 10%;' aria-valuenow='10' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.1f}".format(user["signals"]["friends_growth_rate"])}}</span></div>
+                    {% else %}
+                    {% if user["signals"]["friends_growth_rate"] < 5 %}
+
+                    <div class="progress-bar bg-success" role="progressbar" style='width: {{"{:.0f}".format(100*user["signals"]["friends_growth_rate"]/20)}}%;' aria-valuenow='{{"{:.0f}".format(100*user["signals"]["friends_growth_rate"]/20)}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.1f}".format(user["signals"]["friends_growth_rate"])}}</span></div>
+
+                    {% else %}
+                    {% if user["signals"]["friends_growth_rate"] < 10 %}
+
+                    <div class="progress-bar bg-warning" role="progressbar" style='width: {{"{:.0f}".format(100*user["signals"]["friends_growth_rate"]/20)}}%;' aria-valuenow='{{"{:.0f}".format(100*user["signals"]["friends_growth_rate"]/20)}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.1f}".format(user["signals"]["friends_growth_rate"])}}</span></div>
+
+                    {% else %}
+
+                    <div class="progress-bar bg-danger" role="progressbar" style='width: {{"{:.0f}".format(100*user["signals"]["friends_growth_rate"]/20)}}%;' aria-valuenow='{{"{:.0f}".format(100*user["signals"]["friends_growth_rate"]/20)}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.1f}".format(user["signals"]["friends_growth_rate"])}}</span></div>
+
+                    {% endif %}
+                    {% endif %}
+
+                    {% endif %}
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <div style="font-size: 8px; color: black;">Low</div>
+                    <div style="font-size: 8px; color: black;">High</div>
+                </div>
+            </th>
             {% else %}
-            {% if user["signals"]["friends_growth_rate"] >= 5 %}
-            <td class="orange">
-                {{"{:.2f}".format(user["signals"]["friends_growth_rate"])}}
-            </td>
-            {% else %}
-            <td class="green">
-                {{"{:.2f}".format(user["signals"]["friends_growth_rate"])}}
-            </td>
-            {% endif %}
-            {% endif %}
-            {% else %}
+            <th>Friends growth rate <br>(friends per day)
+            </th>
             <td>-</td>
             {% endif %}
+
         </tr>
+
         <tr>
-            <th>Tweets growth rate <br>(tweets per day)</th>
             {% if not(user["signals"]["statuses_growth_rate"] is none) %}
             {% if user["signals"]["statuses_growth_rate"] >= 30 %}
-            <td class="red">
-                {{"{:.2f}".format(user["signals"]["statuses_growth_rate"])}}
-            </td>
+            <th colspan="2" class="red1">Tweets growth rate (tweets per day):
+                {% else %}
+                {% if user["signals"]["statuses_growth_rate"] >= 20 %}
+            <th colspan="2" class="orange1">Tweets growth rate (tweets per day):
+                {% else %}
+            <th colspan="2" class="green1">Tweets growth rate (tweets per day):
+                {% endif %}
+                {% endif %}
+
+                <div class="progress prog" style="margin-top:5px; height: 5px; border-radius:0;">
+                    <div class="progress-bar bg-success prog" role="progressbar" style="width: 20%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-warning prog" role="progressbar" style="width: 10%" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-danger prog" role="progressbar" style="width: 70%" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="progress prog-with-text" style="height: 15px; border-radius:0;">
+                    {% if user["signals"]["statuses_growth_rate"] <= 12 %}
+                    <div class="progress-bar bg-success" role="progressbar" style='width: 12%;' aria-valuenow='12' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.1f}".format(user["signals"]["statuses_growth_rate"])}}</span></div>
+                    {% else %}
+                    {% if user["signals"]["statuses_growth_rate"] < 20 %}
+
+                    <div class="progress-bar bg-success" role="progressbar" style='width: {{"{:.0f}".format(user["signals"]["statuses_growth_rate"])}}%;' aria-valuenow='{{"{:.0f}".format(user["signals"]["statuses_growth_rate"])}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.1f}".format(user["signals"]["statuses_growth_rate"])}}</span></div>
+
+                    {% else %}
+                    {% if user["signals"]["statuses_growth_rate"] < 30 %}
+
+                    <div class="progress-bar bg-warning" role="progressbar" style='width: {{"{:.0f}".format(user["signals"]["statuses_growth_rate"])}}%;' aria-valuenow='{{"{:.0f}".format(user["signals"]["statuses_growth_rate"])}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.1f}".format(user["signals"]["statuses_growth_rate"])}}</span></div>
+
+                    {% else %}
+
+                    <div class="progress-bar bg-danger" role="progressbar" style='width: {{"{:.0f}".format(user["signals"]["statuses_growth_rate"])}}%;' aria-valuenow='{{"{:.0f}".format(user["signals"]["statuses_growth_rate"])}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.1f}".format(user["signals"]["statuses_growth_rate"])}}</span></div>
+
+                    {% endif %}
+                    {% endif %}
+
+                    {% endif %}
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <div style="font-size: 8px; color: black;">Low</div>
+                    <div style="font-size: 8px; color: black;">High</div>
+                </div>
+            </th>
             {% else %}
-            {% if user["signals"]["statuses_growth_rate"] >= 20 %}
-            <td class="orange">
-                {{"{:.2f}".format(user["signals"]["statuses_growth_rate"])}}
-            </td>
-            {% else %}
-            <td class="green">
-                {{"{:.2f}".format(user["signals"]["statuses_growth_rate"])}}
-            </td>
-            {% endif %}
-            {% endif %}
-            {% else %}
+            <th>Tweets growth rate (tweets per day)
+            </th>
             <td>-</td>
             {% endif %}
+
         </tr>
+
 
     </table>
 </div>
@@ -336,91 +505,7 @@
             <td class="green">{{user["signals"]["identifies_itself_as_bot"]}}</td>
             {% endif %}
         </tr>
-        <tr>
-            <th>Number of malicious URLs
-                <span data-toggle="tooltip" data-placement="top" data-html="true" title='<p style="font-size: 12px;">Number of URLs contained in tweets that may contain content or media identified as sensitive content.</p>' style="font-size: 12px;">
-                            <i class="fa fa-info-circle" aria-hidden="true"></i>
-                </span>
-            </th>
-            {% if not(user["signals"]["is_sensitive_count"] is none) %}
-            {% if user["signals"]["is_sensitive_count"] > 0 %}
-            <td class="red">{{user["signals"]["is_sensitive_count"]}}</td>
-            {% else %}
-            <td class="green">{{user["signals"]["is_sensitive_count"]}}</td>
-            {% endif %}
-            {% else %}
-            <td>-</td>
-            {% endif %}
-        </tr>
-        <tr>
-            <th>URL-to-tweet ratio</th>
-            {% if not(user["signals"]["url_tweet_ratio"] is none) %}
 
-            {% if user["signals"]["url_tweet_ratio"] >= 0.9 %}
-            <td class="red">
-                {{"{:.2f}".format(user["signals"]["url_tweet_ratio"])}}
-            </td>
-            {% else %}
-            {% if user["signals"]["url_tweet_ratio"] >= 0.7 %}
-            <td class="orange">
-                {{"{:.2f}".format(user["signals"]["url_tweet_ratio"])}}
-            </td>
-            {% else %}
-            <td class="green">
-                {{"{:.2f}".format(user["signals"]["url_tweet_ratio"])}}
-            </td>
-            {% endif %}
-            {% endif %}
-
-            {% else %}
-            <td>-</td>
-            {% endif %}
-        </tr>
-        <tr>
-            <th>User mentions-to-tweet ratio</th>
-            {% if not(user["signals"]["user_mentions_tweet_ratio"] is none) %}
-
-            {% if user["signals"]["user_mentions_tweet_ratio"] >= 3 %}
-            <td class="red">
-                {{"{:.2f}".format(user["signals"]["user_mentions_tweet_ratio"])}}
-            </td>
-            {% else %}
-            {% if user["signals"]["user_mentions_tweet_ratio"] >= 0.7 %}
-            <td class="orange">
-                {{"{:.2f}".format(user["signals"]["user_mentions_tweet_ratio"])}}
-            </td>
-            {% else %}
-            <td class="green">
-                {{"{:.2f}".format(user["signals"]["user_mentions_tweet_ratio"])}}
-            </td>
-            {% endif %}
-            {% endif %}
-            {% else %}
-            <td>-</td>
-            {% endif %}
-        </tr>
-        <tr>
-            <th>Hashtag-to-tweet ratio</th>
-            {% if not(user["signals"]["hashtag_tweet_ratio"] is none) %}
-            {% if user["signals"]["hashtag_tweet_ratio"] >= 4 %}
-            <td class="red">
-                {{"{:.2f}".format(user["signals"]["hashtag_tweet_ratio"])}}
-            </td>
-            {% else %}
-            {% if user["signals"]["hashtag_tweet_ratio"] >= 3 %}
-            <td class="orange">
-                {{"{:.2f}".format(user["signals"]["hashtag_tweet_ratio"])}}
-            </td>
-            {% else %}
-            <td class="green">
-                {{"{:.2f}".format(user["signals"]["hashtag_tweet_ratio"])}}
-            </td>
-            {% endif %}
-            {% endif %}
-            {% else %}
-            <td>-</td>
-            {% endif %}
-        </tr>
         <tr>
             <th>Average favorite count</th>
             {% if not(user["signals"]["average_favorite_count"] is none) %}
@@ -453,6 +538,186 @@
             <td>-</td>
             {% endif %}
         </tr>
+
+        <tr>
+            <th>Number of malicious URLs
+                <span data-toggle="tooltip" data-placement="top" data-html="true" title='<p style="font-size: 12px;">Number of URLs contained in tweets that may contain content or media identified as sensitive content.</p>' style="font-size: 12px;">
+                            <i class="fa fa-info-circle" aria-hidden="true"></i>
+                </span>
+            </th>
+            {% if not(user["signals"]["is_sensitive_count"] is none) %}
+            {% if user["signals"]["is_sensitive_count"] > 0 %}
+            <td class="red">{{user["signals"]["is_sensitive_count"]}}</td>
+            {% else %}
+            <td class="green">{{user["signals"]["is_sensitive_count"]}}</td>
+            {% endif %}
+            {% else %}
+            <td>-</td>
+            {% endif %}
+        </tr>
+
+
+        <tr>
+            {% if not(user["signals"]["url_tweet_ratio"] is none) %}
+            {% if user["signals"]["url_tweet_ratio"]   >= 0.9 %}
+            <th colspan="2" class="red1">URL-to-tweet ratio:
+                {% else %}
+                {% if user["signals"]["url_tweet_ratio"]   >= 0.7 %}
+            <th colspan="2" class="orange1">URL-to-tweet ratio:
+                {% else %}
+            <th colspan="2" class="green1">URL-to-tweet ratio:
+                {% endif %}
+                {% endif %}
+
+                <div class="progress prog" style="margin-top:5px; height: 5px; border-radius:0;">
+                    <div class="progress-bar bg-success prog" role="progressbar" style="width: 70%" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-warning prog" role="progressbar" style="width: 20%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-danger prog" role="progressbar" style="width: 10%" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="progress prog-with-text" style="height: 15px; border-radius:0;">
+                    {% if user["signals"]["url_tweet_ratio"]   <= 0.1 %}
+                    <div class="progress-bar bg-success" role="progressbar" style='width: 10%;' aria-valuenow='10' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.2f}".format(user["signals"]["url_tweet_ratio"] )}}</span></div>
+                    {% else %}
+                    {% if user["signals"]["url_tweet_ratio"]   < 0.7 %}
+
+                    <div class="progress-bar bg-success" role="progressbar" style='width: {{"{:.0f}".format(user["signals"]["url_tweet_ratio"] *100)}}%;' aria-valuenow='{{"{:.0f}".format(user["signals"]["url_tweet_ratio"] *100)}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.2f}".format(user["signals"]["url_tweet_ratio"] )}}</span></div>
+
+                    {% else %}
+                    {% if user["signals"]["url_tweet_ratio"]   < 0.9 %}
+
+                    <div class="progress-bar bg-warning" role="progressbar" style='width: {{"{:.0f}".format(user["signals"]["url_tweet_ratio"] *100)}}%;' aria-valuenow='{{"{:.0f}".format(user["signals"]["url_tweet_ratio"] *100)}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.2f}".format(user["signals"]["url_tweet_ratio"] )}}</span></div>
+
+                    {% else %}
+
+                    <div class="progress-bar bg-danger" role="progressbar" style='width: {{"{:.0f}".format(user["signals"]["url_tweet_ratio"] *100)}}%;' aria-valuenow='{{"{:.0f}".format(user["signals"]["url_tweet_ratio"] *100)}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.2f}".format(user["signals"]["url_tweet_ratio"] )}}</span></div>
+
+                    {% endif %}
+                    {% endif %}
+
+                    {% endif %}
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <div style="font-size: 8px; color: black;">Low</div>
+                    <div style="font-size: 8px; color: black;">High</div>
+                </div>
+            </th>
+            {% else %}
+            <th>URL-to-tweet ratio
+            </th>
+            <td>-</td>
+            {% endif %}
+
+        </tr>
+
+
+        <tr>
+            {% if not(user["signals"]["user_mentions_tweet_ratio"] is none) %}
+            {% if user["signals"]["user_mentions_tweet_ratio"]  >= 3 %}
+            <th colspan="2" class="red1">User mentions-to-tweet ratio:
+                {% else %}
+                {% if user["signals"]["user_mentions_tweet_ratio"]  >= 0.7 %}
+            <th colspan="2" class="orange1">User mentions-to-tweet ratio:
+                {% else %}
+            <th colspan="2" class="green1">User mentions-to-tweet ratio:
+                {% endif %}
+                {% endif %}
+
+                <div class="progress prog" style="margin-top:5px; height: 5px; border-radius:0;">
+                    <div class="progress-bar bg-success prog" role="progressbar" style="width: 14%" aria-valuenow="14" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-warning prog" role="progressbar" style="width: 60%" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-danger prog" role="progressbar" style="width: 26%" aria-valuenow="26" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="progress prog-with-text" style="height: 15px; border-radius:0;">
+                    {% if user["signals"]["user_mentions_tweet_ratio"]  <= 0.5 %}
+                    <div class="progress-bar bg-success" role="progressbar" style='width: 10%;' aria-valuenow='10' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.1f}".format(user["signals"]["user_mentions_tweet_ratio"] )}}</span></div>
+                    {% else %}
+                    {% if user["signals"]["user_mentions_tweet_ratio"]  < 0.7 %}
+
+                    <div class="progress-bar bg-success" role="progressbar" style='width: {{"{:.0f}".format(user["signals"]["user_mentions_tweet_ratio"]/5 *100)}}%;' aria-valuenow='{{"{:.0f}".format(user["signals"]["user_mentions_tweet_ratio"]/5 *100)}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.1f}".format(user["signals"]["user_mentions_tweet_ratio"] )}}</span></div>
+
+                    {% else %}
+                    {% if user["signals"]["user_mentions_tweet_ratio"]  < 3 %}
+
+                    <div class="progress-bar bg-warning" role="progressbar" style='width: {{"{:.0f}".format(user["signals"]["user_mentions_tweet_ratio"]/5 *100)}}%;' aria-valuenow='{{"{:.0f}".format(user["signals"]["user_mentions_tweet_ratio"]/5 *100)}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.1f}".format(user["signals"]["user_mentions_tweet_ratio"] )}}</span></div>
+
+                    {% else %}
+
+                    <div class="progress-bar bg-danger" role="progressbar" style='width: {{"{:.0f}".format(user["signals"]["user_mentions_tweet_ratio"]/5 *100)}}%;' aria-valuenow='{{"{:.0f}".format(user["signals"]["user_mentions_tweet_ratio"]/5 *100)}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.1f}".format(user["signals"]["user_mentions_tweet_ratio"] )}}</span></div>
+
+                    {% endif %}
+                    {% endif %}
+
+                    {% endif %}
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <div style="font-size: 8px; color: black;">Low</div>
+                    <div style="font-size: 8px; color: black;">High</div>
+                </div>
+            </th>
+            {% else %}
+            <th>User mentions-to-tweet ratio
+            </th>
+            <td>-</td>
+            {% endif %}
+
+        </tr>
+
+
+        <tr>
+            {% if not(user["signals"]["hashtag_tweet_ratio"] is none) %}
+            {% if user["signals"]["hashtag_tweet_ratio"] >= 4 %}
+            <th colspan="2" class="red1">Hashtag-to-tweet ratio:
+                {% else %}
+                {% if user["signals"]["hashtag_tweet_ratio"] >= 3 %}
+            <th colspan="2" class="orange1">Hashtag-to-tweet ratio:
+                {% else %}
+            <th colspan="2" class="green1">Hashtag-to-tweet ratio:
+                {% endif %}
+                {% endif %}
+
+                <div class="progress prog" style="margin-top:5px; height: 5px; border-radius:0;">
+                    <div class="progress-bar bg-success prog" role="progressbar" style="width: 30%" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-warning prog" role="progressbar" style="width: 10%" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-danger prog" role="progressbar" style="width: 60%" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="progress prog-with-text" style="height: 15px; border-radius:0;">
+                    {% if user["signals"]["hashtag_tweet_ratio"] <= 1 %}
+                    <div class="progress-bar bg-success" role="progressbar" style='width: 10%;' aria-valuenow='10' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.1f}".format(user["signals"]["hashtag_tweet_ratio"])}}</span></div>
+                    {% else %}
+                    {% if user["signals"]["hashtag_tweet_ratio"] < 3 %}
+
+                    <div class="progress-bar bg-success" role="progressbar" style='width: {{"{:.0f}".format(user["signals"]["hashtag_tweet_ratio"]*10)}}%;' aria-valuenow='{{"{:.0f}".format(user["signals"]["hashtag_tweet_ratio"]*10)}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.1f}".format(user["signals"]["hashtag_tweet_ratio"])}}</span></div>
+
+                    {% else %}
+                    {% if user["signals"]["hashtag_tweet_ratio"] < 4 %}
+
+                    <div class="progress-bar bg-warning" role="progressbar" style='width: {{"{:.0f}".format(user["signals"]["hashtag_tweet_ratio"]*10)}}%;' aria-valuenow='{{"{:.0f}".format(user["signals"]["hashtag_tweet_ratio"]*10)}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.1f}".format(user["signals"]["hashtag_tweet_ratio"])}}</span></div>
+
+                    {% else %}
+
+                    <div class="progress-bar bg-danger" role="progressbar" style='width: {{"{:.0f}".format(user["signals"]["hashtag_tweet_ratio"]*10)}}%;' aria-valuenow='{{"{:.0f}".format(user["signals"]["hashtag_tweet_ratio"]*10)}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.1f}".format(user["signals"]["hashtag_tweet_ratio"])}}</span></div>
+
+                    {% endif %}
+                    {% endif %}
+
+                    {% endif %}
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <div style="font-size: 8px; color: black;">Low</div>
+                    <div style="font-size: 8px; color: black;">High</div>
+                </div>
+            </th>
+            {% else %}
+            <th>Hashtag-to-tweet ratio
+            </th>
+            <td>-</td>
+            {% endif %}
+
+        </tr>
+
     </table>
 </div>
 

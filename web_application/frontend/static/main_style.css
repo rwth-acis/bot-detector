@@ -51,18 +51,20 @@ body{
 #big-bird h2{
     color: #fff;
     font: normal 20px 'Bitter', serif;
-    margin-left: 5%;
+    margin-left: 3%;
+    padding-left: 2%;
     width: 50%;
     margin-top: 1%;
+    line-height: 1.5;
 
 }
 
-#big-bird h2 a{
+#big-bird h2 a.link-not-btn{
     color: rgb(29, 155, 240);
     text-decoration: none;
 }
 
-#big-bird h2 a:hover{
+#big-bird h2 a.link-not-btn:hover{
     color: rgb(29, 155, 240);
     text-decoration: underline;
 }
@@ -83,6 +85,24 @@ body{
 }
 
 .start-btn:hover{
+  background: #fff;
+  color: #006699;
+  text-decoration: none;
+}
+
+
+a.link-btn{
+ background: #006699;
+ color: #fff;
+ font-size: 12px;
+ border: 1px solid #257C9E;
+ padding: 5px;
+ padding-top: 2px;
+ padding-bottom: 2px;
+ margin: 1px;
+}
+
+a.link-btn:hover{
   background: #fff;
   color: #006699;
   text-decoration: none;
@@ -444,6 +464,19 @@ nav a:hover{
 
 }
 
+.app-info{
+  border-right: 5px double #1C6EA4;
+  border-top: 5px double #1C6EA4;
+  border-radius: 25px 0px 25px 0px;
+  -webkit-box-shadow: -1px 1px 1px 1px rgba(255,255,255,0.3);
+  box-shadow: -1px 1px 1px 1px rgba(255,255,255,0.3);
+  padding: 2%;
+  background: rgba(0, 0, 0, 0.5);
+  font-size:12px !important;
+  color: white;
+  margin-bottom: 5%;
+  margin-top: 3% !important;
+}
 
 
 @media only screen and (max-width: 700px) {
@@ -455,6 +488,9 @@ nav a:hover{
 
   .app-info{
     margin-bottom: 200px !important;
+    width: 95% !important;
+    margin: auto !important;
+    padding: 15px !important;
   }
 
 
@@ -508,6 +544,8 @@ nav a:hover{
    border-radius: 0px;
    padding: 5px;
   }
+
+
 
   #burger{
       display: inline;
