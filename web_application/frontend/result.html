@@ -238,6 +238,10 @@
                 $(".progress-bar").loading();
                 $('#main-table').DataTable({
                     stateSave: true,
+                    "columnDefs": [
+                        { "orderData": [ 3, 4 ],    "targets": 3 },
+                        { "orderData": [ 4, 3 ],    "targets": 4 }
+                      ],
                     dom: 'lBfrtip',
                     buttons: ['csv', 'excel',
                         {
@@ -309,7 +313,7 @@
 
 
                 var data = anychart.data.set([
-                  {x:'Positive', value:{{positive_count1}}, normal:  {fill: "#a6b401"} },
+                  {x:'Positive', value:{{positive_count1}}, normal:  {fill: "#689900"} },
                   {x:'Negative', value:{{negative_count1}} , normal:  {fill: "#d50102"}},
                   {x:'Neutral', value:{{neutral_count1}} , normal:  {fill: "#A8A8A8"}}
                 ]);
@@ -332,7 +336,7 @@
                 chart.draw();
 
                 var data = anychart.data.set([
-                  {x:'Positive', value:{{positive_count2}}, normal:  {fill: "#a6b401"} },
+                  {x:'Positive', value:{{positive_count2}}, normal:  {fill: "#689900"} },
                   {x:'Negative', value:{{negative_count2}} , normal:  {fill: "#d50102"}},
                   {x:'Neutral', value:{{neutral_count2}} , normal:  {fill: "#A8A8A8"}}
                 ]);

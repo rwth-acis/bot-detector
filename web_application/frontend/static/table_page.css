@@ -97,8 +97,8 @@ div.progress-bar.bg-primary.progress-bar-striped{
     max-width: 1000px;
     margin: auto;
     margin-top: 3px;
-    padding-left: 1%;
-    padding-right: 1%;
+    padding-left: 0%;
+    padding-right: 0%;
 }
 #scroll1::-webkit-scrollbar {
   -webkit-appearance: none;
