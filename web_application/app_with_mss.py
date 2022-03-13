@@ -6,6 +6,7 @@ from json import dumps
 import logging
 import uuid
 
+import requests
 import tweepy
 from flask import Flask, render_template, url_for, request, send_from_directory
 from flask_pymongo import PyMongo
@@ -159,7 +160,8 @@ def about():
 @app.route(os.environ['APP_URL_PATH'] + "part-result", methods=['post', 'get'])
 def part_result():
     if request.method == 'POST':
-        id = uuid.uuid4()
+        print(request.form)
+        id = str(uuid.uuid4())
         logging.info(id)
 
         # ________________________________________________________
@@ -227,9 +229,6 @@ def part_result():
             areaParameters3 = "all"
             print(areaParameters3)
 
-
-
-
         parameters = {
             "collection": str(id),
             "keywords": keywords,
@@ -256,46 +255,67 @@ def part_result():
         access_token = os.environ['ACCESS_TOKEN']
         access_token_secret = os.environ['ACCESS_TOKEN_SECRET']
         bearer = os.environ['BEARER']
-        use_bearer = int(os.environ['USE_BEARER'])
 
         kafka_url = os.environ['KAFKA_URL']
 
-        if parameters["SearchParameters1"] == "real-time":
-            p1 = multiprocessing.Process(name='p1', target=startTweetsLoader,
-                                         args=(keywords, kafka_url, str(id), "test1-id",
-                                               parameters, consumer_key, consumer_secret, access_token,
-                                               access_token_secret,))
-        else:
-            if use_bearer:
-                print("use_bearer")
-                p1 = multiprocessing.Process(name='p1', target=startTweetsLoaderWithParameters,
-                                             args=(keywords, kafka_url, str(id), "test1-id",
-                                                   parameters, None, None, None, None, bearer,))
-            else:
-                print("don't use_bearer")
-                p1 = multiprocessing.Process(name='p1', target=startTweetsLoaderWithParameters,
-                                             args=(keywords, kafka_url, str(id), "test1-id",
-                                                   parameters, consumer_key, consumer_secret, access_token,
-                                                   access_token_secret, None,))
-        if use_bearer:
-            print("use_bearer")
-            p2 = multiprocessing.Process(name='p2', target=startSignalGenerator, args=(
-                kafka_url, 'test1-id', 'earliest', str(id),
-                kafka_url, (str(id) + "-signals"),
-                None, None, None, None, bearer,))
-        else:
-            print("don't use_bearer")
-            p2 = multiprocessing.Process(name='p2', target=startSignalGenerator, args=(
-                kafka_url, 'test1-id', 'earliest', str(id),
-                kafka_url, (str(id) + "-signals"),
-                consumer_key, consumer_secret, access_token, access_token_secret, None,))
+        tl_data = {
+            "keywords": keywords,
+            "producer_servers": kafka_url,
+            "producer_topic": str(id),
+            "topic_key": "test1-id",
+            "parameters": parameters,
+            "consumer_key": consumer_key,
+            "consumer_secret": consumer_secret,
+            "access_token": access_token,
+            "access_token_secret": access_token_secret,
+            "bearer": bearer,
 
-        p3 = multiprocessing.Process(name='p3', target=startBotDetector, args=(
-            kafka_url, 'test1-id', 'earliest', (str(id) + "-signals"),
-            kafka_url, str(id),))
-        p1.start()
-        p2.start()
-        p3.start()
+            "collection": str(id),
+            "limit": limit,
+            "areaParameters1": areaParameters1,
+            "areaParameters2": areaParameters2,
+            "areaParameters3": areaParameters3,
+            "SearchParameters1": SearchParameters1,
+            "start_date": start_date,
+            "end_date": end_date,
+            "requestOptions": requestOptions
+        }
+
+        sg_data = {
+            "consumer_servers": kafka_url,
+            "consumer_group_id": 'test1-id',
+            "consumer_offset": 'earliest',
+            "consumer_topic": str(id),
+            "producer_servers": kafka_url,
+            "producer_topic": (str(id) + "-signals"),
+            "consumer_key": consumer_key,
+            "consumer_secret": consumer_secret,
+            "access_token": access_token,
+            "access_token_secret": access_token_secret,
+            "bearer": bearer
+        }
+
+        bd_data = {
+            "consumer_servers": kafka_url,
+            "consumer_group_id": 'test1-id',
+            "consumer_offset": 'earliest',
+            "consumer_topic": (str(id) + "-signals"),
+            "producer_servers": kafka_url,
+            "collection_name": str(id)
+        }
+
+        ms_tl_addr = os.environ['MS_TL_ADDRESS']
+        ms_sg_addr = os.environ['MS_SG_ADDRESS']
+        ms_bd_addr = os.environ['MS_BD_ADDRESS']
+
+        tl_result = requests.post((ms_tl_addr + os.environ['MS_TL_URL_PATH'] + "load-tweets"), data=tl_data)
+        print(tl_result.text)
+        print(tl_data)
+        sg_result = requests.post((ms_sg_addr + os.environ['MS_SG_URL_PATH'] + "generate-signals"), data=sg_data)
+        print(sg_result.text)
+        bd_result = requests.post((ms_bd_addr + os.environ['MS_BD_URL_PATH'] + "detect-bots"), data=bd_data)
+        print(bd_result.text)
+
     return redirect((os.environ['APP_URL']) + "/result/" + str(id))
 
 
@@ -738,5 +758,5 @@ def recalc(id):
 """
 
 if __name__ == "__main__":
-    #app.run()
+    # app.run()
     app.run(host='0.0.0.0')
