@@ -5,6 +5,10 @@
 <script src=
                 "https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js">
 </script>
+
+<script src="https://cdn.anychart.com/releases/8.10.0/js/anychart-core.min.js"></script>
+<script src="https://cdn.anychart.com/releases/8.10.0/js/anychart-pie.min.js"></script>
+
 <link href="https://fonts.googleapis.com/css?family=Asap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
 <link href="https://www.jqueryscript.net/css/jquerysctipttop.css" rel="stylesheet" type="text/css">
@@ -103,6 +107,13 @@
                 <th>Statuses count</th>
                 <td>{{user["user"]["statuses_count"]}}</td>
             </tr>
+
+            {% if not(user["user"]["location"] is none)%}
+            <tr>
+                <th>Location</th>
+                <td>{{user["user"]["location"]}}</td>
+            </tr>
+            {% endif %}
 
 
         </table>
@@ -759,9 +770,59 @@
 
         </tr>
 
+        <tr>
+            {% if not(user["signals"]["negative_sentiment_rate"] is none) %}
+            {% if user["signals"]["negative_sentiment_rate"] >= 0.7 %}
+
+            <th colspan="2" class="orange1">Percent of negative tweets:
+                {% else %}
+            <th colspan="2" class="green1">Percent of negative tweets:
+                {% endif %}
+
+
+                <div class="progress prog" style="margin-top:5px; height: 5px; border-radius:0;">
+                    <div class="progress-bar bg-success prog" role="progressbar" style="width: 70%" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-warning prog" role="progressbar" style="width: 30%" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="progress prog-with-text" style="height: 15px; border-radius:0;">
+                    {% if user["signals"]["negative_sentiment_rate"] <= 0.1 %}
+                    <div class="progress-bar bg-success" role="progressbar" style='width: 10%;' aria-valuenow='10' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.0f}".format(100*user["signals"]["negative_sentiment_rate"])}}%</span></div>
+                    {% else %}
+                    {% if user["signals"]["negative_sentiment_rate"] < 0.7 %}
+
+                    <div class="progress-bar bg-success" role="progressbar" style='width: {{"{:.0f}".format(100*user["signals"]["negative_sentiment_rate"])}}%;' aria-valuenow='{{"{:.0f}".format(100*user["signals"]["negative_sentiment_rate"])}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.0f}".format(100*user["signals"]["negative_sentiment_rate"])}}%</span></div>
+
+                    {% else %}
+
+                    <div class="progress-bar bg-warning" role="progressbar" style='width: {{"{:.0f}".format(100*user["signals"]["negative_sentiment_rate"])}}%;' aria-valuenow='{{"{:.0f}".format(100*user["signals"]["negative_sentiment_rate"])}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.0f}".format(100*user["signals"]["negative_sentiment_rate"])}}%</span></div>
+
+                    {% endif %}
+
+                    {% endif %}
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <div style="font-size: 8px; color: black;">0%</div>
+                    <div style="font-size: 8px; color: black;">100%</div>
+                </div>
+            </th>
+            {% else %}
+            <th>Percent of negative tweets
+            </th>
+            <td>-</td>
+            {% endif %}
+
+        </tr>
+
+
     </table>
 </div>
 
+
+{% if not(user["signals"]["sentiment_counts"] is none) %}
+<div id="chart-container1">
+</div>
+{% endif %}
 
 
 
@@ -778,5 +839,35 @@
 <div id="profile-image" style="display:none;">{{user["user"]["profile_image_url_https"]}}</div>
 {% endif %}
 
+{% if not blank%}
+{% if not(user["signals"]["sentiment_counts"] is none) %}
+<script>
+    $(document).ready(function(){
+                var data = anychart.data.set([
+                  {x:'Positive', value:{{user["signals"]["sentiment_counts"][0]}}, normal:  {fill: "#689900"} },
+                  {x:'Negative', value:{{user["signals"]["sentiment_counts"][2]}} , normal:  {fill: "#d50102"}},
+                  {x:'Neutral', value:{{user["signals"]["sentiment_counts"][1]}} , normal:  {fill: "#A8A8A8"}}
+                ]);
+                // create a pie chart with the data
+                var chart = anychart.pie(data)
+                // set the chart radius making a donut chart
+                chart.innerRadius('55%');
+                var title = chart.title();
+                title.enabled(true);
+                title.fontSize(12);
+                title.text('Sentiment analysis of the latest tweets:');
+                chart.container('chart-container1');
+
+                chart.hovered().outline().width("10%");
+                chart.selected().outline().width("3");
+                chart.selected().outline().fill("#455a64");
+                chart.selected().outline().stroke(null);
+                chart.selected().outline().offset(2);
+                chart.legend().fontSize(10);
+                chart.draw();
+    });
+</script>
+{% endif %}
+{% endif %}
 
 {% endblock %}

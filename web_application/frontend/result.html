@@ -140,7 +140,9 @@
             {% for user in users %}
             <tr>
 
-                <td class="user"><a href="{{app_url}}/{{ collection }}/user/{{user['_id']}}" target="_blank"><b>{{user["user"]["name"]}}</b></a><br><a href='https://twitter.com/{{user["user"]["screen_name"]}}' target="_blank">(@{{user["user"]["screen_name"]}}<sup><i class="fa fa-external-link" aria-hidden="true" style="font-size: 8px; padding-bottom:4px;"></i></sup>)</a></td>
+                <td class="user"><a href="{{app_url}}/{{ collection }}/user/{{user['_id']}}" target="_blank"><b>{{user["user"]["name"]}} </b></a>
+
+                    <br><a href='https://twitter.com/{{user["user"]["screen_name"]}}' target="_blank">(@{{user["user"]["screen_name"]}}<sup><i class="fa fa-external-link" aria-hidden="true" style="font-size: 8px; padding-bottom:4px;"></i></sup>)</a></td>
 
 
                 {% if user["signals"]["identifies_itself_as_bot"] == True %}
@@ -243,7 +245,19 @@
                         { "orderData": [ 4, 3 ],    "targets": 4 }
                       ],
                     dom: 'lBfrtip',
-                    buttons: ['csv', 'excel',
+                    buttons: [
+                        {
+                          extend: 'csv',
+                          exportOptions: {
+                                columns: [ 0, 1, 2, 3, 4 ]
+                           }
+                        },
+                        {
+                          extend: 'excel',
+                          exportOptions: {
+                                columns: [ 0, 1, 2, 3, 4 ]
+                           }
+                        },
                         {
                             text: 'JSON',
                             action: function ( e, dt, button, config ) {
@@ -257,11 +271,14 @@
                         },
                         {
                           extend: 'pdf',
+                          exportOptions: {
+                                columns: [ 0, 1, 2, 3, 4 ]
+                           },
                           customize: function(doc) {
 
                                 var colCount = new Array();
                                 var tr = $('#main-table tbody tr:first-child');
-                                var trWidth = $(tr).width();
+                                var trWidth = $(tr).width()-80;
 
                                 var length = $('#main-table tbody tr:first-child td').length;
 
