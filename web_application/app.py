@@ -6,6 +6,7 @@ from json import dumps
 import logging
 import uuid
 
+
 import tweepy
 from flask import Flask, render_template, url_for, request, send_from_directory
 from flask_pymongo import PyMongo
@@ -142,6 +143,19 @@ def resultid(id):
         logging.info(e)
 
 
+@app.route(os.environ['APP_URL_PATH'] + 'requests-history')
+def history():
+    col2 = db["Requests"]
+    r = list(col2.find())
+    for req in r:
+        req["_id"] = str(req["_id"].generation_time).replace("+00:00", "")
+
+    return render_template('history.html', requests=r,
+                           app_url=os.environ['APP_URL'],
+                           app_url_path=os.environ['APP_URL_PATH'][:-1],
+                           example_db=os.environ['EXAMPLE_DB'])
+
+
 @app.route(os.environ['APP_URL_PATH'] + "table")
 def table():
     return render_template("table.html", app_url=os.environ['APP_URL'],
@@ -226,9 +240,6 @@ def part_result():
             print(areaParameters2)
             areaParameters3 = "all"
             print(areaParameters3)
-
-
-
 
         parameters = {
             "collection": str(id),
@@ -738,5 +749,5 @@ def recalc(id):
 """
 
 if __name__ == "__main__":
-    #app.run()
+    # app.run()
     app.run(host='0.0.0.0')

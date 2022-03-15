@@ -143,6 +143,19 @@ def resultid(id):
         logging.info(e)
 
 
+@app.route(os.environ['APP_URL_PATH'] + 'requests-history')
+def history():
+    col2 = db["Requests"]
+    r = list(col2.find())
+    for req in r:
+        req["_id"] = str(req["_id"].generation_time).replace("+00:00", "")
+
+    return render_template('history.html', requests=r,
+                           app_url=os.environ['APP_URL'],
+                           app_url_path=os.environ['APP_URL_PATH'][:-1],
+                           example_db=os.environ['EXAMPLE_DB'])
+
+
 @app.route(os.environ['APP_URL_PATH'] + "table")
 def table():
     return render_template("table.html", app_url=os.environ['APP_URL'],
