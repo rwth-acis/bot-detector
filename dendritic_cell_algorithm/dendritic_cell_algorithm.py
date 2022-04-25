@@ -822,7 +822,7 @@ def dc_algorithm_cresci_2017_test_k_mix(data1, label1, part1, data2, label2, par
 
 
 def dc_algorithm_twibot_2020_test(data, part):
-    random.seed(52)
+    random.seed(10)
     start = time.time()
     # =========================== INITIALIZE ANTIGENS ====================================
     antigen_array = []
