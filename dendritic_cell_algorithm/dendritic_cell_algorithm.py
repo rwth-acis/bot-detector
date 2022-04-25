@@ -918,11 +918,6 @@ def dc_algorithm_twibot_2020_test(data, part):
     jsonStr = json.dumps(result, indent=4)
     logging.info(jsonStr)
 
-    """with open('result1.json', 'w') as outfile:
-            outfile.write(jsonStr)"""
-
-    """with open('../datasets/twibot-2020/result-new-test.json', 'w') as outfile:
-        outfile.write(jsonStr)"""
 
     # Closing file
 
