@@ -89,7 +89,7 @@ def f(X):
     os.environ['SS_UPPER_BOUND_AVG_TWEET_SIMILARITY'] = str(X[30])
     # 2
     # os.environ['SS_THRESHOLD_TIME_ENTROPY'] = str(int(X[42]))+"."+str(int(X[43]))+str(int(X[44]))
-    # os.environ['PAMP_THRESHOLD_TIME_ENTROPY'] = str(float(os.environ['SS_THRESHOLD_TIME_ENTROPY'])+float("0."+str(int(X[45]))+str(int(X[46]))))
+    # os.environ['PAMP_THRESHOLD_TIME_ENTROPY'] = str(float(os.environ['SS_THRESHOLD_TIME_ENTROPY'])-float("0."+str(int(X[45]))+str(int(X[46]))))
 
 
     # 16 - 8 =8

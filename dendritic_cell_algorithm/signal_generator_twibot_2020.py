@@ -110,15 +110,16 @@ class Signals:
         return self._cms_bad_intentions
 
     def update_csm(self):
-        self._cms = float(os.environ['W_PAMP_CSM']) * self._pamp + float(
-            os.environ['W_DS_CSM']) * self._danger_signal + float(os.environ[
-                                                                      'W_SS_CSM']) * self._safe_signal
+
         self._cms_bot = float(os.environ['W_PAMP_CSM']) * self._pamp_bot + float(
             os.environ['W_DS_CSM']) * self._danger_signal_bot + \
                         float(os.environ['W_SS_CSM']) * self._safe_signal_bot
         self._cms_bad_intentions = float(os.environ['W_PAMP_CSM']) * self._pamp_bad_intentions + float(os.environ[
                                                                                                            'W_DS_CSM']) * self._danger_signal_bad_intentions + float(
             os.environ['W_SS_CSM']) * self._safe_signal_bad_intentions
+
+        self._cms = self._cms_bot + self._cms_bad_intentions
+
         logging.info(f"CMS: {self._cms}")
         logging.info(f"CMS_bot: {self._cms_bot}")
         logging.info(f"CMS_bad_intentions: {self._cms_bad_intentions}")
@@ -133,15 +134,15 @@ class Signals:
         return self._mDC_bad_intentions
 
     def update_mDC(self):
-        self._mDC = max(float(os.environ['W_PAMP_MDC']) * self._pamp + float(
-            os.environ['W_DS_MDC']) * self._danger_signal + float(os.environ[
-                                                                      'W_SS_MDC']) * self._safe_signal, 0)
+
         self._mDC_bot = max(float(os.environ['W_PAMP_MDC']) * self._pamp_bot + float(
             os.environ['W_DS_MDC']) * self._danger_signal_bot + \
                             float(os.environ['W_SS_MDC']) * self._safe_signal_bot, 0)
         self._mDC_bad_intentions = max(float(os.environ['W_PAMP_MDC']) * self._pamp_bad_intentions + float(
             os.environ['W_DS_MDC']) * self._danger_signal_bad_intentions + float(
             os.environ['W_SS_MDC']) * self._safe_signal_bad_intentions, 0)
+
+        self._mDC = self._mDC_bot + self._mDC_bad_intentions
         logging.info(f"mDC: {self._mDC}")
         logging.info(f"mDC_bot: {self._mDC_bot}")
         logging.info(f"mDC_bad_intentions: {self._mDC_bad_intentions}")
@@ -156,15 +157,16 @@ class Signals:
         return self._smDC_bad_intentions
 
     def update_smDC(self):
-        self._smDC = float(os.environ['W_PAMP_SMDC']) * self._pamp + float(
-            os.environ['W_DS_SMDC']) * self._danger_signal + \
-                     float(os.environ['W_SS_SMDC']) * self._safe_signal
+
         self._smDC_bot = float(os.environ['W_PAMP_SMDC']) * self._pamp_bot + float(os.environ[
                                                                                        'W_DS_SMDC']) * self._danger_signal_bot + \
                          float(os.environ['W_SS_SMDC']) * self._safe_signal_bot
         self._smDC_bad_intentions = float(os.environ['W_PAMP_SMDC']) * self._pamp_bad_intentions + float(os.environ[
                                                                                                              'W_DS_SMDC']) * self._danger_signal_bad_intentions + \
                                     float(os.environ['W_SS_SMDC']) * self._safe_signal_bad_intentions
+
+        self._smDC = self._smDC_bot + self._smDC_bad_intentions
+
         logging.info(f"smDC: {self._smDC}")
         logging.info(f"smDC_bot: {self._smDC_bot}")
         logging.info(f"smDC_bad_intentions: {self._smDC_bad_intentions}")
@@ -207,6 +209,7 @@ class Signals:
 
         if len(tweets) > 20:
             tweets = tweets[:20]
+
 
         logging.info("Check default_profile")
         self.increase_danger_signal(float(os.environ["DEFAULT_PROFILE_DS_MULTIPLIER"]) * float(default_profile), True,
@@ -399,6 +402,198 @@ class Signals:
         self.update_parameters("followers_friends_ratio", followers_friends_ratio)
         self.update_parameters("statuses_growth_rate", statuses_growth_rate)
         self.update_parameters("friends_growth_rate", friends_growth_rate)
+
+
+    def generate_signals_with_given_parameters(self,
+                                                   friends_count,
+                                                   statuses_count,
+                                                   followers_count,
+                                                   verified,
+                                                   default_profile,
+                                                   default_profile_image,
+                                                   created_at,
+                                                   tweets,
+                                                   parameters):
+
+
+        logging.info("Check default_profile")
+        self.increase_danger_signal(float(os.environ["DEFAULT_PROFILE_DS_MULTIPLIER"]) * float(default_profile), True,
+                                    False,
+                                    "default_profile")
+        self.increase_safe_signal(float(os.environ["DEFAULT_PROFILE_SS_MULTIPLIER"]) * (1 - float(default_profile)), True,
+                                  False,
+                                  "default_profile")
+
+        logging.info("Check default_profile_image")
+        self.increase_danger_signal(
+            float(os.environ["DEFAULT_PROFILE_IMAGE_DS_MULTIPLIER"]) * float(default_profile_image),
+            True, False, "default_profile_image")
+        self.increase_safe_signal(
+            float(os.environ["DEFAULT_PROFILE_IMAGE_SS_MULTIPLIER"]) * (1 - float(default_profile_image)),
+            True, False, "default_profile_image")
+
+        self.increase_safe_signal(float(os.environ['VERIFIED_SS_MULTIPLIER']) * float(verified), False, True, "verified")
+
+        if len(tweets) > 1:
+            avg_tweet_similarity = parameters['avg_tweet_similarity']
+            logging.info("Check avg_tweet_similarity")
+
+            self.increase_pamp(min(determine_signal_strength(avg_tweet_similarity, ">",
+                                                             float(os.environ["PAMP_THRESHOLD_AVG_TWEET_SIMILARITY"]),
+                                                             float(os.environ["PAMP_INTERVAL_AVG_TWEET_SIMILARITY"])),
+                                   float(os.environ["PAMP_UPPER_BOUND_AVG_TWEET_SIMILARITY"]) * len(tweets)),
+                               True, False, "avg_tweet_similarity")
+
+            self.increase_safe_signal(determine_signal_strength(avg_tweet_similarity, "<",
+                                                                float(os.environ["SS_THRESHOLD_AVG_TWEET_SIMILARITY"]),
+                                                                float(os.environ["SS_INTERVAL_AVG_TWEET_SIMILARITY"])),
+                                      True, False, "avg_tweet_similarity")
+
+            small_interval_between_tweets_count = None
+
+        else:
+            avg_tweet_similarity = None
+            small_interval_between_tweets_count = None
+
+        time_entropy = None
+
+        if len(tweets) > 3:
+            retweet_tweet_ratio = parameters['retweet_tweet_ratio']
+            url_tweet_ratio = parameters['url_tweet_ratio']
+            user_mentions_tweet_ratio = parameters['user_mentions_tweet_ratio']
+            hashtag_tweet_ratio = parameters['hashtag_tweet_ratio']
+
+            self.increase_danger_signal(
+                min(determine_signal_strength(retweet_tweet_ratio, ">",
+                                              float(os.environ["DS_THRESHOLD_BASIC_RATIO"]),
+                                              float(os.environ["DS_INTERVAL_BASIC_RATIO"])),
+                    float(os.environ["DS_UPPER_BOUND_BASIC_RATIO"]) * len(tweets)),
+                True, False, "max(retweet_tweet_ratio, quote_tweet_ratio)")
+
+            self.increase_safe_signal(
+                determine_signal_strength(retweet_tweet_ratio, "<",
+                                          float(os.environ["SS_THRESHOLD_BASIC_RATIO"]),
+                                          float(os.environ["SS_INTERVAL_BASIC_RATIO"])),
+                True, False, "max(retweet_tweet_ratio, quote_tweet_ratio)")
+
+            self.increase_danger_signal(min(determine_signal_strength(url_tweet_ratio, ">",
+                                                                      float(os.environ["DS_THRESHOLD_BASIC_RATIO"]),
+                                                                      float(os.environ["DS_INTERVAL_BASIC_RATIO"])),
+                                            float(os.environ["DS_UPPER_BOUND_BASIC_RATIO"]) * len(tweets)),
+                                        False, True, "url_tweet_ratio")
+
+            self.increase_safe_signal(determine_signal_strength(url_tweet_ratio, "<",
+                                                                float(os.environ["SS_THRESHOLD_BASIC_RATIO"]),
+                                                                float(os.environ["SS_INTERVAL_BASIC_RATIO"])),
+                                      False, True, "url_tweet_ratio")
+
+            self.increase_danger_signal(
+                min(determine_signal_strength(user_mentions_tweet_ratio, ">",
+                                              float(os.environ["DS_THRESHOLD_BASIC_RATIO"]),
+                                              float(os.environ["DS_INTERVAL_BASIC_RATIO"])),
+                    float(os.environ["DS_UPPER_BOUND_BASIC_RATIO"]) * len(tweets)),
+                False, True, "user_mentions_tweet_ratio")
+
+            self.increase_safe_signal(determine_signal_strength(user_mentions_tweet_ratio, "<",
+                                                                float(os.environ["SS_THRESHOLD_BASIC_RATIO"]),
+                                                                float(os.environ["SS_INTERVAL_BASIC_RATIO"])),
+                                      False, True, "user_mentions_tweet_ratio")
+
+            self.increase_danger_signal(min(determine_signal_strength(hashtag_tweet_ratio, ">=",
+                                                                      float(os.environ[
+                                                                                "DS_THRESHOLD_HASHTAG_TWEET_RATIO"]),
+                                                                      float(os.environ[
+                                                                                "DS_INTERVAL_HASHTAG_TWEET_RATIO"])),
+                                            float(os.environ["DS_UPPER_BOUND_BASIC_RATIO"]) * len(tweets)),
+                                        False, True, "hashtag_tweet_ratio")
+
+            self.increase_safe_signal(determine_signal_strength(hashtag_tweet_ratio, "<=",
+                                                                float(os.environ["SS_THRESHOLD_HASHTAG_TWEET_RATIO"]),
+                                                                float(os.environ["SS_INTERVAL_HASHTAG_TWEET_RATIO"])),
+                                      False, True, "hashtag_tweet_ratio")
+
+            """
+            self.increase_danger_signal(
+                min(determine_signal_strength(average_retweet_count, "<=", 0.1, 0.01), len(tweets)),
+                False, True, "average_retweet_count")"""
+
+        else:
+            retweet_tweet_ratio, url_tweet_ratio, user_mentions_tweet_ratio, hashtag_tweet_ratio = None, None, None, None
+
+        # name_screen_name_similarity = similarity(name, screen_name)
+        # self.increase_danger_signal(determine_signal_strength(name_screen_name_similarity, ">=", 0.9, 0.05))
+
+        # screen_name_length = len(screen_name)
+        # self.increase_danger_signal(determine_signal_strength(screen_name_length, ">=", 13, 2))
+
+        identifies_itself_as_bot = parameters["identifies_itself_as_bot"]
+        """self.increase_safe_signal(
+            float(os.environ["SS_MULTIPLIER_IDENTIFIES_ITSELF_AS_BOT"]) * float(identifies_itself_as_bot),
+            False, True, "identifies_itself_as_bot")
+        self.increase_pamp(
+            float(os.environ["SS_MULTIPLIER_IDENTIFIES_ITSELF_AS_BOT"]) * float(identifies_itself_as_bot),
+            False, True, "identifies_itself_as_bot")"""
+
+        if friends_count > 0:
+            followers_friends_ratio = followers_count / friends_count
+            self.increase_safe_signal(
+                min(determine_signal_strength(followers_friends_ratio, ">=",
+                                              float(os.environ["SS_THRESHOLD_FOLLOWERS_FRIENDS_RATIO"]),
+                                              float(os.environ["SS_INTERVAL_FOLLOWERS_FRIENDS_RATIO"])),
+                    float(os.environ["SS_UPPER_BOUND_FOLLOWERS_FRIENDS_RATIO"])), True, False,
+                "followers_friends_ratio")
+        else:
+            followers_friends_ratio = None
+
+        user_age = (datetime.now() - datetime.strptime(created_at.replace(" +0000", ""), '%c')).days
+
+        if user_age > 0:
+            friends_growth_rate = friends_count / user_age
+            statuses_growth_rate = statuses_count / user_age
+            logging.info("friends_growth_rate")
+            self.increase_danger_signal(
+                min(float(os.environ["DS_MULTIPLIER_FRIENDS_GROWTH_RATE"]) * determine_signal_strength(
+                    friends_growth_rate, ">=",
+                    float(os.environ["DS_THRESHOLD_FRIENDS_GROWTH_RATE"]),
+                    float(os.environ["DS_INTERVAL_FRIENDS_GROWTH_RATE"])),
+                    user_age * float(os.environ["DS_UPPER_BOUND_FRIENDS_GROWTH_RATE"])), True, False,
+                "friends_growth_rate")
+
+            logging.info("statuses_growth_rate")
+            self.increase_danger_signal(
+                float(os.environ["DS_MULTIPLIER_STATUSES_GROWTH_RATE"]) * determine_signal_strength(
+                    statuses_growth_rate, ">=",
+                    float(os.environ["DS_THRESHOLD_STATUSES_GROWTH_RATE"]),
+                    float(os.environ["DS_INTERVAL_STATUSES_GROWTH_RATE"])), True, False,
+                "statuses_growth_rate")
+
+        else:
+            friends_growth_rate = None
+            statuses_growth_rate = None
+        self.update_csm()
+        self.update_mDC()
+        self.update_smDC()
+        self.update_k()
+        self.recalculate_probabilities(identifies_itself_as_bot)
+
+        self.update_parameters("cms", self._cms)
+        self.update_parameters("mDC", self._mDC)
+        self.update_parameters("smDC", self._smDC)
+        self.update_parameters("k", self._k)
+
+        self.update_parameters("cms_bot", self._cms_bot)
+        self.update_parameters("mDC_bot", self._mDC_bot)
+        self.update_parameters("smDC_bot", self._smDC_bot)
+        self.update_parameters("k_bot", self._k_bot)
+
+        self.update_parameters("cms_bad_intentions", self._cms_bad_intentions)
+        self.update_parameters("mDC_bad_intentions", self._mDC_bad_intentions)
+        self.update_parameters("smDC_bad_intentions", self._smDC_bad_intentions)
+        self.update_parameters("k_bad_intentions", self._k_bad_intentions)
+
+        self.update_parameters("is_bot_probability", self._is_bot_probability)
+        self.update_parameters("intentions_are_bad_probability", self._intentions_are_bad_probability)
+
 
 
 def average_tweet_similarity(tweets):
@@ -612,3 +807,5 @@ def contain_words(string, words):
             has_word = True
             break
     return has_word
+
+

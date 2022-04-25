@@ -6,7 +6,7 @@ class DendriticCell:
         self.id = id
         self.k = 0.0
         self.cms = 0.0
-        self.migration_threshold = 350
+        self.migration_threshold = 500
         self.antigens = {}
         self.class_label = ""
 
