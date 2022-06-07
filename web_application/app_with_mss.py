@@ -8,7 +8,7 @@ import uuid
 
 import requests
 import tweepy
-from flask import Flask, render_template, url_for, request, send_from_directory
+from flask import Flask, render_template, url_for, request, send_from_directory, jsonify
 from flask_pymongo import PyMongo
 import folium
 from geopy.exc import GeocoderTimedOut
@@ -69,6 +69,289 @@ def home():
     return render_template("base.html", app_url=os.environ['APP_URL'],
                            app_url_path=os.environ['APP_URL_PATH'][:-1],
                            example_db=os.environ['EXAMPLE_DB'])
+
+
+
+###############################################################################
+#============================      API       ==================================
+###############################################################################
+
+@app.route(os.environ['APP_URL_PATH'] + 'api/result/<id>')
+def apiresultid(id):
+    col1 = db[str(id)]
+    users = col1.find()
+    col2 = db["Requests"]
+    parameters = col2.find_one({"collection": str(id)})
+    print(parameters)
+    ready_count = 0
+    try:
+        for user in users:
+            ready_count += 1
+
+        # print(parameters["limit"])
+        # print("_______________")
+        if not ("completed" in parameters):
+            ready_count = int(ready_count / (int(parameters["limit"])) * 100)
+        else:
+            ready_count = 100
+        # print(ready_count)
+        # print(jsonify(users=col1.find(), collection=str(id), parameters=parameters, ready_percent=ready_count))
+        return jsonify(users=col1.find(), collection=str(id), parameters=parameters, ready_percent=ready_count)
+
+    except Exception as e:
+        # return dumps({'error': str(e)})
+        logging.info(e)
+
+
+
+
+
+@app.route(os.environ['APP_URL_PATH'] + "api/create-request")
+def api_part_result():
+        print(request.json)
+        id = str(uuid.uuid4())
+        logging.info(id)
+
+        # ________________________________________________________
+        # _______________________PARAMETERS_______________________
+        # ________________________________________________________
+
+        try:
+            keywords = request.args.get('keywords')
+            print(keywords)
+            limit = request.args.get('limit')
+            print(limit)
+            areaParameters1 = request.args.get('areaParameters1')
+            print(areaParameters1)
+            areaParameters2 = request.args.get('areaParameters2')
+            print(areaParameters2)
+            areaParameters3 = request.args.get('areaParameters3')
+            print(areaParameters3)
+            SearchParameters1 = request.args.get('SearchParameters1')
+            print(SearchParameters1)
+            start_date = request.args.get('start-date')
+            end_date = request.args.get('end-date')
+            requestOptions = request.args.get('requestOptions')
+            print(requestOptions)
+
+            if SearchParameters1 == "time-period":
+                if not start_date:
+                    start_date = datetime.datetime.date(datetime.datetime.now() - datetime.timedelta(days=7)).strftime(
+                        "%Y-%m-%d")
+                if not end_date:
+                    end_date = datetime.datetime.date(datetime.datetime.now()).strftime("%Y-%m-%d")
+
+            if SearchParameters1 == "seven-days":
+                start_date = datetime.datetime.date(datetime.datetime.now() - datetime.timedelta(days=7)).strftime(
+                    "%Y-%m-%d")
+                end_date = datetime.datetime.date(datetime.datetime.now()).strftime("%Y-%m-%d")
+
+            if (start_date > end_date) and SearchParameters1 == "time-period":
+                date = start_date
+                start_date = end_date
+                end_date = date
+
+            if (start_date == end_date) and SearchParameters1 == "time-period":
+                end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d")
+                end_date = datetime.datetime.date(end_date + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+
+            print(start_date)
+            print(end_date)
+
+            if requestOptions == "basic":
+                SearchParameters1 = "mixed"
+                print(SearchParameters1)
+                limit = 20
+                print(limit)
+                areaParameters1 = "all"
+                print(areaParameters1)
+                areaParameters2 = "all"
+                print(areaParameters2)
+                areaParameters3 = "all"
+                print(areaParameters3)
+
+            if SearchParameters1 == "real-time":
+                areaParameters1 = "all"
+                print(areaParameters1)
+                areaParameters2 = "all"
+                print(areaParameters2)
+                areaParameters3 = "all"
+                print(areaParameters3)
+
+            parameters = {
+                "collection": str(id),
+                "keywords": keywords,
+                "limit": limit,
+                "areaParameters1": areaParameters1,
+                "areaParameters2": areaParameters2,
+                "areaParameters3": areaParameters3,
+                "SearchParameters1": SearchParameters1,
+                "start_date": start_date,
+                "end_date": end_date,
+                "requestOptions": requestOptions
+            }
+
+            col1 = db[str(id)]
+            col2 = db["Requests"]
+            col2.insert_one(parameters)
+
+            # ___________________________________________________________
+            # ______________________END_PARAMETERS_______________________
+            # ___________________________________________________________
+
+            consumer_key = os.environ['CONSUMER_KEY']
+            consumer_secret = os.environ['CONSUMER_SECRET']
+            access_token = os.environ['ACCESS_TOKEN']
+            access_token_secret = os.environ['ACCESS_TOKEN_SECRET']
+            bearer = os.environ['BEARER']
+
+            kafka_url = os.environ['KAFKA_URL']
+
+            tl_data = {
+                "keywords": keywords,
+                "producer_servers": kafka_url,
+                "producer_topic": str(id),
+                "topic_key": "test1-id",
+                "parameters": parameters,
+                "consumer_key": consumer_key,
+                "consumer_secret": consumer_secret,
+                "access_token": access_token,
+                "access_token_secret": access_token_secret,
+                "bearer": bearer,
+
+                "collection": str(id),
+                "limit": limit,
+                "areaParameters1": areaParameters1,
+                "areaParameters2": areaParameters2,
+                "areaParameters3": areaParameters3,
+                "SearchParameters1": SearchParameters1,
+                "start_date": start_date,
+                "end_date": end_date,
+                "requestOptions": requestOptions
+            }
+
+            sg_data = {
+                "consumer_servers": kafka_url,
+                "consumer_group_id": 'test1-id',
+                "consumer_offset": 'earliest',
+                "consumer_topic": str(id),
+                "producer_servers": kafka_url,
+                "producer_topic": (str(id) + "-signals"),
+                "consumer_key": consumer_key,
+                "consumer_secret": consumer_secret,
+                "access_token": access_token,
+                "access_token_secret": access_token_secret,
+                "bearer": bearer
+            }
+
+            bd_data = {
+                "consumer_servers": kafka_url,
+                "consumer_group_id": 'test1-id',
+                "consumer_offset": 'earliest',
+                "consumer_topic": (str(id) + "-signals"),
+                "producer_servers": kafka_url,
+                "collection_name": str(id)
+            }
+
+            ms_tl_addr = os.environ['MS_TL_ADDRESS']
+            ms_sg_addr = os.environ['MS_SG_ADDRESS']
+            ms_bd_addr = os.environ['MS_BD_ADDRESS']
+
+            tl_result = requests.post((ms_tl_addr + os.environ['MS_TL_URL_PATH'] + "load-tweets"), data=tl_data)
+            print(tl_result.text)
+            print(tl_data)
+            sg_result = requests.post((ms_sg_addr + os.environ['MS_SG_URL_PATH'] + "generate-signals"), data=sg_data)
+            print(sg_result.text)
+            bd_result = requests.post((ms_bd_addr + os.environ['MS_BD_URL_PATH'] + "detect-bots"), data=bd_data)
+            print(bd_result.text)
+
+            return jsonify(parameters), 201
+
+        except Exception as e:
+            return jsonify(e), 404
+
+
+
+
+@app.route(os.environ['APP_URL_PATH'] + 'api/user-check/<screen_name>')
+def api_user_check(screen_name):
+    screen_name = screen_name.replace("@", "")
+
+    consumer_key = os.environ['CONSUMER_KEY']
+    consumer_secret = os.environ['CONSUMER_SECRET']
+    access_token = os.environ['ACCESS_TOKEN']
+    access_token_secret = os.environ['ACCESS_TOKEN_SECRET']
+    bearer = os.environ['BEARER']
+    use_bearer = int(os.environ['USE_BEARER'])
+
+    if use_bearer:
+        auth = tweepy.OAuth2BearerHandler(bearer)
+    else:
+        auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+        auth.set_access_token(access_token, access_token_secret)
+
+    api = tweepy.API(auth, retry_count=3, timeout=100000, wait_on_rate_limit=True)
+
+    userObj = {}
+    try:
+        user = api.get_user(screen_name=screen_name)._json
+        user.pop('status', None)
+        userObj["user"] = user
+
+        userObj["tweets"] = []
+        logging.info(screen_name)
+        tweets_raw = api.user_timeline(screen_name=screen_name,
+                                       # max 200 tweets
+                                       count=20,
+                                       include_rts=False,
+                                       # Necessary to keep full_text
+                                       tweet_mode='extended'
+                                       )
+        logging.info(tweets_raw)
+        for fulltweet in tweets_raw:
+            tw = fulltweet._json
+            tw.pop('user', None)
+            userObj["tweets"].append(tw)
+
+        new_signals = Signals()
+        # friends_count, followers_count, verified, default_profile, default_profile_image, created_at, name,
+        # screen_name, description, tweets
+        new_signals.generate_signals(user["friends_count"], user["statuses_count"], user["followers_count"],
+                                     user["verified"],
+                                     user["default_profile"],
+                                     user["default_profile_image"], user["created_at"], user["name"],
+                                     user["screen_name"],
+                                     user["description"],
+                                     userObj["tweets"])
+
+        logging.info(new_signals.get_parameters())
+        userObj["signals"] = new_signals.get_parameters()
+
+        return jsonify(userObj), 200
+
+    except Exception as e:
+        # return dumps({'error': str(e)})
+        return jsonify(e), 404
+
+
+@app.route(os.environ['APP_URL_PATH'] + 'api/<collection>/user/<id>')
+def user(collection, id):
+    try:
+        col = db[collection]
+        user_found = col.find_one(ObjectId(id))
+        if user_found:
+            return jsonify(user_found)
+        else:
+            return 404
+    except Exception as e:
+        return jsonify(e), 404
+
+
+###############################################################################
+#==========================      API END       ================================
+###############################################################################
+
+
 
 
 @app.route(os.environ['APP_URL_PATH'] + 'result/<id>')
