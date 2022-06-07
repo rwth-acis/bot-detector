@@ -23,7 +23,7 @@ from dendritic_cell_algorithm import dc_algorithm_cresci_2017 as dca17
 from dendritic_cell_algorithm import dc_algorithm_twibot_2020_test as dca20
 
 # JSON file
-f = open("../datasets/twibot-2020/dev.json", "r", encoding="cp850")
+f = open("../datasets/twibot-2020/train.json", "r", encoding="cp850")
 
 # Reading from file
 data = json.loads(f.read())
@@ -89,7 +89,7 @@ def f(X):
     os.environ['SS_UPPER_BOUND_AVG_TWEET_SIMILARITY'] = str(X[30])
     # 2
     # os.environ['SS_THRESHOLD_TIME_ENTROPY'] = str(int(X[42]))+"."+str(int(X[43]))+str(int(X[44]))
-    # os.environ['PAMP_THRESHOLD_TIME_ENTROPY'] = str(float(os.environ['SS_THRESHOLD_TIME_ENTROPY'])+float("0."+str(int(X[45]))+str(int(X[46]))))
+    # os.environ['PAMP_THRESHOLD_TIME_ENTROPY'] = str(float(os.environ['SS_THRESHOLD_TIME_ENTROPY'])-float("0."+str(int(X[45]))+str(int(X[46]))))
 
 
     # 16 - 8 =8
@@ -121,8 +121,10 @@ def f(X):
     # os.environ['DS_THRESHOLD_AVERAGE_FAVORITE_COUNT'] = "0."+str(int(X[73]))+str(int(X[74]))
     # os.environ['DS_INTERVAL_AVERAGE_FAVORITE_COUNT'] = "0."+str(int(X[75]))+str(int(X[76]))
 
+    os.environ['MCAV'] = "0." + str(int(X[47]))
+
     print(str(os.environ)[2912:])
-    result = dca20(data, 1)
+    result = dca20(data, 14)
     res = json.loads(result)
 
     classified_count = res.pop("classified_count")
@@ -147,22 +149,22 @@ load_dotenv()
 
 varbound = np.concatenate((np.full((21, 2), [1, 10]), np.full((5, 2), [5, 40]), np.full((1, 2), [0, 60]),
                            np.full((1, 2), [-10, -1]), np.full((2, 2), [0, 0]), np.full((1, 2), [5, 100]),
-                           np.full((20, 2), [0, 9])),
+                           np.full((21, 2), [0, 9])),
                           axis=0)
 
-vartype = np.concatenate((np.full((31, 1), 'int'), np.full((20, 1), 'int')),
+vartype = np.concatenate((np.full((31, 1), 'int'), np.full((21, 1), 'int')),
                          axis=0)
 
-algorithm_param = {'max_num_iteration': 200,
-                   'population_size': 15,
-                   'mutation_probability': 0.1,
-                   'elit_ratio': 0.01,
+algorithm_param = {'max_num_iteration': 250,
+                   'population_size': 20,
+                   'mutation_probability': 0.4,
+                   'elit_ratio': 0.05,
                    'crossover_probability': 0.5,
                    'parents_portion': 0.3,
                    'crossover_type': 'uniform',
-                   'max_iteration_without_improv': 20}
+                   'max_iteration_without_improv': 25}
 
-model = ga(function=f, dimension=51, variable_type_mixed=vartype, variable_boundaries=varbound, function_timeout=36000,
+model = ga(function=f, dimension=52, variable_type_mixed=vartype, variable_boundaries=varbound, function_timeout=36000,
            algorithm_parameters=algorithm_param)
 
 model.run()
