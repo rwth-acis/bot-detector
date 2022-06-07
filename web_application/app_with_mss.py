@@ -77,7 +77,7 @@ def home():
 ###############################################################################
 
 @app.route(os.environ['APP_URL_PATH'] + 'api/result/<id>')
-def apiresultid(id):
+def api_resultid(id):
     col1 = db[str(id)]
     users = col1.find()
     col2 = db["Requests"]
@@ -335,7 +335,7 @@ def api_user_check(screen_name):
 
 
 @app.route(os.environ['APP_URL_PATH'] + 'api/<collection>/user/<id>')
-def user(collection, id):
+def api_user(collection, id):
     try:
         col = db[collection]
         user_found = col.find_one(ObjectId(id))
