@@ -8,6 +8,7 @@ import uuid
 
 import requests
 import tweepy
+from bson import json_util
 from flask import Flask, render_template, url_for, request, send_from_directory, jsonify
 from flask_pymongo import PyMongo
 import folium
@@ -71,9 +72,8 @@ def home():
                            example_db=os.environ['EXAMPLE_DB'])
 
 
-
 ###############################################################################
-#============================      API       ==================================
+# ============================      API       ==================================
 ###############################################################################
 
 @app.route(os.environ['APP_URL_PATH'] + 'api/result/<id>')
@@ -96,181 +96,177 @@ def api_resultid(id):
             ready_count = 100
         # print(ready_count)
         # print(jsonify(users=col1.find(), collection=str(id), parameters=parameters, ready_percent=ready_count))
-        return jsonify(users=col1.find(), collection=str(id), parameters=parameters, ready_percent=ready_count)
+        return json_util.dumps(
+            {"users": col1.find(), "collection": str(id), "parameters": parameters, "ready_percent": ready_count})
 
     except Exception as e:
         # return dumps({'error': str(e)})
         logging.info(e)
 
 
-
-
-
 @app.route(os.environ['APP_URL_PATH'] + "api/create-request")
 def api_part_result():
-        print(request.json)
-        id = str(uuid.uuid4())
-        logging.info(id)
+    # print(request.json)
+    id = str(uuid.uuid4())
+    logging.info(id)
 
-        # ________________________________________________________
-        # _______________________PARAMETERS_______________________
-        # ________________________________________________________
+    # ________________________________________________________
+    # _______________________PARAMETERS_______________________
+    # ________________________________________________________
 
-        try:
-            keywords = request.args.get('keywords')
-            print(keywords)
-            limit = request.args.get('limit')
-            print(limit)
-            areaParameters1 = request.args.get('areaParameters1')
-            print(areaParameters1)
-            areaParameters2 = request.args.get('areaParameters2')
-            print(areaParameters2)
-            areaParameters3 = request.args.get('areaParameters3')
-            print(areaParameters3)
-            SearchParameters1 = request.args.get('SearchParameters1')
-            print(SearchParameters1)
-            start_date = request.args.get('start-date')
-            end_date = request.args.get('end-date')
-            requestOptions = request.args.get('requestOptions')
-            print(requestOptions)
+    try:
+        keywords = request.args.get('keywords')
+        print(keywords)
+        limit = request.args.get('limit')
+        print(limit)
+        areaParameters1 = request.args.get('areaParameters1')
+        print(areaParameters1)
+        areaParameters2 = request.args.get('areaParameters2')
+        print(areaParameters2)
+        areaParameters3 = request.args.get('areaParameters3')
+        print(areaParameters3)
+        SearchParameters1 = request.args.get('SearchParameters1')
+        print(SearchParameters1)
+        start_date = request.args.get('start-date')
+        end_date = request.args.get('end-date')
+        requestOptions = request.args.get('requestOptions')
+        print(requestOptions)
 
-            if SearchParameters1 == "time-period":
-                if not start_date:
-                    start_date = datetime.datetime.date(datetime.datetime.now() - datetime.timedelta(days=7)).strftime(
-                        "%Y-%m-%d")
-                if not end_date:
-                    end_date = datetime.datetime.date(datetime.datetime.now()).strftime("%Y-%m-%d")
-
-            if SearchParameters1 == "seven-days":
+        if SearchParameters1 == "time-period":
+            if not start_date:
                 start_date = datetime.datetime.date(datetime.datetime.now() - datetime.timedelta(days=7)).strftime(
                     "%Y-%m-%d")
+            if not end_date:
                 end_date = datetime.datetime.date(datetime.datetime.now()).strftime("%Y-%m-%d")
 
-            if (start_date > end_date) and SearchParameters1 == "time-period":
-                date = start_date
-                start_date = end_date
-                end_date = date
+        if SearchParameters1 == "seven-days":
+            start_date = datetime.datetime.date(datetime.datetime.now() - datetime.timedelta(days=7)).strftime(
+                "%Y-%m-%d")
+            end_date = datetime.datetime.date(datetime.datetime.now()).strftime("%Y-%m-%d")
 
-            if (start_date == end_date) and SearchParameters1 == "time-period":
-                end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d")
-                end_date = datetime.datetime.date(end_date + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+        if SearchParameters1 == "time-period" and (start_date > end_date):
+            date = start_date
+            start_date = end_date
+            end_date = date
 
-            print(start_date)
-            print(end_date)
+        if SearchParameters1 == "time-period" and (start_date == end_date):
+            end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d")
+            end_date = datetime.datetime.date(end_date + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
 
-            if requestOptions == "basic":
-                SearchParameters1 = "mixed"
-                print(SearchParameters1)
-                limit = 20
-                print(limit)
-                areaParameters1 = "all"
-                print(areaParameters1)
-                areaParameters2 = "all"
-                print(areaParameters2)
-                areaParameters3 = "all"
-                print(areaParameters3)
+        print(start_date)
+        print(end_date)
 
-            if SearchParameters1 == "real-time":
-                areaParameters1 = "all"
-                print(areaParameters1)
-                areaParameters2 = "all"
-                print(areaParameters2)
-                areaParameters3 = "all"
-                print(areaParameters3)
+        if requestOptions == "basic":
+            SearchParameters1 = "mixed"
+            print(SearchParameters1)
+            limit = 20
+            print(limit)
+            areaParameters1 = "all"
+            print(areaParameters1)
+            areaParameters2 = "all"
+            print(areaParameters2)
+            areaParameters3 = "all"
+            print(areaParameters3)
 
-            parameters = {
-                "collection": str(id),
-                "keywords": keywords,
-                "limit": limit,
-                "areaParameters1": areaParameters1,
-                "areaParameters2": areaParameters2,
-                "areaParameters3": areaParameters3,
-                "SearchParameters1": SearchParameters1,
-                "start_date": start_date,
-                "end_date": end_date,
-                "requestOptions": requestOptions
-            }
+        if SearchParameters1 == "real-time":
+            areaParameters1 = "all"
+            print(areaParameters1)
+            areaParameters2 = "all"
+            print(areaParameters2)
+            areaParameters3 = "all"
+            print(areaParameters3)
 
-            col1 = db[str(id)]
-            col2 = db["Requests"]
-            col2.insert_one(parameters)
+        parameters = {
+            "collection": str(id),
+            "keywords": keywords,
+            "limit": limit,
+            "areaParameters1": areaParameters1,
+            "areaParameters2": areaParameters2,
+            "areaParameters3": areaParameters3,
+            "SearchParameters1": SearchParameters1,
+            "start_date": start_date,
+            "end_date": end_date,
+            "requestOptions": requestOptions
+        }
 
-            # ___________________________________________________________
-            # ______________________END_PARAMETERS_______________________
-            # ___________________________________________________________
+        col1 = db[str(id)]
+        col2 = db["Requests"]
+        col2.insert_one(parameters)
 
-            consumer_key = os.environ['CONSUMER_KEY']
-            consumer_secret = os.environ['CONSUMER_SECRET']
-            access_token = os.environ['ACCESS_TOKEN']
-            access_token_secret = os.environ['ACCESS_TOKEN_SECRET']
-            bearer = os.environ['BEARER']
+        # ___________________________________________________________
+        # ______________________END_PARAMETERS_______________________
+        # ___________________________________________________________
 
-            kafka_url = os.environ['KAFKA_URL']
+        consumer_key = os.environ['CONSUMER_KEY']
+        consumer_secret = os.environ['CONSUMER_SECRET']
+        access_token = os.environ['ACCESS_TOKEN']
+        access_token_secret = os.environ['ACCESS_TOKEN_SECRET']
+        bearer = os.environ['BEARER']
 
-            tl_data = {
-                "keywords": keywords,
-                "producer_servers": kafka_url,
-                "producer_topic": str(id),
-                "topic_key": "test1-id",
-                "parameters": parameters,
-                "consumer_key": consumer_key,
-                "consumer_secret": consumer_secret,
-                "access_token": access_token,
-                "access_token_secret": access_token_secret,
-                "bearer": bearer,
+        kafka_url = os.environ['KAFKA_URL']
 
-                "collection": str(id),
-                "limit": limit,
-                "areaParameters1": areaParameters1,
-                "areaParameters2": areaParameters2,
-                "areaParameters3": areaParameters3,
-                "SearchParameters1": SearchParameters1,
-                "start_date": start_date,
-                "end_date": end_date,
-                "requestOptions": requestOptions
-            }
+        tl_data = {
+            "keywords": keywords,
+            "producer_servers": kafka_url,
+            "producer_topic": str(id),
+            "topic_key": "test1-id",
+            "parameters": parameters,
+            "consumer_key": consumer_key,
+            "consumer_secret": consumer_secret,
+            "access_token": access_token,
+            "access_token_secret": access_token_secret,
+            "bearer": bearer,
 
-            sg_data = {
-                "consumer_servers": kafka_url,
-                "consumer_group_id": 'test1-id',
-                "consumer_offset": 'earliest',
-                "consumer_topic": str(id),
-                "producer_servers": kafka_url,
-                "producer_topic": (str(id) + "-signals"),
-                "consumer_key": consumer_key,
-                "consumer_secret": consumer_secret,
-                "access_token": access_token,
-                "access_token_secret": access_token_secret,
-                "bearer": bearer
-            }
+            "collection": str(id),
+            "limit": limit,
+            "areaParameters1": areaParameters1,
+            "areaParameters2": areaParameters2,
+            "areaParameters3": areaParameters3,
+            "SearchParameters1": SearchParameters1,
+            "start_date": start_date,
+            "end_date": end_date,
+            "requestOptions": requestOptions
+        }
 
-            bd_data = {
-                "consumer_servers": kafka_url,
-                "consumer_group_id": 'test1-id',
-                "consumer_offset": 'earliest',
-                "consumer_topic": (str(id) + "-signals"),
-                "producer_servers": kafka_url,
-                "collection_name": str(id)
-            }
+        sg_data = {
+            "consumer_servers": kafka_url,
+            "consumer_group_id": 'test1-id',
+            "consumer_offset": 'earliest',
+            "consumer_topic": str(id),
+            "producer_servers": kafka_url,
+            "producer_topic": (str(id) + "-signals"),
+            "consumer_key": consumer_key,
+            "consumer_secret": consumer_secret,
+            "access_token": access_token,
+            "access_token_secret": access_token_secret,
+            "bearer": bearer
+        }
 
-            ms_tl_addr = os.environ['MS_TL_ADDRESS']
-            ms_sg_addr = os.environ['MS_SG_ADDRESS']
-            ms_bd_addr = os.environ['MS_BD_ADDRESS']
+        bd_data = {
+            "consumer_servers": kafka_url,
+            "consumer_group_id": 'test1-id',
+            "consumer_offset": 'earliest',
+            "consumer_topic": (str(id) + "-signals"),
+            "producer_servers": kafka_url,
+            "collection_name": str(id)
+        }
 
-            tl_result = requests.post((ms_tl_addr + os.environ['MS_TL_URL_PATH'] + "load-tweets"), data=tl_data)
-            print(tl_result.text)
-            print(tl_data)
-            sg_result = requests.post((ms_sg_addr + os.environ['MS_SG_URL_PATH'] + "generate-signals"), data=sg_data)
-            print(sg_result.text)
-            bd_result = requests.post((ms_bd_addr + os.environ['MS_BD_URL_PATH'] + "detect-bots"), data=bd_data)
-            print(bd_result.text)
+        ms_tl_addr = os.environ['MS_TL_ADDRESS']
+        ms_sg_addr = os.environ['MS_SG_ADDRESS']
+        ms_bd_addr = os.environ['MS_BD_ADDRESS']
 
-            return jsonify(parameters), 201
+        tl_result = requests.post((ms_tl_addr + os.environ['MS_TL_URL_PATH'] + "load-tweets"), data=tl_data)
+        print(tl_result.text)
+        print(tl_data)
+        sg_result = requests.post((ms_sg_addr + os.environ['MS_SG_URL_PATH'] + "generate-signals"), data=sg_data)
+        print(sg_result.text)
+        bd_result = requests.post((ms_bd_addr + os.environ['MS_BD_URL_PATH'] + "detect-bots"), data=bd_data)
+        print(bd_result.text)
 
-        except Exception as e:
-            return jsonify(e), 404
+        return json_util.dumps(parameters), 201
 
-
+    except Exception as e:
+        return jsonify(e), 404
 
 
 @app.route(os.environ['APP_URL_PATH'] + 'api/user-check/<screen_name>')
@@ -340,7 +336,7 @@ def api_user(collection, id):
         col = db[collection]
         user_found = col.find_one(ObjectId(id))
         if user_found:
-            return jsonify(user_found)
+            return json_util.dumps(user_found)
         else:
             return 404
     except Exception as e:
@@ -348,10 +344,8 @@ def api_user(collection, id):
 
 
 ###############################################################################
-#==========================      API END       ================================
+# ==========================      API END       ================================
 ###############################################################################
-
-
 
 
 @app.route(os.environ['APP_URL_PATH'] + 'result/<id>')
