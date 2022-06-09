@@ -9,7 +9,9 @@ import uuid
 import requests
 import tweepy
 from bson import json_util
-from flask import Flask, render_template, url_for, request, send_from_directory, jsonify
+
+from flask_oidc import OpenIDConnect
+from flask import Flask, render_template, url_for, request, send_from_directory, jsonify, g
 from flask_pymongo import PyMongo
 import folium
 from geopy.exc import GeocoderTimedOut
@@ -37,6 +39,24 @@ logging.getLogger().setLevel(logging.INFO)
 
 app = Flask(__name__, template_folder='frontend')
 
+app.config.update({
+    'SECRET_KEY': 'NotVerySecretKey',
+    'TESTING': True,
+    'DEBUG': True,
+    'OIDC_CLIENT_SECRETS': 'client_secrets.json',
+    'OIDC_ID_TOKEN_COOKIE_SECURE': False,
+    'OIDC_REQUIRE_VERIFIED_EMAIL': False,
+    'OIDC_USER_INFO_ENABLED': True,
+    'OIDC_OPENID_REALM': 'main',
+    'OIDC_SCOPES': ['openid', 'email', 'profile'],
+    'OIDC_INTROSPECTION_AUTH_METHOD': 'client_secret_post',
+    'OIDC_TOKEN_TYPE_HINT': 'access_token'
+})
+
+app.config["OIDC_CALLBACK_ROUTE"] = "/bot-detector/*"
+
+oidc = OpenIDConnect(app)
+
 app.static_folder = 'frontend/static'
 
 if int(os.environ['USE_DATABASE_SERVICE']):
@@ -55,6 +75,29 @@ except AttributeError as error:
     print(error)
 
 
+@app.route(os.environ['APP_URL_PATH'] + 'login', methods=['GET'])
+@oidc.require_login
+def secureEndpoint():
+    return "Hello from our secure endpoint, where you will need to authenticate beforehand."
+
+@app.route(os.environ['APP_URL_PATH'] + 'profile', methods=['GET'])
+@oidc.require_login
+def profile():
+    info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+
+    username = info.get('preferred_username')
+    email = info.get('email')
+    user_id = info.get('sub')
+
+    return render_template("profile.html", app_url=os.environ['APP_URL'],
+                           app_url_path=os.environ['APP_URL_PATH'][:-1],
+                           example_db=os.environ['EXAMPLE_DB'], name=username, email=email, user_id=user_id, user_name=username)
+
+
+
+
+
+
 @app.route(os.environ['APP_URL_PATH'] + "static/images/<image_name>")
 def static_dir(image_name):
     return send_from_directory("frontend/static/images", image_name)
@@ -67,9 +110,17 @@ def send_js(path):
 
 @app.route(os.environ['APP_URL_PATH'])
 def home():
-    return render_template("base.html", app_url=os.environ['APP_URL'],
-                           app_url_path=os.environ['APP_URL_PATH'][:-1],
-                           example_db=os.environ['EXAMPLE_DB'])
+    if oidc.user_loggedin:
+        info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+
+        username = info.get('preferred_username')
+        return render_template("base.html", app_url=os.environ['APP_URL'],
+                               app_url_path=os.environ['APP_URL_PATH'][:-1],
+                               example_db=os.environ['EXAMPLE_DB'], user_name=username)
+    else:
+        return render_template("base.html", app_url=os.environ['APP_URL'],
+                               app_url_path=os.environ['APP_URL_PATH'][:-1],
+                               example_db=os.environ['EXAMPLE_DB'])
 
 
 ###############################################################################
@@ -407,14 +458,28 @@ def resultid(id):
         else:
             ready_count = 100
         print(ready_count)
-        return render_template('result.html', users=col1.find(), folium_map=Markup(folium_map._repr_html_()),
-                               app_url=os.environ['APP_URL'],
-                               negative_count1=negative_count1, positive_count1=positive_count1,
-                               neutral_count1=neutral_count1, negative_count2=negative_count2,
-                               positive_count2=positive_count2, neutral_count2=neutral_count2,
-                               collection=str(id), parameters=parameters, ready_count=ready_count,
-                               app_url_path=os.environ['APP_URL_PATH'][:-1],
-                               example_db=os.environ['EXAMPLE_DB'])
+        if oidc.user_loggedin:
+            info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+
+            username = info.get('preferred_username')
+            return render_template('result.html', users=col1.find(), folium_map=Markup(folium_map._repr_html_()),
+                                   app_url=os.environ['APP_URL'],
+                                   negative_count1=negative_count1, positive_count1=positive_count1,
+                                   neutral_count1=neutral_count1, negative_count2=negative_count2,
+                                   positive_count2=positive_count2, neutral_count2=neutral_count2,
+                                   collection=str(id), parameters=parameters, ready_count=ready_count,
+                                   app_url_path=os.environ['APP_URL_PATH'][:-1],
+                                   example_db=os.environ['EXAMPLE_DB'], user_name=username)
+        else:
+            return render_template('result.html', users=col1.find(), folium_map=Markup(folium_map._repr_html_()),
+                                   app_url=os.environ['APP_URL'],
+                                   negative_count1=negative_count1, positive_count1=positive_count1,
+                                   neutral_count1=neutral_count1, negative_count2=negative_count2,
+                                   positive_count2=positive_count2, neutral_count2=neutral_count2,
+                                   collection=str(id), parameters=parameters, ready_count=ready_count,
+                                   app_url_path=os.environ['APP_URL_PATH'][:-1],
+                                   example_db=os.environ['EXAMPLE_DB'])
+
     except Exception as e:
         # return dumps({'error': str(e)})
         logging.info(e)
@@ -427,24 +492,53 @@ def history():
     for req in r:
         req["_id"] = str(req["_id"].generation_time).replace("+00:00", "")
 
-    return render_template('history.html', requests=r,
-                           app_url=os.environ['APP_URL'],
-                           app_url_path=os.environ['APP_URL_PATH'][:-1],
-                           example_db=os.environ['EXAMPLE_DB'])
+    if oidc.user_loggedin:
+        info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+
+        username = info.get('preferred_username')
+        return render_template('history.html', requests=r,
+                               app_url=os.environ['APP_URL'],
+                               app_url_path=os.environ['APP_URL_PATH'][:-1],
+                               example_db=os.environ['EXAMPLE_DB'], user_name=username)
+    else:
+        return render_template('history.html', requests=r,
+                               app_url=os.environ['APP_URL'],
+                               app_url_path=os.environ['APP_URL_PATH'][:-1],
+                               example_db=os.environ['EXAMPLE_DB'])
+
+
 
 
 @app.route(os.environ['APP_URL_PATH'] + "table")
 def table():
-    return render_template("table.html", app_url=os.environ['APP_URL'],
-                           app_url_path=os.environ['APP_URL_PATH'][:-1],
-                           example_db=os.environ['EXAMPLE_DB'])
+    if oidc.user_loggedin:
+        info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+
+        username = info.get('preferred_username')
+        return render_template("table.html", app_url=os.environ['APP_URL'],
+                               app_url_path=os.environ['APP_URL_PATH'][:-1],
+                               example_db=os.environ['EXAMPLE_DB'], user_name=username)
+    else:
+        return render_template("table.html", app_url=os.environ['APP_URL'],
+                                      app_url_path=os.environ['APP_URL_PATH'][:-1],
+                                      example_db=os.environ['EXAMPLE_DB'])
+
 
 
 @app.route(os.environ['APP_URL_PATH'] + "index")
 def about():
-    return render_template("index.html", app_url=os.environ['APP_URL'],
-                           app_url_path=os.environ['APP_URL_PATH'][:-1],
-                           example_db=os.environ['EXAMPLE_DB'])
+    if oidc.user_loggedin:
+        info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+
+        username = info.get('preferred_username')
+        return render_template("index.html", app_url=os.environ['APP_URL'],
+                               app_url_path=os.environ['APP_URL_PATH'][:-1],
+                               example_db=os.environ['EXAMPLE_DB'], user_name=username)
+    else:
+        return render_template("index.html", app_url=os.environ['APP_URL'],
+                                      app_url_path=os.environ['APP_URL_PATH'][:-1],
+                                      example_db=os.environ['EXAMPLE_DB'])
+
 
 
 @app.route(os.environ['APP_URL_PATH'] + "part-result", methods=['post', 'get'])
@@ -614,10 +708,19 @@ def user_check(screen_name):
     if request.method == 'POST':
         screen_name = request.form.get('screen-name').replace("@", "")
     if screen_name == "form":
-        return render_template('user-check.html', blank=True, exception=False,
-                               app_url=os.environ['APP_URL'],
-                               app_url_path=os.environ['APP_URL_PATH'][:-1],
-                               example_db=os.environ['EXAMPLE_DB'])
+        if oidc.user_loggedin:
+            info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+            username = info.get('preferred_username')
+            return render_template('user-check.html', blank=True, exception=False,
+                                   app_url=os.environ['APP_URL'],
+                                   app_url_path=os.environ['APP_URL_PATH'][:-1],
+                                   example_db=os.environ['EXAMPLE_DB'], user_name=username)
+        else:
+            return render_template('user-check.html', blank=True, exception=False,
+                                   app_url=os.environ['APP_URL'],
+                                   app_url_path=os.environ['APP_URL_PATH'][:-1],
+                                   example_db=os.environ['EXAMPLE_DB'])
+
 
     consumer_key = os.environ['CONSUMER_KEY']
     consumer_secret = os.environ['CONSUMER_SECRET']
@@ -669,17 +772,39 @@ def user_check(screen_name):
         logging.info(new_signals.get_parameters())
         userObj["signals"] = new_signals.get_parameters()
 
-        return render_template('user-check.html', blank=False, exception=False, tweetArr=json.dumps(userObj["tweets"]),
-                               user=userObj,
-                               app_url=os.environ['APP_URL'],
-                               app_url_path=os.environ['APP_URL_PATH'][:-1],
-                               example_db=os.environ['EXAMPLE_DB'])
+        if oidc.user_loggedin:
+            info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+
+            username = info.get('preferred_username')
+
+            return render_template('user-check.html', blank=False, exception=False, tweetArr=json.dumps(userObj["tweets"]),
+                                   user=userObj,
+                                   app_url=os.environ['APP_URL'],
+                                   app_url_path=os.environ['APP_URL_PATH'][:-1],
+                                   example_db=os.environ['EXAMPLE_DB'], user_name=username)
+        else:
+            return render_template('user-check.html', blank=False, exception=False, tweetArr=json.dumps(userObj["tweets"]),
+                                   user=userObj,
+                                   app_url=os.environ['APP_URL'],
+                                   app_url_path=os.environ['APP_URL_PATH'][:-1],
+                                   example_db=os.environ['EXAMPLE_DB'])
+
+
     except Exception as e:
         # return dumps({'error': str(e)})
-        return render_template('user-check.html', blank=True, exception=True,
-                               app_url=os.environ['APP_URL'],
-                               app_url_path=os.environ['APP_URL_PATH'][:-1],
-                               example_db=os.environ['EXAMPLE_DB'])
+        if oidc.user_loggedin:
+            info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+            username = info.get('preferred_username')
+            return render_template('user-check.html', blank=True, exception=True,
+                                   app_url=os.environ['APP_URL'],
+                                   app_url_path=os.environ['APP_URL_PATH'][:-1],
+                                   example_db=os.environ['EXAMPLE_DB'], user_name=username)
+        else:
+            return render_template('user-check.html', blank=True, exception=True,
+                                   app_url=os.environ['APP_URL'],
+                                   app_url_path=os.environ['APP_URL_PATH'][:-1],
+                                   example_db=os.environ['EXAMPLE_DB'])
+
 
 
 @app.route(os.environ['APP_URL_PATH'] + '<collection>/user/<id>')
@@ -688,20 +813,50 @@ def user(collection, id):
         col = db[collection]
         user_found = col.find_one(ObjectId(id))
         if user_found:
-            return render_template('user.html', tweetArr=json.dumps(user_found["tweets"]), user=user_found,
-                                   tweet=json.dumps(user_found["found_tweet"]),
-                                   app_url=os.environ['APP_URL'],
+            if oidc.user_loggedin:
+                info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+                username = info.get('preferred_username')
+
+                return render_template('user.html', tweetArr=json.dumps(user_found["tweets"]), user=user_found,
+                                       tweet=json.dumps(user_found["found_tweet"]),
+                                       app_url=os.environ['APP_URL'],
+                                       app_url_path=os.environ['APP_URL_PATH'][:-1],
+                                       collection=collection,
+                                       example_db=os.environ['EXAMPLE_DB'], user_name=username)
+            else:
+                return render_template('user.html', tweetArr=json.dumps(user_found["tweets"]), user=user_found,
+                                       tweet=json.dumps(user_found["found_tweet"]),
+                                       app_url=os.environ['APP_URL'],
+                                       app_url_path=os.environ['APP_URL_PATH'][:-1],
+                                       collection=collection,
+                                       example_db=os.environ['EXAMPLE_DB'])
+
+        else:
+            if oidc.user_loggedin:
+                info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+                username = info.get('preferred_username')
+
+                return render_template('404.html', app_url=os.environ['APP_URL'],
+                                       app_url_path=os.environ['APP_URL_PATH'][:-1],
+                                       example_db=os.environ['EXAMPLE_DB'], user_name=username)
+            else:
+                return render_template('404.html', app_url=os.environ['APP_URL'],
+                                       app_url_path=os.environ['APP_URL_PATH'][:-1],
+                                       example_db=os.environ['EXAMPLE_DB'])
+
+    except Exception as e:
+        if oidc.user_loggedin:
+            info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+            username = info.get('preferred_username')
+
+            return render_template('404.html', app_url=os.environ['APP_URL'],
                                    app_url_path=os.environ['APP_URL_PATH'][:-1],
-                                   collection=collection,
-                                   example_db=os.environ['EXAMPLE_DB'])
+                                   example_db=os.environ['EXAMPLE_DB'], user_name=username)
         else:
             return render_template('404.html', app_url=os.environ['APP_URL'],
                                    app_url_path=os.environ['APP_URL_PATH'][:-1],
                                    example_db=os.environ['EXAMPLE_DB'])
-    except Exception as e:
-        return render_template('404.html', app_url=os.environ['APP_URL'],
-                               app_url_path=os.environ['APP_URL_PATH'][:-1],
-                               example_db=os.environ['EXAMPLE_DB'])
+
 
 
 @app.route(os.environ['APP_URL_PATH'] + 'recalculate/<collection>/<id>')
@@ -767,9 +922,18 @@ def recalc(collection, id):
 
 @app.errorhandler(404)
 def page_not_found(e):
-    return render_template('404.html', app_url=os.environ['APP_URL'],
-                           app_url_path=os.environ['APP_URL_PATH'][:-1],
-                           example_db=os.environ['EXAMPLE_DB']), 404
+
+    if oidc.user_loggedin:
+        info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+        username = info.get('preferred_username')
+
+        return render_template('404.html', app_url=os.environ['APP_URL'],
+                                      app_url_path=os.environ['APP_URL_PATH'][:-1],
+                                      example_db=os.environ['EXAMPLE_DB'], user_name=username), 404
+    else:
+        return render_template('404.html', app_url=os.environ['APP_URL'],
+                               app_url_path=os.environ['APP_URL_PATH'][:-1],
+                               example_db=os.environ['EXAMPLE_DB']), 404
 
 
 """
