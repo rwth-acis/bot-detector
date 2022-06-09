@@ -486,6 +486,9 @@ nav a:hover{
 
   }
 
+ .login-icon{
+    float:none !important;
+ }
   .app-info{
     margin-bottom: 200px !important;
     width: 95% !important;

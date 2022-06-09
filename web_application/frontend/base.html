@@ -23,6 +23,13 @@
         <li><a href="{{app_url}}/index">Request form</a></li>
         <li><a href="{{app_url}}/result/{{example_db}}">Example result</a></li>
         <li><a href="{{app_url}}/user-check/form">Check account</a></li>
+
+        {% if user_name is defined %}
+        <li class="login-icon" style="float:right"><a href="{{app_url}}/profile"><i class="fa fa-user"></i> {{ user_name }} </a></li>
+        {% else %}
+        <li class="login-icon" style="float:right"><a href="{{app_url}}/profile"><i class="fa fa-sign-in"></i> Login</a></li>
+        {% endif %}
+
     </ul>
 </nav>
 <div id="body-content">
