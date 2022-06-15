@@ -54,12 +54,13 @@
         <thead>
         <tr>
             <th>Time of creation</th>
+            <th>ID</th>
             <th>Keywords</th>
             <th>Limit of users for checking</th>
             <th>Search type</th>
             <th>Additional parameters for tweets</th>
             <th>Search is complete</th>
-            <th>Link</th>
+            <th>Links</th>
 
 
         </tr>
@@ -71,6 +72,10 @@
 
             <td>
                 {{request["_id"]}}
+            </td>
+
+            <td>
+                {{request["collection"]}}
             </td>
 
             <td>
@@ -145,7 +150,14 @@
             {% endif %}
 
 
-            <td><a href="{{app_url}}/result/{{ request['collection'] }}" class="btn btn-info" target="_blank">Get more information</a></td>
+            <td style="text-align: center;">
+                <a href="{{app_url}}/result/{{ request['collection'] }}" class="btn btn-info" target="_blank" style="margin:auto; margin-bottom:5px;">Request results</a>
+                {% if user_history is defined %}
+                {% if user_history == True %}
+                <a href="{{app_url}}/access/{{request['collection']}}" class="btn btn-info" target="_blank" style="margin:auto;">Access settings</a>
+                {% endif %}
+                {% endif %}
+            </td>
 
         </tr>
         {% endfor %}

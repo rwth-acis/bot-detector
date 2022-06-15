@@ -432,6 +432,7 @@ nav a:hover{
 
 #not-found{
     min-height: 500px;
+    margin-top: 40px;
 }
 #not-found p{
     text-align: center;
@@ -478,6 +479,34 @@ nav a:hover{
   margin-top: 3% !important;
 }
 
+.login-icon{
+ background-color: #00001e;
+ padding-right: 20px;
+ border: none;
+ float:right;
+ border-radius: 0 0 0 50%;
+}
+
+.dropdown-menu {
+    right: 20px !important;
+    min-width: 8rem !important;
+    background-color: #00001e !important;
+    margin: 0.125rem 0 0 -10px !important;
+    border-radius: 0 0 5% 5% !important;
+}
+
+a.dropdown-item{
+    color: #F8F8F8;
+    text-decoration: none;
+
+}
+
+a.dropdown-item:hover{
+  background-color: transparent;
+  color: rgb(29, 155, 240);
+  text-decoration: none;
+}
+
 
 @media only screen and (max-width: 700px) {
   body{
@@ -486,9 +515,29 @@ nav a:hover{
 
   }
 
+  .dropdown-menu {
+      position: relative !important;
+      min-width: 100% !important;
+      background-color: #00001e !important;
+      margin: 0 !important;
+      border-radius: 0 !important;
+      margin-bottom: 20px !important;
+      margin-left: 0px !important;
+      border-top: solid 1px white !important;
+      border-bottom: solid 1px white !important;
+      border: 0px;
+      transform: none !important;
+  }
+
+  .dropdown-item {
+      text-align: center;
+  }
+
  .login-icon{
     float:none !important;
+    padding-right: 0%;
  }
+
   .app-info{
     margin-bottom: 200px !important;
     width: 95% !important;
