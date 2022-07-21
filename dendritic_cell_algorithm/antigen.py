@@ -51,7 +51,7 @@ class Antigen:
                                                         self.number_of_migrated_cells,
                                                         mcav),
                 "classification_result": ans,
-                "сlassified_correctly": classified_correctly,
+                "classified_correctly": classified_correctly,
                 "parameters": self.value["parameters"],
                 "screen_name": self.value["screen_name"]}
 
