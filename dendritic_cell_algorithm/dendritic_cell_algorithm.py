@@ -388,7 +388,7 @@ def dc_algorithm_cresci_2017_test(data1, label1, part1, data2, label2, part2):
         for i in range(antigen.number_of_copies):
             # cell_random = int(random_in_bounds(0, (len(dc_array) - 1)))
             dc_with_min_distance = dc_distances_min[0][1]
-            print("dc_id: " + str(dc_with_min_distance))
+
             logging.info("expose cell {0} to antigen {1}".format(int(dc_with_min_distance.id), int(antigen.id)))
             logging.info("expose cell {0} to antigen {1}".format(str(dc_with_min_distance), str(antigen)))
             cell, status = dc_with_min_distance.expose_cell(antigen)
@@ -526,7 +526,7 @@ def dc_algorithm_twibot_2020_test(data, part):
 
             # cell_random = int(random_in_bounds(0, (len(dc_array) - 1)))
             dc_with_min_distance = dc_distances_min[0][1]
-            print("dc_id: " + str(dc_with_min_distance))
+
             logging.info("expose cell {0} to antigen {1}".format(int(dc_with_min_distance.id), int(antigen.id)))
             logging.info("expose cell {0} to antigen {1}".format(str(dc_with_min_distance), str(antigen)))
             cell, status = dc_with_min_distance.expose_cell(antigen)
