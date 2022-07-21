@@ -70,16 +70,17 @@ class Antigen:
             self.classify_antigen()
 
     def __str__(self):
+        """
         return "{  Antigen id: % s, class_label: % s, " \
                "number_of_migrated_cells: % s, collected_by: % s  }" % (
                    self.id,
                    self.class_label,
                    self.number_of_migrated_cells, self.collected_by)
+"""
 
-        """
         return "{Antigen id: % s, value: % s, k: % s, cms: % s, class_label: % s, number_of_copies: % s, " \
                "number_of_migrated_cells: % s, collected_by: % s}              " % (
                self.id, self.value, self.k, self.cms,
                self.class_label, self.number_of_copies,
                self.number_of_migrated_cells, self.collected_by)
-        """
+
