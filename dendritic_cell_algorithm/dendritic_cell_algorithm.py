@@ -47,7 +47,7 @@ def dc_algorithm_cresci_2017(path, label):
     logging.info([str(item) for item in antigen_array])
     """
     antigen_array = []
-    result = {"classified_count": 0, "classified_correctly_count": 0, "time": 0}
+    result = {"classified_count": 0, "classified_correctly_count": 0, "anomaly_classified_correctly_count": 0, "anomaly_classified_UNcorrectly_count": 0, "normal_classified_correctly_count": 0, "normal_classified_UNcorrectly_count": 0, "time": 0}
 
     # JSON file
     f = open(path, "r", encoding="cp850")
@@ -285,7 +285,8 @@ def dc_algorithm_cresci_2017_test(data1, label1, part1, data2, label2, part2):
     # =========================== INITIALIZE ANTIGENS ====================================
 
     antigen_array = []
-    result = {"classified_count": 0, "classified_correctly_count": 0, "time": 0}
+    result = {"classified_count": 0, "classified_correctly_count": 0, "anomaly_classified_correctly_count": 0, "anomaly_classified_UNcorrectly_count": 0, "normal_classified_correctly_count": 0, "normal_classified_UNcorrectly_count": 0, "time": 0}
+
 
     c = 0
     # Iterating through the json
@@ -457,7 +458,7 @@ def dc_algorithm_twibot_2020_test(data, part):
     number_of_antigen_copies = 10
     # =========================== INITIALIZE ANTIGENS ====================================
     antigen_array = []
-    result = {"classified_count": 0, "classified_correctly_count": 0, "time": 0}
+    result = {"classified_count": 0, "classified_correctly_count": 0, "anomaly_classified_correctly_count": 0, "anomaly_classified_UNcorrectly_count": 0, "normal_classified_correctly_count": 0, "normal_classified_UNcorrectly_count": 0, "time": 0}
 
     # Iterating through the json
     c = 0

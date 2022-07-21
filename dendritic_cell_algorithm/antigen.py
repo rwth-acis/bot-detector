@@ -45,6 +45,20 @@ class Antigen:
             if classified_correctly:
                 self.result.setdefault("classified_correctly_count", 0)
                 self.result["classified_correctly_count"] += 1
+                if self.class_label == "Anomaly":
+                    self.result.setdefault("anomaly_classified_correctly_count", 0)
+                    self.result["anomaly_classified_correctly_count"] += 1
+                else:
+                    self.result.setdefault("normal_classified_correctly_count", 0)
+                    self.result["normal_classified_correctly_count"] += 1
+            else:
+                if self.class_label == "Anomaly":
+                    self.result.setdefault("anomaly_classified_UNcorrectly_count", 0)
+                    self.result["anomaly_classified_UNcorrectly_count"] += 1
+                else:
+                    self.result.setdefault("normal_classified_UNcorrectly_count", 0)
+                    self.result["normal_classified_UNcorrectly_count"] += 1
+
             self.result[self.id] = {
                 "id": self.id,
                 "mature_rate": '{0} / {1} = {2}'.format(number_of_mdc,
