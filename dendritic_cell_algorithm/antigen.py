@@ -66,6 +66,7 @@ class Antigen:
                                                         mcav),
                 "classification_result": ans,
                 "classified_correctly": classified_correctly,
+                "label_from_dataset": self.class_label,
                 "parameters": self.value["parameters"],
                 "screen_name": self.value["screen_name"]}
 
