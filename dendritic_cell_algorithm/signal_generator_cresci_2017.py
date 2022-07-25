@@ -204,7 +204,8 @@ class Signals:
                          name,
                          screen_name,
                          description,
-                         tweets):
+                         tweets,
+                         crawled_at = "2014-12-31 23:59:59"):
         """
         if len(tweets) > 40:
             tweets = tweets[:40]
@@ -251,7 +252,7 @@ class Signals:
         else:
             followers_friends_ratio = None
 
-        user_age = (datetime.now() - datetime.strptime(created_at.replace(" +0000", ""), '%Y-%m-%d %X')).days
+        user_age = (datetime.strptime(crawled_at.replace(" +0000", ""), '%Y-%m-%d %X') - datetime.strptime(created_at.replace(" +0000", ""), '%c')).days
 
         if user_age > 0:
             friends_growth_rate = friends_count / user_age
@@ -514,7 +515,8 @@ class Signals:
                              name,
                              screen_name,
                              description,
-                             tweets):
+                             tweets,
+                             crawled_at = "2014-12-31 23:59:59"):
         """
         if len(tweets) > 40:
             tweets = tweets[:40]
@@ -561,7 +563,7 @@ class Signals:
         else:
             followers_friends_ratio = None
 
-        user_age = (datetime.now() - datetime.strptime(created_at.replace(" +0000", ""), '%Y-%m-%d %X')).days
+        user_age = (datetime.strptime(crawled_at.replace(" +0000", ""), '%Y-%m-%d %X') - datetime.strptime(created_at.replace(" +0000", ""), '%c')).days
 
         if user_age > 0:
             friends_growth_rate = friends_count / user_age
@@ -861,7 +863,8 @@ class Signals:
                            screen_name,
                            description,
                            tweets,
-                           k):
+                           k,
+                           crawled_at = "2014-12-31 23:59:59"):
         if len(tweets) > k:
             tweets = tweets[:k]
         #print(len(tweets))
@@ -1048,7 +1051,7 @@ class Signals:
         else:
             followers_friends_ratio = None
 
-        user_age = (datetime.now() - datetime.strptime(created_at.replace(" +0000", ""), '%Y-%m-%d %X')).days
+        user_age = (datetime.strptime(crawled_at.replace(" +0000", ""), '%Y-%m-%d %X') - datetime.strptime(created_at.replace(" +0000", ""), '%c')).days
 
         if user_age > 0:
             friends_growth_rate = friends_count / user_age

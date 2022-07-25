@@ -73,7 +73,7 @@ def dc_algorithm_cresci_2017(path, label):
                                  int(user["default_profile_image"]) if (
                                          str(user["default_profile_image"]) != "NULL" and str(
                                      user["default_profile_image"]) != "") else False,
-                                 user["timestamp"], user["name"],
+                                 user["created_at"], user["name"],
                                  user["screen_name"], user["description"], user["tweets"], 20)
 
             logging.info(user["id"])
@@ -311,8 +311,8 @@ def dc_algorithm_cresci_2017_test(data1, label1, part1, data2, label2, part2):
                                      int(user["default_profile_image"]) if (
                                              str(user["default_profile_image"]) != "NULL" and str(
                                          user["default_profile_image"]) != "") else False,
-                                     user["timestamp"], user["name"],
-                                     user["screen_name"], user["description"], user["tweets"], 20)
+                                     user["created_at"], user["name"],
+                                     user["screen_name"], user["description"], user["tweets"], 20, user["crawled_at"])
 
                 logging.info(user["id"])
                 logging.info(s.get_k())
@@ -345,8 +345,8 @@ def dc_algorithm_cresci_2017_test(data1, label1, part1, data2, label2, part2):
                                      int(user["default_profile_image"]) if (
                                              str(user["default_profile_image"]) != "NULL" and str(
                                          user["default_profile_image"]) != "") else False,
-                                     user["timestamp"], user["name"],
-                                     user["screen_name"], user["description"], user["tweets"], 20)
+                                     user["created_at"], user["name"],
+                                     user["screen_name"], user["description"], user["tweets"], 20, user["crawled_at"])
 
                 logging.info(user["id"])
                 logging.info(s.get_k())
@@ -504,7 +504,7 @@ def dc_algorithm_twibot_2020_test(data, part):
     # =========================== INITIALIZE DCs ====================================
 
     dc_array = []
-    for i in range(50):
+    for i in range(100):
         dc = DendriticCell(str(i))
         dc_array.append(dc)
 
@@ -533,7 +533,7 @@ def dc_algorithm_twibot_2020_test(data, part):
             # cell_random = int(random_in_bounds(0, (len(dc_array) - 1)))
             dc_with_min_distance = dc_distances_min[0][1]
 
-            logging.info("expose cell {0} to antigen {1}".format(int(dc_with_min_distance.id), int(antigen.id)))
+            print("expose cell {0} to antigen {1}".format(int(dc_with_min_distance.id), int(antigen.id)))
             logging.info("expose cell {0} to antigen {1}".format(str(dc_with_min_distance), str(antigen)))
             cell, status = dc_with_min_distance.expose_cell(antigen)
 
@@ -625,8 +625,8 @@ def dc_algorithm_cresci_2017_random_test(data1, label1, part1, data2, label2, pa
                                      int(user["default_profile_image"]) if (
                                              str(user["default_profile_image"]) != "NULL" and str(
                                          user["default_profile_image"]) != "") else False,
-                                     user["timestamp"], user["name"],
-                                     user["screen_name"], user["description"], user["tweets"], 20)
+                                     user["created_at"], user["name"],
+                                     user["screen_name"], user["description"], user["tweets"], 20, user["crawled_at"])
 
                 logging.info(user["id"])
                 logging.info(s.get_k())
@@ -659,8 +659,8 @@ def dc_algorithm_cresci_2017_random_test(data1, label1, part1, data2, label2, pa
                                      int(user["default_profile_image"]) if (
                                              str(user["default_profile_image"]) != "NULL" and str(
                                          user["default_profile_image"]) != "") else False,
-                                     user["timestamp"], user["name"],
-                                     user["screen_name"], user["description"], user["tweets"], 20)
+                                     user["created_at"], user["name"],
+                                     user["screen_name"], user["description"], user["tweets"], 20, user["crawled_at"])
 
                 logging.info(user["id"])
                 logging.info(s.get_k())
@@ -784,7 +784,7 @@ def dc_algorithm_twibot_2020_random_test(data, part):
     # =========================== INITIALIZE DCs ====================================
 
     dc_array = []
-    for i in range(50):
+    for i in range(100):
         dc = DendriticCell(str(i))
         dc_array.append(dc)
 
@@ -869,7 +869,7 @@ def dc_algorithm_cresci_2017_test_avg(data1, label1, part1, data2, label2, part2
                                        int(user["default_profile_image"]) if (
                                                str(user["default_profile_image"]) != "NULL" and str(
                                            user["default_profile_image"]) != "") else False,
-                                       user["timestamp"], user["name"],
+                                       user["created_at"], user["name"],
                                        user["screen_name"], user["description"], user["tweets"])
 
                 logging.info(user["id"])
@@ -903,7 +903,7 @@ def dc_algorithm_cresci_2017_test_avg(data1, label1, part1, data2, label2, part2
                                        int(user["default_profile_image"]) if (
                                                str(user["default_profile_image"]) != "NULL" and str(
                                            user["default_profile_image"]) != "") else False,
-                                       user["timestamp"], user["name"],
+                                       user["created_at"], user["name"],
                                        user["screen_name"], user["description"], user["tweets"])
 
                 logging.info(user["id"])
@@ -1005,7 +1005,7 @@ def dc_algorithm_cresci_2017_test_k(data1, label1, part1, data2, label2, part2, 
                                      int(user["default_profile_image"]) if (
                                              str(user["default_profile_image"]) != "NULL" and str(
                                          user["default_profile_image"]) != "") else False,
-                                     user["timestamp"], user["name"],
+                                     user["created_at"], user["name"],
                                      user["screen_name"], user["description"], user["tweets"], k)
 
                 logging.info(user["id"])
@@ -1039,7 +1039,7 @@ def dc_algorithm_cresci_2017_test_k(data1, label1, part1, data2, label2, part2, 
                                      int(user["default_profile_image"]) if (
                                              str(user["default_profile_image"]) != "NULL" and str(
                                          user["default_profile_image"]) != "") else False,
-                                     user["timestamp"], user["name"],
+                                     user["created_at"], user["name"],
                                      user["screen_name"], user["description"], user["tweets"], k)
 
                 logging.info(user["id"])
@@ -1141,7 +1141,7 @@ def dc_algorithm_cresci_2017_test_k_mix(data1, label1, part1, data2, label2, par
                                      int(user["default_profile_image"]) if (
                                              str(user["default_profile_image"]) != "NULL" and str(
                                          user["default_profile_image"]) != "") else False,
-                                     user["timestamp"], user["name"],
+                                     user["created_at"], user["name"],
                                      user["screen_name"], user["description"], user["tweets"], k)
 
                 logging.info(user["id"])
@@ -1175,7 +1175,7 @@ def dc_algorithm_cresci_2017_test_k_mix(data1, label1, part1, data2, label2, par
                                      int(user["default_profile_image"]) if (
                                              str(user["default_profile_image"]) != "NULL" and str(
                                          user["default_profile_image"]) != "") else False,
-                                     user["timestamp"], user["name"],
+                                     user["created_at"], user["name"],
                                      user["screen_name"], user["description"], user["tweets"], k)
 
                 logging.info(user["id"])

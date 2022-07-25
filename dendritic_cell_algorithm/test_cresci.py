@@ -19,6 +19,7 @@ from dendritic_cell_algorithm import dc_algorithm_twibot_2020
 import numpy as np
 from geneticalgorithm import geneticalgorithm as ga
 from dendritic_cell_algorithm import dc_algorithm_cresci_2017_test as dca17
+from dendritic_cell_algorithm import dc_algorithm_cresci_2017_random_test as dca17_random
 from dendritic_cell_algorithm import dc_algorithm_cresci_2017 as dca
 from dendritic_cell_algorithm import dc_algorithm_twibot_2020 as dca20
 

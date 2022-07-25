@@ -338,7 +338,7 @@ class Signals:
         else:
             followers_friends_ratio = None
 
-        user_age = (datetime.now() - datetime.strptime(created_at.replace(" +0000", ""), '%c')).days
+        user_age = (datetime(2020, 10, 1) - datetime.strptime(created_at.replace(" +0000", ""), '%c')).days
 
         if user_age > 0:
             friends_growth_rate = friends_count / user_age
@@ -545,7 +545,7 @@ class Signals:
         else:
             followers_friends_ratio = None
 
-        user_age = (datetime.now() - datetime.strptime(created_at.replace(" +0000", ""), '%c')).days
+        user_age = (datetime(2020, 10, 1) - datetime.strptime(created_at.replace(" +0000", ""), '%c')).days
 
         if user_age > 0:
             friends_growth_rate = friends_count / user_age

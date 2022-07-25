@@ -1,4 +1,5 @@
 import os
+import random
 import sys
 import json
 import csv
@@ -22,11 +23,11 @@ import numpy as np
 from geneticalgorithm import geneticalgorithm as ga
 from dendritic_cell_algorithm import dc_algorithm_cresci_2017 as dca17
 from dendritic_cell_algorithm import dc_algorithm_twibot_2020_test as dca20
-
+from dendritic_cell_algorithm import dc_algorithm_twibot_2020_random_test as dca20_random
 load_dotenv()
 
 
-logging.getLogger().setLevel(logging.INFO)
+#logging.getLogger().setLevel(logging.INFO)
 
 """"""
 
@@ -37,6 +38,9 @@ data = json.loads(f.read())
 """"""
 
 print(str(os.environ))
+
+
+random.seed(11)
 
 """
 
@@ -61,13 +65,31 @@ for user in data2:
 for user in data3:
     data1.append(user)
 """
-result = dca20(data, 5)
+print("nonrandom")
+
+result = dca20(data, 1)
 res = json.loads(result)
-with open('../datasets/twibot-2020/result-trained-my_for_auc_test.json', 'w') as outfile:
+with open('../datasets/test7.json', 'w') as outfile:
     outfile.write(result)
 classified_count = res.pop("classified_count")
 classified_correctly_count = res.pop("classified_correctly_count")
 accuracy = classified_correctly_count / classified_count
+
+
+
+
+anomaly_classified_correctly_count = res.pop("anomaly_classified_correctly_count")
+anomaly_classified_UNcorrectly_count = res.pop("anomaly_classified_UNcorrectly_count")
+normal_classified_correctly_count = res.pop("normal_classified_correctly_count")
+normal_classified_UNcorrectly_count = res.pop("normal_classified_UNcorrectly_count")
+
+print("anomaly_classified_correctly_count: {0} \n".format(anomaly_classified_correctly_count))
+print("anomaly_classified_UNcorrectly_count: {0} \n".format(anomaly_classified_UNcorrectly_count))
+print("normal_classified_correctly_count: {0} \n".format(normal_classified_correctly_count))
+print("normal_classified_UNcorrectly_count: {0} \n".format(normal_classified_UNcorrectly_count))
+
+
+
 print("\nAccuracy = {0}/{1} = {2} \n".format(classified_correctly_count, classified_count, accuracy))
 print(1 - accuracy)
 time = res.pop("time")
