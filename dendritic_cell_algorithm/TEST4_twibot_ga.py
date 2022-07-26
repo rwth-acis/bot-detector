@@ -121,19 +121,21 @@ def f(X):
     # os.environ['DS_THRESHOLD_AVERAGE_FAVORITE_COUNT'] = "0."+str(int(X[73]))+str(int(X[74]))
     # os.environ['DS_INTERVAL_AVERAGE_FAVORITE_COUNT'] = "0."+str(int(X[75]))+str(int(X[76]))
 
-    os.environ['MCAV'] = "0." + str(int(X[47]))
+    os.environ['MCAV'] = "0." + str(int(X[51]))
 
-    print(str(os.environ)[2912:])
-    result = dca20(data, 14)
+
+    result = dca20(data,4)
     res = json.loads(result)
 
     classified_count = res.pop("classified_count")
     classified_correctly_count = res.pop("classified_correctly_count")
     accuracy = classified_correctly_count / classified_count
-    print("\nAccuracy = {0}/{1} = {2} \n".format(classified_correctly_count, classified_count, accuracy))
-    print(1 - accuracy)
-    time = res.pop("time")
-    print("Time: {0} \n".format(time))
+    if accuracy >= 0.7:
+        print(str(os.environ)[2912:])
+        print("\nAccuracy = {0}/{1} = {2} \n".format(classified_correctly_count, classified_count, accuracy))
+        print(1 - accuracy)
+        time = res.pop("time")
+        print("Time: {0} \n".format(time))
     return 1 - accuracy
 
 
@@ -147,9 +149,9 @@ vartype = np.concatenate((np.full((41, 1), 'int'), np.full((18, 1), 'real')),
 
 load_dotenv()
 
-varbound = np.concatenate((np.full((21, 2), [1, 10]), np.full((5, 2), [5, 40]), np.full((1, 2), [0, 60]),
-                           np.full((1, 2), [-10, -1]), np.full((2, 2), [0, 0]), np.full((1, 2), [5, 100]),
-                           np.full((21, 2), [0, 9])),
+varbound = np.concatenate((np.full((21, 2), [0, 15]), np.full((5, 2), [5, 50]), np.full((1, 2), [0, 100]),
+                           np.full((1, 2), [-15, -1]), np.full((2, 2), [0, 0]), np.full((1, 2), [5, 150]),
+                           np.full((20, 2), [0, 9]), np.full((1, 2), [3, 7])),
                           axis=0)
 
 vartype = np.concatenate((np.full((31, 1), 'int'), np.full((21, 1), 'int')),
@@ -157,11 +159,11 @@ vartype = np.concatenate((np.full((31, 1), 'int'), np.full((21, 1), 'int')),
 
 algorithm_param = {'max_num_iteration': 250,
                    'population_size': 20,
-                   'mutation_probability': 0.4,
-                   'elit_ratio': 0.05,
-                   'crossover_probability': 0.5,
+                   'mutation_probability': 0.3,
+                   'elit_ratio': 0.1,
+                   'crossover_probability': 0.4,
                    'parents_portion': 0.3,
-                   'crossover_type': 'uniform',
+                   'crossover_type': 'two_point',
                    'max_iteration_without_improv': 25}
 
 model = ga(function=f, dimension=52, variable_type_mixed=vartype, variable_boundaries=varbound, function_timeout=36000,

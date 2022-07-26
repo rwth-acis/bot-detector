@@ -31,7 +31,7 @@ load_dotenv()
 
 """"""
 
-f = open("../datasets/twibot-2020/train.json", "r", encoding="cp850")
+f = open("../datasets/twibot-2020/test.json", "r", encoding="cp850")
 
 # Reading from file
 data = json.loads(f.read())
@@ -40,7 +40,7 @@ data = json.loads(f.read())
 print(str(os.environ))
 
 
-random.seed(11)
+
 
 """
 
@@ -69,7 +69,7 @@ print("nonrandom")
 
 result = dca20(data, 1)
 res = json.loads(result)
-with open('../datasets/test7.json', 'w') as outfile:
+with open('../datasets/test8.json', 'w') as outfile:
     outfile.write(result)
 classified_count = res.pop("classified_count")
 classified_correctly_count = res.pop("classified_correctly_count")
