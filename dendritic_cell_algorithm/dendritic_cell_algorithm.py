@@ -280,8 +280,8 @@ def dc_algorithm_twibot_2020(path):
     return jsonStr
 
 
-def dc_algorithm_cresci_2017_test(data1, label1, part1, data2, label2, part2):
-    random.seed(10)
+def dc_algorithm_cresci_2017_test(data1, label1, part1, data2, label2, part2, seed=10):
+    random.seed(seed)
     start = time.time()
     load_dotenv()
     # =========================== INITIALIZE ANTIGENS ====================================
