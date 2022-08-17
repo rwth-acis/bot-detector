@@ -558,8 +558,6 @@ def dashboard():
         for req in r:
             req["_id"] = str(req["_id"].generation_time).replace("+00:00", "")
 
-    print(r)
-
     return render_template('history.html', requests=r,
                            app_url=os.environ['APP_URL'],
                            app_url_path=os.environ['APP_URL_PATH'][:-1],
@@ -582,6 +580,8 @@ def dashboard_delete_request(id):
                     return error403("403")
             else:
                 return error403("403")
+        else:
+            return error403("403")
 
     else:
         return page_not_found("404")
