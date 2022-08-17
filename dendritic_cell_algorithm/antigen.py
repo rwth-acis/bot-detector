@@ -45,13 +45,28 @@ class Antigen:
             if classified_correctly:
                 self.result.setdefault("classified_correctly_count", 0)
                 self.result["classified_correctly_count"] += 1
+                if self.class_label == "Anomaly":
+                    self.result.setdefault("anomaly_classified_correctly_count", 0)
+                    self.result["anomaly_classified_correctly_count"] += 1
+                else:
+                    self.result.setdefault("normal_classified_correctly_count", 0)
+                    self.result["normal_classified_correctly_count"] += 1
+            else:
+                if self.class_label == "Anomaly":
+                    self.result.setdefault("anomaly_classified_UNcorrectly_count", 0)
+                    self.result["anomaly_classified_UNcorrectly_count"] += 1
+                else:
+                    self.result.setdefault("normal_classified_UNcorrectly_count", 0)
+                    self.result["normal_classified_UNcorrectly_count"] += 1
+
             self.result[self.id] = {
                 "id": self.id,
                 "mature_rate": '{0} / {1} = {2}'.format(number_of_mdc,
                                                         self.number_of_migrated_cells,
                                                         mcav),
                 "classification_result": ans,
-                "сlassified_correctly": classified_correctly,
+                "classified_correctly": classified_correctly,
+                "label_from_dataset": self.class_label,
                 "parameters": self.value["parameters"],
                 "screen_name": self.value["screen_name"]}
 
@@ -70,16 +85,17 @@ class Antigen:
             self.classify_antigen()
 
     def __str__(self):
+        """
         return "{  Antigen id: % s, class_label: % s, " \
                "number_of_migrated_cells: % s, collected_by: % s  }" % (
                    self.id,
                    self.class_label,
                    self.number_of_migrated_cells, self.collected_by)
+"""
 
-        """
         return "{Antigen id: % s, value: % s, k: % s, cms: % s, class_label: % s, number_of_copies: % s, " \
                "number_of_migrated_cells: % s, collected_by: % s}              " % (
                self.id, self.value, self.k, self.cms,
                self.class_label, self.number_of_copies,
                self.number_of_migrated_cells, self.collected_by)
-        """
+

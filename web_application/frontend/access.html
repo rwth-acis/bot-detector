@@ -30,28 +30,75 @@
         <thead>
         <tr>
 
-            <th scope="col">Parameter</th>
-            <th scope="col">Value</th>
+            <th scope="col" style="font-weight: normal;">Request ID</th>
+            <th scope="col" style="font-weight: normal;">{{collection_id}}</th>
+
+        </tr>
+
+
+        <tr class="bg-dark">
+
+            <th scope="col" style="color:white;">Role</th>
+            <th scope="col" style="color:white;">IDs of users</th>
 
         </tr>
         </thead>
         <tbody>
         <tr>
 
-            <td>Name</td>
-            <td>{{name}}</td>
+            <td>Owner</td>
+            <td>
+                {{user_id}}
+            </td>
 
         </tr>
         <tr>
 
-            <td>E-mail</td>
-            <td>{{email}}</td>
+            <td>Users with read permission</td>
+            <td>
+                {% if read_permission is defined %}
+
+                {% if read_permission %}
+
+                {% for r in read_permission %}
+                {{r}}
+                <br>
+                {% endfor %}
+
+                {% else %}
+                <p style="text-align:center">-</p>
+                {% endif %}
+
+                {% else %}
+                <p style="text-align:center">-</p>
+                {% endif %}
+
+            </td>
 
         </tr>
         <tr>
 
-            <td>User ID</td>
-            <td>{{user_id}}</td>
+            <td>Users with write permission</td>
+            <td>
+                {% if write_permission is defined %}
+
+                {% if write_permission %}
+
+                {% for r in write_permission %}
+                {{r}}
+                <br>
+                {% endfor %}
+
+                {% else %}
+                <p style="text-align:center">-</p>
+                {% endif %}
+
+                {% else %}
+                <p style="text-align:center">-</p>
+                {% endif %}
+
+            </td>
+
 
         </tr>
         </tbody>
@@ -59,3 +106,8 @@
 
 </div>
 {% endblock %}
+
+
+
+
+

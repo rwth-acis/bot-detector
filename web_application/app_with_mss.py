@@ -2,6 +2,7 @@ import copy
 import json
 import os
 import datetime
+import urllib
 from json import dumps
 import logging
 import uuid
@@ -11,7 +12,7 @@ import tweepy
 from bson import json_util
 
 from flask_oidc import OpenIDConnect
-from flask import Flask, render_template, url_for, request, send_from_directory, jsonify, g
+from flask import Flask, render_template, url_for, request, send_from_directory, jsonify, g, abort
 from flask_pymongo import PyMongo
 import folium
 from geopy.exc import GeocoderTimedOut
@@ -78,7 +79,10 @@ except AttributeError as error:
 @app.route(os.environ['APP_URL_PATH'] + 'login', methods=['GET'])
 @oidc.require_login
 def secureEndpoint():
-    return "Hello from our secure endpoint, where you will need to authenticate beforehand."
+    redirect_to = request.args.get('redirect-to')
+    return redirect((os.environ['APP_URL']) + "/" + redirect_to)
+    return "OK"
+
 
 @app.route(os.environ['APP_URL_PATH'] + 'profile', methods=['GET'])
 @oidc.require_login
@@ -91,11 +95,18 @@ def profile():
 
     return render_template("profile.html", app_url=os.environ['APP_URL'],
                            app_url_path=os.environ['APP_URL_PATH'][:-1],
-                           example_db=os.environ['EXAMPLE_DB'], name=username, email=email, user_id=user_id, user_name=username)
+                           example_db=os.environ['EXAMPLE_DB'], name=username, email=email, user_id=user_id,
+                           user_name=username)
 
 
-
-
+@app.route(os.environ['APP_URL_PATH'] + 'logout', methods=['GET'])
+# @oidc.require_login
+def logout():
+    # return redirect((os.environ['APP_URL']) + "profile")
+    oidc.logout()
+    return redirect(
+        "https://auth.las2peer.org/auth/realms/main" + "/protocol/openid-connect/logout?redirect_uri=" + urllib.parse.quote(
+            os.environ['APP_URL'] + "/", safe=''))
 
 
 @app.route(os.environ['APP_URL_PATH'] + "static/images/<image_name>")
@@ -406,6 +417,27 @@ def resultid(id):
     col2 = db["Requests"]
     parameters = col2.find_one({"collection": str(id)})
     print(parameters)
+    if parameters is not None:
+        if "owner" in parameters:
+            if parameters["owner"] is not None:
+                if not oidc.user_loggedin:
+                    return redirect(
+                        (os.environ['APP_URL']) + "/login?redirect-to=" + urllib.parse.quote("/result/" + str(id),
+                                                                                             safe=''))
+
+                info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+                username = info.get('preferred_username')
+                print("loggedin")
+                print(info.get('sub'))
+                print(parameters["owner"])
+                if not (info.get('sub') in parameters["owner"]["sub"]):
+                    return error403("403")
+                    # return abort(403)
+
+    else:
+        return page_not_found("404")
+        # return abort(404)
+
     ready_count = 0
     try:
         folium_map = folium.Map(location=[0, 0], zoom_start=2)
@@ -507,6 +539,86 @@ def history():
                                example_db=os.environ['EXAMPLE_DB'])
 
 
+@app.route(os.environ['APP_URL_PATH'] + 'dashboard')
+@oidc.require_login
+def dashboard():
+    info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+    username = info.get('preferred_username')
+    col1 = db["Permissions"]
+    user = col1.find_one({"user_id": info.get('sub')})
+
+    r = []
+    col2 = db["Requests"]
+    if user is not None:
+        for collection in user["owner"]:
+            req = col2.find_one({"collection": collection})
+            if req is not None:
+                r.append(req)
+
+        for req in r:
+            req["_id"] = str(req["_id"].generation_time).replace("+00:00", "")
+
+    print(r)
+
+    return render_template('history.html', requests=r,
+                           app_url=os.environ['APP_URL'],
+                           app_url_path=os.environ['APP_URL_PATH'][:-1],
+                           example_db=os.environ['EXAMPLE_DB'], user_name=username, user_history=True)
+
+
+@app.route(os.environ['APP_URL_PATH'] + 'dashboard/delete/<id>')
+@oidc.require_login
+def dashboard_delete_request(id):
+    info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+    username = info.get('preferred_username')
+
+    col2 = db["Requests"]
+    parameters = col2.find_one({"collection": str(id)})
+
+    if parameters is not None:
+        if "owner" in parameters:
+            if parameters["owner"] is not None:
+                if not (info.get('sub') in parameters["owner"]["sub"]):
+                    return error403("403")
+            else:
+                return error403("403")
+
+    else:
+        return page_not_found("404")
+
+    col2.delete_one({"collection": str(id)})
+    db[str(id)].drop()
+
+    col1 = db["Permissions"]
+
+    col1.update_one({"user_id": info.get('sub')}, {'$pullAll': {'owner': [id]}})
+
+    return redirect((os.environ['APP_URL']) + "/dashboard")
+
+
+@app.route(os.environ['APP_URL_PATH'] + 'access/<id>')
+@oidc.require_login
+def access(id):
+    info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+    username = info.get('preferred_username')
+
+    # col1 = db["Permissions"]
+
+    # user = col1.find_one({"user_id": info.get('sub')})
+
+    col2 = db["Requests"]
+    req = col2.find_one({"collection": str(id)})
+
+    if not (info.get('sub') in req["owner"]["sub"]):
+        return error403("403")
+
+    req["_id"] = str(req["_id"].generation_time).replace("+00:00", "")
+
+    return render_template('access.html', collection_id=id,
+                           app_url=os.environ['APP_URL'],
+                           app_url_path=os.environ['APP_URL_PATH'][:-1],
+                           example_db=os.environ['EXAMPLE_DB'], user_name=username, user_id=req["owner"]["sub"],
+                           read_permission=req["read_permission"], write_permission=req["write_permission"])
 
 
 @app.route(os.environ['APP_URL_PATH'] + "table")
@@ -520,9 +632,8 @@ def table():
                                example_db=os.environ['EXAMPLE_DB'], user_name=username)
     else:
         return render_template("table.html", app_url=os.environ['APP_URL'],
-                                      app_url_path=os.environ['APP_URL_PATH'][:-1],
-                                      example_db=os.environ['EXAMPLE_DB'])
-
+                               app_url_path=os.environ['APP_URL_PATH'][:-1],
+                               example_db=os.environ['EXAMPLE_DB'])
 
 
 @app.route(os.environ['APP_URL_PATH'] + "index")
@@ -536,9 +647,8 @@ def about():
                                example_db=os.environ['EXAMPLE_DB'], user_name=username)
     else:
         return render_template("index.html", app_url=os.environ['APP_URL'],
-                                      app_url_path=os.environ['APP_URL_PATH'][:-1],
-                                      example_db=os.environ['EXAMPLE_DB'])
-
+                               app_url_path=os.environ['APP_URL_PATH'][:-1],
+                               example_db=os.environ['EXAMPLE_DB'])
 
 
 @app.route(os.environ['APP_URL_PATH'] + "part-result", methods=['post', 'get'])
@@ -613,18 +723,42 @@ def part_result():
             areaParameters3 = "all"
             print(areaParameters3)
 
-        parameters = {
-            "collection": str(id),
-            "keywords": keywords,
-            "limit": limit,
-            "areaParameters1": areaParameters1,
-            "areaParameters2": areaParameters2,
-            "areaParameters3": areaParameters3,
-            "SearchParameters1": SearchParameters1,
-            "start_date": start_date,
-            "end_date": end_date,
-            "requestOptions": requestOptions
-        }
+        if oidc.user_loggedin:
+            info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+
+            parameters = {
+                "collection": str(id),
+                "keywords": keywords,
+                "limit": limit,
+                "areaParameters1": areaParameters1,
+                "areaParameters2": areaParameters2,
+                "areaParameters3": areaParameters3,
+                "SearchParameters1": SearchParameters1,
+                "start_date": start_date,
+                "end_date": end_date,
+                "requestOptions": requestOptions,
+                "owner": info,
+                "read_permission": [],
+                "write_permission": [],
+            }
+
+            col3 = db["Permissions"]
+            col3.update_one({'user_id': info.get('sub')}, {"$push": {"owner": str(id)}}, upsert=True);
+
+        else:
+            parameters = {
+                "collection": str(id),
+                "keywords": keywords,
+                "limit": limit,
+                "areaParameters1": areaParameters1,
+                "areaParameters2": areaParameters2,
+                "areaParameters3": areaParameters3,
+                "SearchParameters1": SearchParameters1,
+                "start_date": start_date,
+                "end_date": end_date,
+                "requestOptions": requestOptions,
+                "owner": None
+            }
 
         col1 = db[str(id)]
         col2 = db["Requests"]
@@ -721,7 +855,6 @@ def user_check(screen_name):
                                    app_url_path=os.environ['APP_URL_PATH'][:-1],
                                    example_db=os.environ['EXAMPLE_DB'])
 
-
     consumer_key = os.environ['CONSUMER_KEY']
     consumer_secret = os.environ['CONSUMER_SECRET']
     access_token = os.environ['ACCESS_TOKEN']
@@ -777,13 +910,15 @@ def user_check(screen_name):
 
             username = info.get('preferred_username')
 
-            return render_template('user-check.html', blank=False, exception=False, tweetArr=json.dumps(userObj["tweets"]),
+            return render_template('user-check.html', blank=False, exception=False,
+                                   tweetArr=json.dumps(userObj["tweets"]),
                                    user=userObj,
                                    app_url=os.environ['APP_URL'],
                                    app_url_path=os.environ['APP_URL_PATH'][:-1],
                                    example_db=os.environ['EXAMPLE_DB'], user_name=username)
         else:
-            return render_template('user-check.html', blank=False, exception=False, tweetArr=json.dumps(userObj["tweets"]),
+            return render_template('user-check.html', blank=False, exception=False,
+                                   tweetArr=json.dumps(userObj["tweets"]),
                                    user=userObj,
                                    app_url=os.environ['APP_URL'],
                                    app_url_path=os.environ['APP_URL_PATH'][:-1],
@@ -804,7 +939,6 @@ def user_check(screen_name):
                                    app_url=os.environ['APP_URL'],
                                    app_url_path=os.environ['APP_URL_PATH'][:-1],
                                    example_db=os.environ['EXAMPLE_DB'])
-
 
 
 @app.route(os.environ['APP_URL_PATH'] + '<collection>/user/<id>')
@@ -856,7 +990,6 @@ def user(collection, id):
             return render_template('404.html', app_url=os.environ['APP_URL'],
                                    app_url_path=os.environ['APP_URL_PATH'][:-1],
                                    example_db=os.environ['EXAMPLE_DB'])
-
 
 
 @app.route(os.environ['APP_URL_PATH'] + 'recalculate/<collection>/<id>')
@@ -922,18 +1055,32 @@ def recalc(collection, id):
 
 @app.errorhandler(404)
 def page_not_found(e):
-
     if oidc.user_loggedin:
         info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
         username = info.get('preferred_username')
 
         return render_template('404.html', app_url=os.environ['APP_URL'],
-                                      app_url_path=os.environ['APP_URL_PATH'][:-1],
-                                      example_db=os.environ['EXAMPLE_DB'], user_name=username), 404
+                               app_url_path=os.environ['APP_URL_PATH'][:-1],
+                               example_db=os.environ['EXAMPLE_DB'], user_name=username), 404
     else:
         return render_template('404.html', app_url=os.environ['APP_URL'],
                                app_url_path=os.environ['APP_URL_PATH'][:-1],
                                example_db=os.environ['EXAMPLE_DB']), 404
+
+
+@app.errorhandler(403)
+def error403(e):
+    if oidc.user_loggedin:
+        info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+        username = info.get('preferred_username')
+
+        return render_template('403.html', app_url=os.environ['APP_URL'],
+                               app_url_path=os.environ['APP_URL_PATH'][:-1],
+                               example_db=os.environ['EXAMPLE_DB'], user_name=username), 403
+    else:
+        return render_template('403.html', app_url=os.environ['APP_URL'],
+                               app_url_path=os.environ['APP_URL_PATH'][:-1],
+                               example_db=os.environ['EXAMPLE_DB']), 403
 
 
 """
