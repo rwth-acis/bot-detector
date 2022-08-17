@@ -421,7 +421,9 @@ def resultid(id):
         if "owner" in parameters:
             if parameters["owner"] is not None:
                 if not oidc.user_loggedin:
-                    return redirect((os.environ['APP_URL']) + "/login?redirect-to="+urllib.parse.quote("/result/" + str(id), safe=''))
+                    return redirect(
+                        (os.environ['APP_URL']) + "/login?redirect-to=" + urllib.parse.quote("/result/" + str(id),
+                                                                                             safe=''))
 
                 info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
                 username = info.get('preferred_username')
@@ -430,11 +432,11 @@ def resultid(id):
                 print(parameters["owner"])
                 if not (info.get('sub') in parameters["owner"]["sub"]):
                     return error403("403")
-                    #return abort(403)
+                    # return abort(403)
 
     else:
         return page_not_found("404")
-        #return abort(404)
+        # return abort(404)
 
     ready_count = 0
     try:
@@ -550,14 +552,48 @@ def dashboard():
     if user is not None:
         for collection in user["owner"]:
             req = col2.find_one({"collection": collection})
-            r.append(req)
-    for req in r:
-        req["_id"] = str(req["_id"].generation_time).replace("+00:00", "")
+            if req is not None:
+                r.append(req)
+
+        for req in r:
+            req["_id"] = str(req["_id"].generation_time).replace("+00:00", "")
+
+    print(r)
 
     return render_template('history.html', requests=r,
                            app_url=os.environ['APP_URL'],
                            app_url_path=os.environ['APP_URL_PATH'][:-1],
                            example_db=os.environ['EXAMPLE_DB'], user_name=username, user_history=True)
+
+
+@app.route(os.environ['APP_URL_PATH'] + 'dashboard/delete/<id>')
+@oidc.require_login
+def dashboard_delete_request(id):
+    info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+    username = info.get('preferred_username')
+
+    col2 = db["Requests"]
+    parameters = col2.find_one({"collection": str(id)})
+
+    if parameters is not None:
+        if "owner" in parameters:
+            if parameters["owner"] is not None:
+                if not (info.get('sub') in parameters["owner"]["sub"]):
+                    return error403("403")
+            else:
+                return error403("403")
+
+    else:
+        return page_not_found("404")
+
+    col2.delete_one({"collection": str(id)})
+    db[str(id)].drop()
+
+    col1 = db["Permissions"]
+
+    col1.update_one({"user_id": info.get('sub')}, {'$pullAll': {'owner': [id]}})
+
+    return redirect((os.environ['APP_URL']) + "/dashboard")
 
 
 @app.route(os.environ['APP_URL_PATH'] + 'access/<id>')
@@ -566,9 +602,9 @@ def access(id):
     info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
     username = info.get('preferred_username')
 
-    #col1 = db["Permissions"]
+    # col1 = db["Permissions"]
 
-    #user = col1.find_one({"user_id": info.get('sub')})
+    # user = col1.find_one({"user_id": info.get('sub')})
 
     col2 = db["Requests"]
     req = col2.find_one({"collection": str(id)})
@@ -576,9 +612,7 @@ def access(id):
     if not (info.get('sub') in req["owner"]["sub"]):
         return error403("403")
 
-
     req["_id"] = str(req["_id"].generation_time).replace("+00:00", "")
-    print(req["read_permission"])
 
     return render_template('access.html', collection_id=id,
                            app_url=os.environ['APP_URL'],
