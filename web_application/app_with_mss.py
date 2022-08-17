@@ -517,6 +517,30 @@ def resultid(id):
         logging.info(e)
 
 
+@app.route(os.environ['APP_URL_PATH'] + 'result/<id1>/delete/<id2>')
+@oidc.require_login
+def delete_user_from_result(id1, id2):
+    info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+    col2 = db["Requests"]
+    parameters = col2.find_one({"collection": str(id1)})
+
+    if parameters is not None:
+        if "owner" in parameters:
+            if parameters["owner"] is not None:
+                if not (info.get('sub') in parameters["owner"]["sub"]):
+                    return error403("403")
+            else:
+                return error403("403")
+        else:
+            return error403("403")
+
+    else:
+        return page_not_found("404")
+
+    db[str(id1)].delete_one({"_id":ObjectId(str(id2))})
+
+    return redirect((os.environ['APP_URL']) + "/result/" + id1)
+
 @app.route(os.environ['APP_URL_PATH'] + 'requests-history')
 def history():
     col2 = db["Requests"]
@@ -568,7 +592,6 @@ def dashboard():
 @oidc.require_login
 def dashboard_delete_request(id):
     info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
-    username = info.get('preferred_username')
 
     col2 = db["Requests"]
     parameters = col2.find_one({"collection": str(id)})
