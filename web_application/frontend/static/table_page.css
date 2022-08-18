@@ -1,5 +1,5 @@
 
-#div-main-table{
+#div-main-table, #div-main-table2, #div-main-table3{
     width: 98%;
     min-width: 700px;
     max-width: 1000px;
@@ -83,15 +83,15 @@ div.progress-bar.bg-primary.progress-bar-striped{
 
 
 
-#div-main-table::-webkit-scrollbar {
+#div-main-table::-webkit-scrollbar, #div-main-table2::-webkit-scrollbar, #div-main-table3::-webkit-scrollbar {
   -webkit-appearance: none;
   width: 10px;
 }
 
-#scroll1 div {
+#scroll1 div,  #scroll2 div, #scroll3 div{
     height: 1px;
 }
-#scroll1{
+#scroll1, #scroll2, #scroll3{
     width: 98%;
     min-width: 700px;
     max-width: 1000px;
@@ -100,17 +100,17 @@ div.progress-bar.bg-primary.progress-bar-striped{
     padding-left: 0%;
     padding-right: 0%;
 }
-#scroll1::-webkit-scrollbar {
+#scroll1::-webkit-scrollbar, #scroll2::-webkit-scrollbar, #scroll3::-webkit-scrollbar  {
   -webkit-appearance: none;
   width: 10px;
 }
-#scroll1::-webkit-scrollbar-thumb {
+#scroll1::-webkit-scrollbar-thumb, #scroll2::-webkit-scrollbar-thumb, #scroll3::-webkit-scrollbar-thumb {
   border-radius: 5px;
   background-color: rgba(0,0,0,.5);
   -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
 }
 
-#div-main-table::-webkit-scrollbar-thumb {
+#div-main-table::-webkit-scrollbar-thumb, #div-main-table2::-webkit-scrollbar-thumb, #div-main-table3::-webkit-scrollbar-thumb  {
   border-radius: 5px;
   background-color: rgba(0,0,0,.5);
   -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
@@ -162,7 +162,7 @@ label{
     overflow: hidden;
 }
 
-#div-main-table .btn, .btn-info{
+#div-main-table .btn, #div-main-table2 .btn, #div-main-table3 .btn, .btn-info{
  margin: 0px;
  background: #006699;
  color: #fff;
@@ -170,7 +170,7 @@ label{
  border: 1px solid #257C9E;
 }
 
-#div-main-table .btn:hover, .btn-info:hover{
+#div-main-table .btn:hover, #div-main-table2 .btn:hover, #div-main-table3 .btn:hover, .btn-info:hover{
  background: #fff;
  color: #006699;
 }
@@ -242,7 +242,7 @@ label{
  margin: auto;
 }
 
-#main-table th{
+#main-table th, #main-table2 th, #main-table3 th{
     text-align: center;
 }
 
@@ -308,6 +308,10 @@ table.dataTable tbody tr.even .created-at{
     overflow: hidden;
 }
 
+.to-hide{
+display: none;
+}
+
 @media only screen and (max-width: 700px) {
 
     body{
@@ -339,7 +343,7 @@ table.dataTable tbody tr.even .created-at{
         width: 98%;
     }
 
-    #div-main-table{
+    #div-main-table, #div-main-table2, #div-main-table3{
         width: 98%;
         padding-left: 1%;
         padding-right: 1%;
@@ -347,13 +351,14 @@ table.dataTable tbody tr.even .created-at{
         overflow-x: scroll;
      }
 
-     #scroll1{
+     #scroll1, #scroll2, #scroll3{
          width: 98%;
          padding-left: 1%;
          padding-right: 1%;
          min-width: 200px;
          overflow-x: scroll;
      }
+
      .title-section div p{
          margin-left: 25%;
      }
