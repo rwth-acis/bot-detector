@@ -428,12 +428,19 @@ def resultid(id):
 
                 info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
                 username = info.get('preferred_username')
-                print("loggedin")
-                print(info.get('sub'))
-                print(parameters["owner"])
-                if not (info.get('sub') in parameters["owner"]["sub"]):
+
+
+                if isinstance(parameters["owner"], dict):
+                    col2.update_one({"collection": str(id)}, {'$set': {'owner': [parameters["owner"]["sub"]]}})
+                    parameters = col2.find_one({"collection": str(id)})
+
+                if not ((info.get('sub') in parameters["owner"]) or (info.get('sub') in parameters["read_permission"]) or (info.get('sub') in parameters["write_permission"])):
                     return error403("403")
-                    # return abort(403)
+
+                if not ((info.get('sub') in parameters["owner"]) or (info.get('sub') in parameters["write_permission"])) and  (info.get('sub') in parameters["read_permission"]):
+                    isPublic = True
+
+
         else:
             isPublic = True
 
@@ -530,8 +537,16 @@ def delete_user_from_result(id1, id2):
     if parameters is not None:
         if "owner" in parameters:
             if parameters["owner"] is not None:
-                if not (info.get('sub') in parameters["owner"]["sub"]):
-                    return error403("403")
+                if not (info.get('sub') in parameters["owner"]):
+                    if "write_permission" in parameters:
+                        if parameters["write_permission"] is not None:
+                            if not (info.get('sub') in parameters["write_permission"]):
+                                return error403("403")
+                        else:
+                            return error403("403")
+                    else:
+                        return error403("403")
+
             else:
                 return error403("403")
         else:
@@ -540,9 +555,10 @@ def delete_user_from_result(id1, id2):
     else:
         return page_not_found("404")
 
-    db[str(id1)].delete_one({"_id":ObjectId(str(id2))})
+    db[str(id1)].delete_one({"_id": ObjectId(str(id2))})
 
     return redirect((os.environ['APP_URL']) + "/result/" + id1)
+
 
 @app.route(os.environ['APP_URL_PATH'] + 'requests-history')
 def history():
@@ -575,25 +591,46 @@ def dashboard():
     user = col1.find_one({"user_id": info.get('sub')})
 
     r = []
+    r1 = []
+    r2 = []
     col2 = db["Requests"]
     if user is not None:
-        for collection in user["owner"]:
-            req = col2.find_one({"collection": collection})
-            if req is not None:
-                r.append(req)
+        if "owner" in user:
+            for collection in user["owner"]:
+                req = col2.find_one({"collection": collection})
+                if req is not None:
+                    r.append(req)
 
         for req in r:
             req["_id"] = str(req["_id"].generation_time).replace("+00:00", "")
 
-    return render_template('history.html', requests=r,
+        if "read_permission" in user:
+            for collection in user["read_permission"]:
+                req = col2.find_one({"collection": collection})
+                if req is not None:
+                    r1.append(req)
+
+        for req in r1:
+            req["_id"] = str(req["_id"].generation_time).replace("+00:00", "")
+
+        if "write_permission" in user:
+            for collection in user["write_permission"]:
+                req = col2.find_one({"collection": collection})
+                if req is not None:
+                    r2.append(req)
+
+        for req in r2:
+            req["_id"] = str(req["_id"].generation_time).replace("+00:00", "")
+
+    return render_template('history.html', requests_owner=r, requests_read=r1, requests_write=r2,
                            app_url=os.environ['APP_URL'],
                            app_url_path=os.environ['APP_URL_PATH'][:-1],
                            example_db=os.environ['EXAMPLE_DB'], user_name=username, user_history=True)
 
 
-@app.route(os.environ['APP_URL_PATH'] + 'dashboard/delete/<id>')
+@app.route(os.environ['APP_URL_PATH'] + 'dashboard/delete/owner/<id>')
 @oidc.require_login
-def dashboard_delete_request(id):
+def dashboard_delete_request_owner(id):
     info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
 
     col2 = db["Requests"]
@@ -602,7 +639,7 @@ def dashboard_delete_request(id):
     if parameters is not None:
         if "owner" in parameters:
             if parameters["owner"] is not None:
-                if not (info.get('sub') in parameters["owner"]["sub"]):
+                if not (info.get('sub') in parameters["owner"]):
                     return error403("403")
             else:
                 return error403("403")
@@ -612,8 +649,11 @@ def dashboard_delete_request(id):
     else:
         return page_not_found("404")
 
-    col2.delete_one({"collection": str(id)})
-    db[str(id)].drop()
+    if len(parameters["owner"]) == 1:
+        col2.delete_one({"collection": str(id)})
+        db[str(id)].drop()
+    else:
+        col2.update_one({"collection": str(id)}, {'$pullAll': {'owner': [info.get('sub')]}})
 
     col1 = db["Permissions"]
 
@@ -621,6 +661,34 @@ def dashboard_delete_request(id):
 
     return redirect((os.environ['APP_URL']) + "/dashboard")
 
+@app.route(os.environ['APP_URL_PATH'] + 'dashboard/delete/read_permission/<id>')
+@oidc.require_login
+def dashboard_delete_request_read_permission(id):
+    info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+
+    col2 = db["Requests"]
+    col1 = db["Permissions"]
+
+    col1.update_one({"user_id": info.get('sub')}, {'$pullAll': {'read_permission': [str(id)]}})
+
+    col2.update_one({"collection": str(id)}, {'$pullAll': {'read_permission': [str(info.get('sub'))]}})
+
+    return redirect((os.environ['APP_URL']) + "/dashboard")
+
+
+@app.route(os.environ['APP_URL_PATH'] + 'dashboard/delete/write_permission/<id>')
+@oidc.require_login
+def dashboard_delete_request_write_permission(id):
+    info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+
+    col2 = db["Requests"]
+    col1 = db["Permissions"]
+
+    col1.update_one({"user_id": info.get('sub')}, {'$pullAll': {'write_permission': [str(id)]}})
+
+    col2.update_one({"collection": str(id)}, {'$pullAll': {'write_permission': [str(info.get('sub'))]}})
+
+    return redirect((os.environ['APP_URL']) + "/dashboard")
 
 @app.route(os.environ['APP_URL_PATH'] + 'access/<id>')
 @oidc.require_login
@@ -635,7 +703,11 @@ def access(id):
     col2 = db["Requests"]
     req = col2.find_one({"collection": str(id)})
 
-    if not (info.get('sub') in req["owner"]["sub"]):
+    if isinstance(req["owner"], dict):
+        col2.update_one({"collection": str(id)}, {'$set': {'owner': [req["owner"]["sub"]]}})
+        req = col2.find_one({"collection": str(id)})
+
+    if not (info.get('sub') in req["owner"]):
         return error403("403")
 
     req["_id"] = str(req["_id"].generation_time).replace("+00:00", "")
@@ -643,8 +715,160 @@ def access(id):
     return render_template('access.html', collection_id=id,
                            app_url=os.environ['APP_URL'],
                            app_url_path=os.environ['APP_URL_PATH'][:-1],
-                           example_db=os.environ['EXAMPLE_DB'], user_name=username, user_id=req["owner"]["sub"],
+                           example_db=os.environ['EXAMPLE_DB'], user_name=username, user_sub=info.get('sub'), owner=req["owner"],
                            read_permission=req["read_permission"], write_permission=req["write_permission"])
+
+
+@app.route(os.environ['APP_URL_PATH'] + 'access/add/owner/<id1>/<id2>')
+@oidc.require_login
+def add_access_owner(id1, id2):
+    info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+    username = info.get('preferred_username')
+
+    col2 = db["Requests"]
+    req = col2.find_one({"collection": str(id1)})
+
+    if not (info.get('sub') in req["owner"]):
+        return error403("403")
+
+    col1 = db["Permissions"]
+
+
+    col1.update_one({"user_id": str(id2)}, {'$addToSet': {'owner': str(id1)}})
+    col2.update_one({"collection": str(id1)}, {'$addToSet': {'owner': str(id2)}})
+
+    req = col2.find_one({"collection": str(id1)})
+    req["_id"] = str(req["_id"].generation_time).replace("+00:00", "")
+
+    return redirect((os.environ['APP_URL']) + "/access/" + id1)
+
+@app.route(os.environ['APP_URL_PATH'] + 'access/delete/owner/<id1>/<id2>')
+@oidc.require_login
+def delete_access_owner(id1, id2):
+    info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+    username = info.get('preferred_username')
+
+    col2 = db["Requests"]
+    req = col2.find_one({"collection": str(id1)})
+
+    if not (info.get('sub') in req["owner"]):
+        return error403("403")
+
+    if (str(info.get('sub')) != str(id2)):
+        return error403("403")
+
+    col1 = db["Permissions"]
+
+
+    col1.update_one({"user_id": info.get('sub')}, {'$pullAll': {'owner': [str(id1)]}})
+
+    col2.update_one({"collection": str(id1)}, {'$pullAll': {'owner': [str(id2)]}})
+
+    req = col2.find_one({"collection": str(id1)})
+    req["_id"] = str(req["_id"].generation_time).replace("+00:00", "")
+
+    return redirect((os.environ['APP_URL']) + "/dashboard")
+
+
+@app.route(os.environ['APP_URL_PATH'] + 'access/add/read_permission/<id1>/<id2>')
+@oidc.require_login
+def add_access_read_permission(id1, id2):
+    info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+    username = info.get('preferred_username')
+
+    col2 = db["Requests"]
+    req = col2.find_one({"collection": str(id1)})
+
+    if not (info.get('sub') in req["owner"]):
+        return error403("403")
+
+    col1 = db["Permissions"]
+
+
+    col1.update_one({"user_id": str(id2)}, {'$addToSet': {'read_permission': str(id1)}})
+    col2.update_one({"collection": str(id1)}, {'$addToSet': {'read_permission': str(id2)}})
+
+    req = col2.find_one({"collection": str(id1)})
+    req["_id"] = str(req["_id"].generation_time).replace("+00:00", "")
+
+    return redirect((os.environ['APP_URL']) + "/access/" + id1)
+
+@app.route(os.environ['APP_URL_PATH'] + 'access/delete/read_permission/<id1>/<id2>')
+@oidc.require_login
+def delete_access_read_permission(id1, id2):
+    info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+    username = info.get('preferred_username')
+
+    col2 = db["Requests"]
+    req = col2.find_one({"collection": str(id1)})
+
+    if not (info.get('sub') in req["owner"]):
+        if (str(info.get('sub')) != str(id2)):
+            return error403("403")
+
+
+    col1 = db["Permissions"]
+
+
+    col1.update_one({"user_id": info.get('sub')}, {'$pullAll': {'read_permission': [str(id1)]}})
+
+    col2.update_one({"collection": str(id1)}, {'$pullAll': {'read_permission': [str(id2)]}})
+
+    req = col2.find_one({"collection": str(id1)})
+    req["_id"] = str(req["_id"].generation_time).replace("+00:00", "")
+
+    return redirect((os.environ['APP_URL']) + "/access/" + id1)
+
+
+@app.route(os.environ['APP_URL_PATH'] + 'access/add/write_permission/<id1>/<id2>')
+@oidc.require_login
+def add_access_write_permission(id1, id2):
+    info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+    username = info.get('preferred_username')
+
+    col2 = db["Requests"]
+    req = col2.find_one({"collection": str(id1)})
+
+    if not (info.get('sub') in req["owner"]):
+        return error403("403")
+
+    col1 = db["Permissions"]
+
+
+    col1.update_one({"user_id": str(id2)}, {'$addToSet': {'write_permission': str(id1)}})
+    col2.update_one({"collection": str(id1)}, {'$addToSet': {'write_permission': str(id2)}})
+
+    req = col2.find_one({"collection": str(id1)})
+    req["_id"] = str(req["_id"].generation_time).replace("+00:00", "")
+
+    return redirect((os.environ['APP_URL']) + "/access/" + id1)
+
+@app.route(os.environ['APP_URL_PATH'] + 'access/delete/write_permission/<id1>/<id2>')
+@oidc.require_login
+def delete_access_write_permission(id1, id2):
+    info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+    username = info.get('preferred_username')
+
+    col2 = db["Requests"]
+    req = col2.find_one({"collection": str(id1)})
+
+    if not (info.get('sub') in req["owner"]):
+        if (str(info.get('sub')) != str(id2)):
+            return error403("403")
+
+
+    col1 = db["Permissions"]
+
+
+    col1.update_one({"user_id": info.get('sub')}, {'$pullAll': {'write_permission': [str(id1)]}})
+
+    col2.update_one({"collection": str(id1)}, {'$pullAll': {'write_permission': [str(id2)]}})
+
+    req = col2.find_one({"collection": str(id1)})
+    req["_id"] = str(req["_id"].generation_time).replace("+00:00", "")
+
+    return redirect((os.environ['APP_URL']) + "/access/" + id1)
+
 
 
 @app.route(os.environ['APP_URL_PATH'] + "table")
@@ -763,7 +987,7 @@ def part_result():
                 "start_date": start_date,
                 "end_date": end_date,
                 "requestOptions": requestOptions,
-                "owner": info,
+                "owner": [info["sub"]],
                 "read_permission": [],
                 "write_permission": [],
             }
@@ -1107,6 +1331,21 @@ def error403(e):
         return render_template('403.html', app_url=os.environ['APP_URL'],
                                app_url_path=os.environ['APP_URL_PATH'][:-1],
                                example_db=os.environ['EXAMPLE_DB']), 403
+
+
+@app.errorhandler(400)
+def error400(e):
+    if oidc.user_loggedin:
+        info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+        username = info.get('preferred_username')
+
+        return render_template('400.html', app_url=os.environ['APP_URL'],
+                               app_url_path=os.environ['APP_URL_PATH'][:-1],
+                               example_db=os.environ['EXAMPLE_DB'], user_name=username, code=e), 400
+    else:
+        return render_template('400.html', app_url=os.environ['APP_URL'],
+                               app_url_path=os.environ['APP_URL_PATH'][:-1],
+                               example_db=os.environ['EXAMPLE_DB'], code=e), 400
 
 
 """
