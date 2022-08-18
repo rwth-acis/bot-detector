@@ -67,7 +67,7 @@
         </thead>
 
         <tbody>
-        {% for request in requests %}
+        {% for request in requests_owner %}
         <tr>
 
             <td>
@@ -157,7 +157,268 @@
                 <a href="{{app_url}}/access/{{request['collection']}}" class="btn btn-info" target="_blank" style="margin:auto; margin-bottom:5px; padding:0.2rem 0.75rem;">Access settings</a>
                 {% endif %}
                 {% endif %}
-                <button type="button" data-collection-id="{{request['collection']}}" class="btn btn-outline-danger open-deleteModal" style="padding:3px; background-color:red; border: white; margin:auto;" data-toggle="modal" data-target="#deleteModal">
+                <button type="button" data-collection-id="{{request['collection']}}" data-permission-type="owner" class="btn btn-outline-danger open-deleteModal" style="padding:3px; background-color:red; border: white; margin:auto;" data-toggle="modal" data-target="#deleteModal">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"></path>
+                        <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"></path>
+                    </svg>
+                </button>
+            </td>
+
+        </tr>
+        {% endfor %}
+        </tbody>
+        <tfoot>
+        </tfoot>
+
+    </table>
+</div>
+
+<div class="title-section" style="text-align:center; padding:10px;">
+    Read permission:
+</div>
+<div id="scroll2" style="overflow-x:scroll; padding-left:0; padding-right:0px;">
+    <div></div>
+</div>
+<div id="div-main-table2" class="display nowrap" style="margin-bottom: 30px;">
+
+
+    <table id="main-table2">
+        <thead>
+        <tr>
+            <th>Time of creation</th>
+            <th>ID</th>
+            <th>Keywords</th>
+            <th>Limit of users for checking</th>
+            <th>Search type</th>
+            <th>Additional parameters for tweets</th>
+            <th>Search is complete</th>
+            <th>Actions</th>
+
+
+        </tr>
+        </thead>
+
+        <tbody>
+        {% for request in requests_read %}
+        <tr>
+
+            <td>
+                {{request["_id"]}}
+            </td>
+
+            <td>
+                {{request["collection"]}}
+            </td>
+
+            <td>
+                {{request["keywords"]}}
+            </td>
+
+            <td>
+                {{request["limit"]}}
+            </td>
+
+            <td>
+                {% if request["SearchParameters1"] == "real-time" %}
+                Check the real-time stream of public tweets
+                {% endif %}
+                {% if request["SearchParameters1"] == "time-period" %}
+                Check tweets from {{request["start_date"]}} - {{request["end_date"]}}
+                {% endif %}
+                {% if request["SearchParameters1"] == "seven-days" %}
+                Check tweets from the last 7 days
+                {% endif %}
+                {% if request["SearchParameters1"] == "recent" %}
+                Check the most recent tweets
+                {% endif %}
+                {% if request["SearchParameters1"] == "popular" %}
+                Check the most popular tweets
+                {% endif %}
+                {% if request["SearchParameters1"] == "mixed" %}
+                Check both popular and most recent tweets
+                {% endif %}
+            </td>
+
+            <td>
+                {% if request["areaParameters1"] == "do-not" %}
+                <p>&bull; Do not check retweets</p>
+                {% endif %}
+                {% if request["areaParameters1"] == "only" %}
+                <p>&bull; Only check retweets</p>
+                {% endif %}
+
+                {% if request["areaParameters2"] == "do-not" %}
+                <p>&bull; Do not check tweets that contain URLs</p>
+                {% endif %}
+                {% if request["areaParameters2"] == "only" %}
+                <p>&bull; Only check tweets that contain a URL</p>
+                {% endif %}
+
+                {% if request["areaParameters3"] == "do-not" %}
+                <p>&bull; Do not check tweets that contain media (e.g. photos or videos)</p>
+                {% endif %}
+                {% if request["areaParameters3"] == "only" %}
+                <p>&bull; Only check tweets that contain media (e.g. photos or videos)</p>
+                {% endif %}
+
+            </td>
+
+            {% if "completed" in request %}
+
+            {% if request["completed"] != True %}
+            <td class="red">
+                False
+            </td>
+            {% else %}
+            <td class="green">
+                True
+            </td>
+            {% endif %}
+
+            {% else %}
+            <td class="orange">
+                -
+            </td>
+            {% endif %}
+
+
+            <td style="text-align: center;">
+                <a href="{{app_url}}/result/{{ request['collection'] }}" class="btn btn-info" target="_blank" style="margin:auto; margin-bottom:5px; padding:0.2rem 0.75rem;">Request results</a>
+
+                <button type="button" data-collection-id="{{request['collection']}}" data-permission-type="read_permission" class="btn btn-outline-danger open-deleteModal" style="padding:3px; background-color:red; border: white; margin:auto;" data-toggle="modal" data-target="#deleteModal">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"></path>
+                        <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"></path>
+                    </svg>
+                </button>
+            </td>
+
+        </tr>
+        {% endfor %}
+        </tbody>
+        <tfoot>
+        </tfoot>
+
+    </table>
+</div>
+
+
+
+
+<div class="title-section" style="text-align:center; padding:10px;">
+    Write permission:
+</div>
+<div id="scroll3" style="overflow-x:scroll; padding-left:0; padding-right:0px;">
+    <div></div>
+</div>
+<div id="div-main-table3" class="display nowrap" style="margin-bottom: 30px;">
+
+
+    <table id="main-table3">
+        <thead>
+        <tr>
+            <th>Time of creation</th>
+            <th>ID</th>
+            <th>Keywords</th>
+            <th>Limit of users for checking</th>
+            <th>Search type</th>
+            <th>Additional parameters for tweets</th>
+            <th>Search is complete</th>
+            <th>Actions</th>
+
+
+        </tr>
+        </thead>
+
+        <tbody>
+        {% for request in requests_write %}
+        <tr>
+
+            <td>
+                {{request["_id"]}}
+            </td>
+
+            <td>
+                {{request["collection"]}}
+            </td>
+
+            <td>
+                {{request["keywords"]}}
+            </td>
+
+            <td>
+                {{request["limit"]}}
+            </td>
+
+            <td>
+                {% if request["SearchParameters1"] == "real-time" %}
+                Check the real-time stream of public tweets
+                {% endif %}
+                {% if request["SearchParameters1"] == "time-period" %}
+                Check tweets from {{request["start_date"]}} - {{request["end_date"]}}
+                {% endif %}
+                {% if request["SearchParameters1"] == "seven-days" %}
+                Check tweets from the last 7 days
+                {% endif %}
+                {% if request["SearchParameters1"] == "recent" %}
+                Check the most recent tweets
+                {% endif %}
+                {% if request["SearchParameters1"] == "popular" %}
+                Check the most popular tweets
+                {% endif %}
+                {% if request["SearchParameters1"] == "mixed" %}
+                Check both popular and most recent tweets
+                {% endif %}
+            </td>
+
+            <td>
+                {% if request["areaParameters1"] == "do-not" %}
+                <p>&bull; Do not check retweets</p>
+                {% endif %}
+                {% if request["areaParameters1"] == "only" %}
+                <p>&bull; Only check retweets</p>
+                {% endif %}
+
+                {% if request["areaParameters2"] == "do-not" %}
+                <p>&bull; Do not check tweets that contain URLs</p>
+                {% endif %}
+                {% if request["areaParameters2"] == "only" %}
+                <p>&bull; Only check tweets that contain a URL</p>
+                {% endif %}
+
+                {% if request["areaParameters3"] == "do-not" %}
+                <p>&bull; Do not check tweets that contain media (e.g. photos or videos)</p>
+                {% endif %}
+                {% if request["areaParameters3"] == "only" %}
+                <p>&bull; Only check tweets that contain media (e.g. photos or videos)</p>
+                {% endif %}
+
+            </td>
+
+            {% if "completed" in request %}
+
+            {% if request["completed"] != True %}
+            <td class="red">
+                False
+            </td>
+            {% else %}
+            <td class="green">
+                True
+            </td>
+            {% endif %}
+
+            {% else %}
+            <td class="orange">
+                -
+            </td>
+            {% endif %}
+
+
+            <td style="text-align: center;">
+                <a href="{{app_url}}/result/{{ request['collection'] }}" class="btn btn-info" target="_blank" style="margin:auto; margin-bottom:5px; padding:0.2rem 0.75rem;">Request results</a>
+
+                <button type="button" data-collection-id="{{request['collection']}}" data-permission-type="write_permission" class="btn btn-outline-danger open-deleteModal" style="padding:3px; background-color:red; border: white; margin:auto;" data-toggle="modal" data-target="#deleteModal">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
                         <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"></path>
                         <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"></path>
@@ -198,16 +459,27 @@
 <script>
 
             $(document).on("click", ".open-deleteModal", function () {
-                console.log("HI!")
                  var collectionId = $(this).data('collection-id');
-                 console.log(collectionId)
-                 $('.modal-footer #confirmDeletionBtn').click(function(){location.href = "{{app_url}}/dashboard/delete/"+ collectionId;});
+                 var permissionType = $(this).data('permission-type');
+                 $('.modal-footer #confirmDeletionBtn').click(function(){location.href = "{{app_url}}/dashboard/delete/"+ permissionType +"/"+ collectionId;});
 
             });
 
             $(document).ready(function(){
 
                 $('#main-table').DataTable({
+                    stateSave: true,
+                    dom: 'lfrtip',
+                    "lengthMenu": [10,25,50,100]
+                 });
+
+                $('#main-table2').DataTable({
+                    stateSave: true,
+                    dom: 'lfrtip',
+                    "lengthMenu": [10,25,50,100]
+                 });
+
+                $('#main-table3').DataTable({
                     stateSave: true,
                     dom: 'lfrtip',
                     "lengthMenu": [10,25,50,100]
@@ -220,6 +492,22 @@
                 });
                 $("#div-main-table").on("scroll", function(){
                     $("#scroll1").scrollLeft($(this).scrollLeft());
+                 });
+
+                $("#scroll2 div").width($("#main-table2").width());
+                $("#scroll2").on("scroll", function(){
+                    $("#div-main-table2").scrollLeft($(this).scrollLeft());
+                });
+                $("#div-main-table2").on("scroll", function(){
+                    $("#scroll2").scrollLeft($(this).scrollLeft());
+                 });
+
+                 $("#scroll3 div").width($("#main-table3").width());
+                $("#scroll3").on("scroll", function(){
+                    $("#div-main-table3").scrollLeft($(this).scrollLeft());
+                });
+                $("#div-main-table3").on("scroll", function(){
+                    $("#scroll3").scrollLeft($(this).scrollLeft());
                  });
 
             });
