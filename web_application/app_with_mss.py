@@ -412,6 +412,7 @@ def api_user(collection, id):
 
 @app.route(os.environ['APP_URL_PATH'] + 'result/<id>')
 def resultid(id):
+    isPublic = False
     col1 = db[str(id)]
     users = col1.find()
     col2 = db["Requests"]
@@ -433,6 +434,8 @@ def resultid(id):
                 if not (info.get('sub') in parameters["owner"]["sub"]):
                     return error403("403")
                     # return abort(403)
+        else:
+            isPublic = True
 
     else:
         return page_not_found("404")
@@ -501,7 +504,7 @@ def resultid(id):
                                    positive_count2=positive_count2, neutral_count2=neutral_count2,
                                    collection=str(id), parameters=parameters, ready_count=ready_count,
                                    app_url_path=os.environ['APP_URL_PATH'][:-1],
-                                   example_db=os.environ['EXAMPLE_DB'], user_name=username)
+                                   example_db=os.environ['EXAMPLE_DB'], user_name=username, isPublic=isPublic)
         else:
             return render_template('result.html', users=col1.find(), folium_map=Markup(folium_map._repr_html_()),
                                    app_url=os.environ['APP_URL'],
@@ -510,7 +513,7 @@ def resultid(id):
                                    positive_count2=positive_count2, neutral_count2=neutral_count2,
                                    collection=str(id), parameters=parameters, ready_count=ready_count,
                                    app_url_path=os.environ['APP_URL_PATH'][:-1],
-                                   example_db=os.environ['EXAMPLE_DB'])
+                                   example_db=os.environ['EXAMPLE_DB'], isPublic=isPublic)
 
     except Exception as e:
         # return dumps({'error': str(e)})
