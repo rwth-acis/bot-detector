@@ -1087,6 +1087,27 @@ def part_result():
     return redirect((os.environ['APP_URL']) + "/result/" + str(id))
 
 
+@app.route(os.environ['APP_URL_PATH'] + '<collection>/agree/<decision>/<id>', methods=["POST", "GET"])
+def agree_with_result(collection, decision, id):
+    if request.method == "POST":
+
+        col1 = db[collection]
+        col1.update_one({"_id": ObjectId(id)},
+                    {'$set': {'classification_result_'+decision: "agree"}})
+    return "Ok"
+
+@app.route(os.environ['APP_URL_PATH'] + '<collection>/disagree/<decision>/<id>', methods=["POST", "GET"])
+def disagree_with_result(collection, decision, id):
+    if request.method == "POST":
+
+        col1 = db[collection]
+        col1.update_one({"_id": ObjectId(id)},
+                        {'$set': {'classification_result_'+decision: "disagree"}})
+    return "Ok"
+
+
+
+
 @app.route(os.environ['APP_URL_PATH'] + 'user-check/<screen_name>', methods=['post', 'get'])
 def user_check(screen_name):
     if request.method == 'POST':

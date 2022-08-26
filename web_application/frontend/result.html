@@ -18,6 +18,7 @@
     <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.13/js/dataTables.jqueryui.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/plug-ins/1.12.1/sorting/any-number.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.4/js/dataTables.buttons.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.4/js/buttons.jqueryui.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.4/js/buttons.colVis.js"></script>
@@ -161,32 +162,67 @@
                 <td class="text"><div class="created-at">{{user["found_tweet"]["created_at"]}}</div>{{user["found_tweet"]["full_text"]}}</td>
                 {% endif %}
 
-
-
-
-                <!--<td>{{user["signals"]["k"]}}</td>-->
-
-                <!--{% if user["signals"]["k"] >= 50 %}
-                <td class="red"><div class="div-red">{{user["signals"]["k"]}}</div></td>
-                {% else %}
-                {% if user["signals"]["k"] >= 30 %}
-                <td class="orange"><div class="div-orange">{{user["signals"]["k"]}}</div></td>
-                {% else %}
-                <td class="green"><div class="div-green">{{user["signals"]["k"]}}</div></td>
-                {% endif %}
-                {% endif %}-->
                 {% if user["signals"]["is_bot_probability"] >= 50 %}
                 <td class="red">
                     <div class="progress-bar position" data-percent='{{user["signals"]["is_bot_probability"]}}' data-duration="800" data-color="white,red,red"></div>
+                    {% if "classification_result_botness" in user %}
+
+                    {% if user["classification_result_botness"] == "agree" %}
+
+                    <a class="badge badge-success agree-disagree-btn decision-made-btn" onclick="">Agreed</a>
+                    <a  class="badge badge-danger agree-disagree-btn" onclick="disagree('{{user['_id']}}', 'botness', this);">Disagree</a>
+                    {% else %}
+                    <a  class="badge badge-success agree-disagree-btn" onclick="agree('{{user['_id']}}', 'botness', this);">Agree</a>
+                    <a  class="badge badge-danger agree-disagree-btn decision-made-btn" onclick="">Disagreed</a>
+
+                    {% endif %}
+
+                    {% else %}
+                    <a  class="badge badge-success agree-disagree-btn" onclick="agree('{{user['_id']}}', 'botness', this);">Agree</a>
+                    <a  class="badge badge-danger agree-disagree-btn" onclick="disagree('{{user['_id']}}', 'botness', this);">Disagree</a>
+                    {% endif %}
                 </td>
                 {% else %}
                 {% if user["signals"]["is_bot_probability"] >= 30 %}
                 <td class="orange">
                     <div class="progress-bar position" data-percent='{{user["signals"]["is_bot_probability"]}}' data-duration="800" data-color="white,orange,orange"></div>
+                    {% if "classification_result_botness" in user %}
+
+                    {% if user["classification_result_botness"] == "agree" %}
+
+                    <a class="badge badge-success agree-disagree-btn decision-made-btn" onclick="">Agreed</a>
+                    <a  class="badge badge-danger agree-disagree-btn" onclick="disagree('{{user['_id']}}', 'botness', this);">Disagree</a>
+                    {% else %}
+                    <a  class="badge badge-success agree-disagree-btn" onclick="agree('{{user['_id']}}', 'botness', this);">Agree</a>
+                    <a  class="badge badge-danger agree-disagree-btn decision-made-btn" onclick="">Disagreed</a>
+
+                    {% endif %}
+
+                    {% else %}
+                    <a  class="badge badge-success agree-disagree-btn" onclick="agree('{{user['_id']}}', 'botness', this);">Agree</a>
+                    <a  class="badge badge-danger agree-disagree-btn" onclick="disagree('{{user['_id']}}', 'botness', this);">Disagree</a>
+                    {% endif %}
                 </td>
                 {% else %}
                 <td class="green">
+
                     <div class="progress-bar position" data-percent='{{user["signals"]["is_bot_probability"]}}' data-duration="800" data-color="white,green,green"></div>
+                    {% if "classification_result_botness" in user %}
+
+                    {% if user["classification_result_botness"] == "agree" %}
+
+                    <a class="badge badge-success agree-disagree-btn decision-made-btn" onclick="">Agreed</a>
+                    <a  class="badge badge-danger agree-disagree-btn" onclick="disagree('{{user['_id']}}', 'botness', this);">Disagree</a>
+                    {% else %}
+                    <a  class="badge badge-success agree-disagree-btn" onclick="agree('{{user['_id']}}', 'botness', this);">Agree</a>
+                    <a  class="badge badge-danger agree-disagree-btn decision-made-btn" onclick="">Disagreed</a>
+
+                    {% endif %}
+
+                    {% else %}
+                    <a  class="badge badge-success agree-disagree-btn" onclick="agree('{{user['_id']}}', 'botness', this);">Agree</a>
+                    <a  class="badge badge-danger agree-disagree-btn" onclick="disagree('{{user['_id']}}', 'botness', this);">Disagree</a>
+                    {% endif %}
                 </td>
                 {% endif %}
                 {% endif %}
@@ -194,15 +230,63 @@
                 {% if user["signals"]["intentions_are_bad_probability"] >= 50 %}
                 <td class="red">
                     <div class="progress-bar position" data-percent='{{user["signals"]["intentions_are_bad_probability"]}}' data-duration="800" data-color="white,red,red"></div>
+                    {% if "classification_result_bad_intentions" in user %}
+
+                    {% if user["classification_result_bad_intentions"] == "agree" %}
+
+                    <a class="badge badge-success agree-disagree-btn decision-made-btn" onclick="">Agreed</a>
+                    <a  class="badge badge-danger agree-disagree-btn" onclick="disagree('{{user['_id']}}', 'bad_intentions', this);">Disagree</a>
+                    {% else %}
+                    <a  class="badge badge-success agree-disagree-btn" onclick="agree('{{user['_id']}}', 'bad_intentions', this);">Agree</a>
+                    <a  class="badge badge-danger agree-disagree-btn decision-made-btn" onclick="">Disagreed</a>
+
+                    {% endif %}
+
+                    {% else %}
+                    <a  class="badge badge-success agree-disagree-btn" onclick="agree('{{user['_id']}}', 'bad_intentions', this);">Agree</a>
+                    <a  class="badge badge-danger agree-disagree-btn" onclick="disagree('{{user['_id']}}', 'bad_intentions', this);">Disagree</a>
+                    {% endif %}
                 </td>
                 {% else %}
                 {% if user["signals"]["intentions_are_bad_probability"] >= 30 %}
                 <td class="orange">
                     <div class="progress-bar position" data-percent='{{user["signals"]["intentions_are_bad_probability"]}}' data-duration="800" data-color="white,orange,orange"></div>
+                    {% if "classification_result_bad_intentions" in user %}
+
+                    {% if user["classification_result_bad_intentions"] == "agree" %}
+
+                    <a class="badge badge-success agree-disagree-btn decision-made-btn" onclick="">Agreed</a>
+                    <a  class="badge badge-danger agree-disagree-btn" onclick="disagree('{{user['_id']}}', 'bad_intentions', this);">Disagree</a>
+                    {% else %}
+                    <a  class="badge badge-success agree-disagree-btn" onclick="agree('{{user['_id']}}', 'bad_intentions', this);">Agree</a>
+                    <a  class="badge badge-danger agree-disagree-btn decision-made-btn" onclick="">Disagreed</a>
+
+                    {% endif %}
+
+                    {% else %}
+                    <a  class="badge badge-success agree-disagree-btn" onclick="agree('{{user['_id']}}', 'bad_intentions', this);">Agree</a>
+                    <a  class="badge badge-danger agree-disagree-btn" onclick="disagree('{{user['_id']}}', 'bad_intentions', this);">Disagree</a>
+                    {% endif %}
                 </td>
                 {% else %}
                 <td class="green">
                     <div class="progress-bar position" data-percent='{{user["signals"]["intentions_are_bad_probability"]}}' data-duration="800" data-color="white,green,green"></div>
+                    {% if "classification_result_bad_intentions" in user %}
+
+                    {% if user["classification_result_bad_intentions"] == "agree" %}
+
+                    <a class="badge badge-success agree-disagree-btn decision-made-btn" onclick="">Agreed</a>
+                    <a  class="badge badge-danger agree-disagree-btn" onclick="disagree('{{user['_id']}}', 'bad_intentions', this);">Disagree</a>
+                    {% else %}
+                    <a  class="badge badge-success agree-disagree-btn" onclick="agree('{{user['_id']}}', 'bad_intentions', this);">Agree</a>
+                    <a  class="badge badge-danger agree-disagree-btn decision-made-btn" onclick="">Disagreed</a>
+
+                    {% endif %}
+
+                    {% else %}
+                    <a  class="badge badge-success agree-disagree-btn" onclick="agree('{{user['_id']}}', 'bad_intentions', this);">Agree</a>
+                    <a  class="badge badge-danger agree-disagree-btn" onclick="disagree('{{user['_id']}}', 'bad_intentions', this);">Disagree</a>
+                    {% endif %}
                 </td>
                 {% endif %}
                 {% endif %}
@@ -262,6 +346,36 @@
     <div id="chart-container2">
     </div>
     <script>
+
+            function agree(user_id, decision, element){
+                $.ajax({
+                    type:'POST',
+                    url:'{{app_url}}/{{ collection }}/agree/' + decision + '/' + user_id,
+                    data:{
+                      "collection": "{{collection}}",
+                      "user_id": user_id,
+                      "decision": "agree"
+                    },
+                }).done(function(element) {
+                    element.value = "Agreed";
+                });
+            };
+
+            function disagree(user_id, decision, element) {
+                $.ajax({
+                    type:'POST',
+                    url:'{{app_url}}/{{ collection }}/disagree/' + decision + '/' + user_id,
+                    data:{
+                      "collection": "{{collection}}",
+                      "user_id": user_id,
+                      "decision": "disagree"
+                    },
+                }).done(function(element) {
+                    element.value = "Disagreed";
+                });
+            };
+
+
             $(document).on("click", ".open-deleteModal", function () {
                 console.log("HI!")
                  var userId = $(this).data('user-id');
@@ -288,7 +402,8 @@
                     stateSave: true,
                     "columnDefs": [
                         { "orderData": [ 3, 4 ],    "targets": 3 },
-                        { "orderData": [ 4, 3 ],    "targets": 4 }
+                        { "orderData": [ 4, 3 ],    "targets": 4 },
+                        { "type": "any-number", "targets" : [ 3, 4 ] }
                       ],
                     dom: 'lBfrtip',
                     buttons: [
