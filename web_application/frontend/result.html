@@ -18,13 +18,13 @@
     <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.13/js/dataTables.jqueryui.js"></script>
-    <script type="text/javascript" src="https://cdn.datatables.net/plug-ins/1.12.1/sorting/any-number.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.4/js/dataTables.buttons.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.4/js/buttons.jqueryui.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.4/js/buttons.colVis.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.4/js/buttons.flash.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.4/js/buttons.html5.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.4/js/buttons.print.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/plug-ins/1.12.1/sorting/any-number.js"></script>
      <!--   -->
 
     <script src="https://cdn.anychart.com/releases/8.10.0/js/anychart-core.min.js"></script>
@@ -169,11 +169,11 @@
 
                     {% if user["classification_result_botness"] == "agree" %}
 
-                    <a class="badge badge-success agree-disagree-btn decision-made-btn" onclick="">Agreed</a>
+                    <a class="badge badge-success agree-disagree-btn decision-made-btn" onclick="agree('{{user['_id']}}', 'bad_intentions', this);">Agreed</a>
                     <a  class="badge badge-danger agree-disagree-btn" onclick="disagree('{{user['_id']}}', 'botness', this);">Disagree</a>
                     {% else %}
                     <a  class="badge badge-success agree-disagree-btn" onclick="agree('{{user['_id']}}', 'botness', this);">Agree</a>
-                    <a  class="badge badge-danger agree-disagree-btn decision-made-btn" onclick="">Disagreed</a>
+                    <a  class="badge badge-danger agree-disagree-btn decision-made-btn" onclick="disagree('{{user['_id']}}', 'bad_intentions', this);">Disagreed</a>
 
                     {% endif %}
 
@@ -190,11 +190,11 @@
 
                     {% if user["classification_result_botness"] == "agree" %}
 
-                    <a class="badge badge-success agree-disagree-btn decision-made-btn" onclick="">Agreed</a>
+                    <a class="badge badge-success agree-disagree-btn decision-made-btn" onclick="agree('{{user['_id']}}', 'bad_intentions', this);">Agreed</a>
                     <a  class="badge badge-danger agree-disagree-btn" onclick="disagree('{{user['_id']}}', 'botness', this);">Disagree</a>
                     {% else %}
                     <a  class="badge badge-success agree-disagree-btn" onclick="agree('{{user['_id']}}', 'botness', this);">Agree</a>
-                    <a  class="badge badge-danger agree-disagree-btn decision-made-btn" onclick="">Disagreed</a>
+                    <a  class="badge badge-danger agree-disagree-btn decision-made-btn" onclick="disagree('{{user['_id']}}', 'bad_intentions', this);">Disagreed</a>
 
                     {% endif %}
 
@@ -211,11 +211,11 @@
 
                     {% if user["classification_result_botness"] == "agree" %}
 
-                    <a class="badge badge-success agree-disagree-btn decision-made-btn" onclick="">Agreed</a>
+                    <a class="badge badge-success agree-disagree-btn decision-made-btn" onclick="agree('{{user['_id']}}', 'bad_intentions', this);">Agreed</a>
                     <a  class="badge badge-danger agree-disagree-btn" onclick="disagree('{{user['_id']}}', 'botness', this);">Disagree</a>
                     {% else %}
                     <a  class="badge badge-success agree-disagree-btn" onclick="agree('{{user['_id']}}', 'botness', this);">Agree</a>
-                    <a  class="badge badge-danger agree-disagree-btn decision-made-btn" onclick="">Disagreed</a>
+                    <a  class="badge badge-danger agree-disagree-btn decision-made-btn" onclick="disagree('{{user['_id']}}', 'bad_intentions', this);">Disagreed</a>
 
                     {% endif %}
 
@@ -234,11 +234,11 @@
 
                     {% if user["classification_result_bad_intentions"] == "agree" %}
 
-                    <a class="badge badge-success agree-disagree-btn decision-made-btn" onclick="">Agreed</a>
+                    <a class="badge badge-success agree-disagree-btn decision-made-btn" onclick="agree('{{user['_id']}}', 'bad_intentions', this);">Agreed</a>
                     <a  class="badge badge-danger agree-disagree-btn" onclick="disagree('{{user['_id']}}', 'bad_intentions', this);">Disagree</a>
                     {% else %}
                     <a  class="badge badge-success agree-disagree-btn" onclick="agree('{{user['_id']}}', 'bad_intentions', this);">Agree</a>
-                    <a  class="badge badge-danger agree-disagree-btn decision-made-btn" onclick="">Disagreed</a>
+                    <a  class="badge badge-danger agree-disagree-btn decision-made-btn" onclick="disagree('{{user['_id']}}', 'bad_intentions', this);">Disagreed</a>
 
                     {% endif %}
 
@@ -255,11 +255,11 @@
 
                     {% if user["classification_result_bad_intentions"] == "agree" %}
 
-                    <a class="badge badge-success agree-disagree-btn decision-made-btn" onclick="">Agreed</a>
+                    <a class="badge badge-success agree-disagree-btn decision-made-btn" onclick="agree('{{user['_id']}}', 'bad_intentions', this);">Agreed</a>
                     <a  class="badge badge-danger agree-disagree-btn" onclick="disagree('{{user['_id']}}', 'bad_intentions', this);">Disagree</a>
                     {% else %}
                     <a  class="badge badge-success agree-disagree-btn" onclick="agree('{{user['_id']}}', 'bad_intentions', this);">Agree</a>
-                    <a  class="badge badge-danger agree-disagree-btn decision-made-btn" onclick="">Disagreed</a>
+                    <a  class="badge badge-danger agree-disagree-btn decision-made-btn" onclick="disagree('{{user['_id']}}', 'bad_intentions', this);">Disagreed</a>
 
                     {% endif %}
 
@@ -275,11 +275,11 @@
 
                     {% if user["classification_result_bad_intentions"] == "agree" %}
 
-                    <a class="badge badge-success agree-disagree-btn decision-made-btn" onclick="">Agreed</a>
+                    <a class="badge badge-success agree-disagree-btn decision-made-btn" onclick="agree('{{user['_id']}}', 'bad_intentions', this);">Agreed</a>
                     <a  class="badge badge-danger agree-disagree-btn" onclick="disagree('{{user['_id']}}', 'bad_intentions', this);">Disagree</a>
                     {% else %}
                     <a  class="badge badge-success agree-disagree-btn" onclick="agree('{{user['_id']}}', 'bad_intentions', this);">Agree</a>
-                    <a  class="badge badge-danger agree-disagree-btn decision-made-btn" onclick="">Disagreed</a>
+                    <a  class="badge badge-danger agree-disagree-btn decision-made-btn" onclick="disagree('{{user['_id']}}', 'bad_intentions', this);">Disagreed</a>
 
                     {% endif %}
 
@@ -346,6 +346,20 @@
     <div id="chart-container2">
     </div>
     <script>
+            $.extend($.fn.dataTableExt.oSort, {
+                "num-html-pre": function ( a ) {
+                    var x = String(a).replace( /<[\s\S]*?>/g, "" );
+                    return parseFloat( x );
+                },
+
+                "num-html-asc": function ( a, b ) {
+                    return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+                },
+
+                "num-html-desc": function ( a, b ) {
+                    return ((a < b) ? 1 : ((a > b) ? -1 : 0));
+                }
+            } );
 
             function agree(user_id, decision, element){
                 $.ajax({
@@ -356,9 +370,14 @@
                       "user_id": user_id,
                       "decision": "agree"
                     },
-                }).done(function(element) {
-                    element.value = "Agreed";
                 });
+                console.log(element);
+                element.innerHTML = "Agreed";
+                element.classList.add("decision-made-btn");
+                console.log(element.nextElementSibling);
+                element.nextElementSibling.innerHTML = "Disagree";
+                element.nextElementSibling.classList.remove("decision-made-btn");
+
             };
 
             function disagree(user_id, decision, element) {
@@ -370,9 +389,13 @@
                       "user_id": user_id,
                       "decision": "disagree"
                     },
-                }).done(function(element) {
-                    element.value = "Disagreed";
                 });
+                console.log(element);
+                element.innerHTML = "Disagreed";
+                element.classList.add("decision-made-btn");
+                element.previousElementSibling.innerHTML = "Agree";
+                element.previousElementSibling.classList.remove("decision-made-btn");
+                console.log(element.previousElementSibling);
             };
 
 
@@ -403,7 +426,7 @@
                     "columnDefs": [
                         { "orderData": [ 3, 4 ],    "targets": 3 },
                         { "orderData": [ 4, 3 ],    "targets": 4 },
-                        { "type": "any-number", "targets" : [ 3, 4 ] }
+                        { "type": "num-html", "targets" : [3, 4] },
                       ],
                     dom: 'lBfrtip',
                     buttons: [
