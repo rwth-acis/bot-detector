@@ -103,13 +103,25 @@ def profile():
             access_token = user["credentials"]["access_token"]
             api_key_secret = user["credentials"]["api_key_secret"]
             api_key = user["credentials"]["api_key"]
+            if "tried_to_use" in user:
+                tried_to_use = user["tried_to_use"]
+                in_use = user["in_use"]
+            else:
+                tried_to_use = False
+                in_use = False
+            if "exception" in user:
+                exception = user["exception"]
+            else:
+                exception = None
 
             return render_template("profile.html", app_url=os.environ['APP_URL'],
                                    app_url_path=os.environ['APP_URL_PATH'][:-1],
                                    example_db=os.environ['EXAMPLE_DB'], name=username, email=email, user_id=user_id,
                                    user_name=username, access_token_secret=access_token_secret,
                                    access_token=access_token,
-                                   api_key_secret=api_key_secret, api_key=api_key)
+                                   api_key_secret=api_key_secret, api_key=api_key, in_use=in_use,
+                                   tried_to_use=tried_to_use,
+                                   exception=exception)
 
     return render_template("profile.html", app_url=os.environ['APP_URL'],
                            app_url_path=os.environ['APP_URL_PATH'][:-1],
@@ -135,6 +147,71 @@ def profile_credentials():
                                                           'credentials.api_key_secret': api_key_secret,
                                                           'credentials.api_key': api_key,
                                                           }}, upsert=True)
+    col3.update_one({"user_sub": str(user_id)}, {'$set': {'tried_to_use': False}})
+    col3.update_one({"user_sub": str(user_id)}, {'$set': {'in_use': False}})
+
+    return redirect((os.environ['APP_URL']) + "/profile")
+
+
+@app.route(os.environ['APP_URL_PATH'] + 'profile/use/credentials', methods=['GET'])
+@oidc.require_login
+def profile_use_credentials():
+    info = oidc.user_getinfo(['sub'])
+    user_id = info.get('sub')
+
+    col3 = db["API_Credentials"]
+
+    user = col3.find_one({"user_sub": info.get('sub')})
+
+    if user is not None:
+        if "credentials" in user:
+            access_token_secret = user["credentials"]["access_token_secret"]
+            access_token = user["credentials"]["access_token"]
+            api_key_secret = user["credentials"]["api_key_secret"]
+            api_key = user["credentials"]["api_key"]
+        else:
+            return 404
+    else:
+        return 404
+
+    # authorization of consumer key and consumer secret
+    auth = tweepy.OAuthHandler(api_key, api_key_secret)
+
+    # set access to user's access key and access secret
+    auth.set_access_token(access_token, access_token_secret)
+
+    # calling the api
+    api = tweepy.API(auth)
+    try:
+        if api.verify_credentials() == False:
+            print("The user credentials are invalid.")
+            col3.update_one({"user_sub": str(user_id)}, {'$set': {'tried_to_use': True}})
+            col3.update_one({"user_sub": str(user_id)}, {'$set': {'in_use': False}})
+        else:
+            print("The user credentials are valid.")
+            col3.update_one({"user_sub": str(user_id)}, {'$set': {'tried_to_use': True}})
+            col3.update_one({"user_sub": str(user_id)}, {'$set': {'in_use': True}})
+            col3.update_one({"user_sub": str(user_id)}, {'$set': {'exception': None}})
+    except Exception as e:
+        print(e)
+        print("The user credentials are invalid.")
+        col3.update_one({"user_sub": str(user_id)}, {'$set': {'tried_to_use': True}})
+        col3.update_one({"user_sub": str(user_id)}, {'$set': {'exception': str(e)}})
+        col3.update_one({"user_sub": str(user_id)}, {'$set': {'in_use': False}})
+
+    return redirect((os.environ['APP_URL']) + "/profile")
+
+
+@app.route(os.environ['APP_URL_PATH'] + 'profile/do-not-use/credentials', methods=['GET'])
+@oidc.require_login
+def profile_do_not_use_credentials():
+    info = oidc.user_getinfo(['sub'])
+    user_id = info.get('sub')
+
+    col3 = db["API_Credentials"]
+
+    col3.update_one({"user_sub": str(user_id)}, {'$set': {'tried_to_use': False}})
+    col3.update_one({"user_sub": str(user_id)}, {'$set': {'in_use': False}})
 
     return redirect((os.environ['APP_URL']) + "/profile")
 
@@ -1058,11 +1135,26 @@ def part_result():
         # ______________________END_PARAMETERS_______________________
         # ___________________________________________________________
 
+
         consumer_key = os.environ['CONSUMER_KEY']
         consumer_secret = os.environ['CONSUMER_SECRET']
         access_token = os.environ['ACCESS_TOKEN']
         access_token_secret = os.environ['ACCESS_TOKEN_SECRET']
         bearer = os.environ['BEARER']
+
+        if oidc.user_loggedin:
+            info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+            col3 = db["API_Credentials"]
+            current_user = col3.find_one({"user_sub": info.get('sub')})
+
+            if "in_use" in current_user:
+                if current_user["in_use"]:
+                    access_token_secret = current_user["credentials"]["access_token_secret"]
+                    access_token = current_user["credentials"]["access_token"]
+                    consumer_secret = current_user["credentials"]["api_key_secret"]
+                    consumer_key = current_user["credentials"]["api_key"]
+                    bearer = None
+
 
         kafka_url = os.environ['KAFKA_URL']
 

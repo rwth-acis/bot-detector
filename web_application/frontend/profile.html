@@ -2,6 +2,8 @@
 {% block title %}Form{% endblock %}
 {% block html_head %}
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
 <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/themes/smoothness/jquery-ui.css" crossorigin="anonymous" referrerpolicy="no-referrer"/>
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js" crossorigin="anonymous" referrerpolicy="no-referrer" ></script>
 
@@ -74,15 +76,11 @@
                 Twitter API credentials
                 <div style="text-align: center; float:right;">
                     <button type="button" class="btn btn-success to-show" onclick = "showEditing();">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pen" viewBox="0 0 16 16">
-                            <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001zm-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708l-1.585-1.585z"></path>
-                        </svg>
+                        <i class="fa fa-edit"></i>
                         Edit
                     </button>
                     <button type="button" class="btn btn-success to-hide" onclick = "hideEditing(); updateCredentials();">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pen" viewBox="0 0 16 16">
-                            <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001zm-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708l-1.585-1.585z"></path>
-                        </svg>
+                        <i class="fa fa-save"></i>
                         Save
                     </button>
                 </div>
@@ -171,7 +169,40 @@
             </td>
 
         </tr>
+        <tr>
 
+            <td colspan="2" style="text-align: center;" class="to-show">
+
+
+                {% if in_use is defined %}
+                {% if not in_use%}
+                <button type="button" class="btn btn-success to-show" onclick = "location.href = '{{app_url}}/profile/use/credentials';">
+                    <i class="fa fa-power-off"></i>
+                    Use your credentials to make requests
+                </button>
+                {% if tried_to_use is defined %}
+                {% if tried_to_use %}
+                <hr>
+                Your credentials are invalid
+                {% endif %}
+                {% endif %}
+                {% if exception is defined %}
+                {% if exception %}
+                <hr>
+                {{exception}}
+                {% endif %}
+                {% endif %}
+                {% else %}
+                <button type="button" class="btn btn-danger to-show" onclick = "location.href = '{{app_url}}/profile/do-not-use/credentials';">
+                    <i class="fa fa-power-off"></i>
+                    Stop using your credentials to make requests
+                </button>
+                {% endif %}
+                {% endif %}
+
+            </td>
+
+        </tr>
         </tbody>
     </table>
 
@@ -180,6 +211,10 @@
 
 <script>
 
+
+        function tryToUseCredentials(){
+            alert("tryToUseCredentials");
+        };
 
 
         function setCookie(cname, value) {
