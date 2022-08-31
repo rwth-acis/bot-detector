@@ -14,6 +14,7 @@
 
 
 <link rel="stylesheet" href="{{ app_url_path }}{{ url_for('static', filename='main_style.css') }}">
+<link rel="stylesheet" href="{{ app_url_path }}{{ url_for('static', filename='table_page.css') }}">
 
 
 {% endblock %}
@@ -58,4 +59,204 @@
     </table>
 
 </div>
+
+
+
+
+<div style="margin: auto; width: 80%; margin-top: 5%;">
+
+
+    <table class="table table-hover table-bordered" style="background-color:white;">
+        <thead>
+        <tr>
+
+            <th scope="col" colspan="2">
+                Twitter API credentials
+                <div style="text-align: center; float:right;">
+                    <button type="button" class="btn btn-success to-show" onclick = "showEditing();">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pen" viewBox="0 0 16 16">
+                            <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001zm-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708l-1.585-1.585z"></path>
+                        </svg>
+                        Edit
+                    </button>
+                    <button type="button" class="btn btn-success to-hide" onclick = "hideEditing(); updateCredentials();">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pen" viewBox="0 0 16 16">
+                            <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001zm-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708l-1.585-1.585z"></path>
+                        </svg>
+                        Save
+                    </button>
+                </div>
+            </th>
+
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+
+            <td>API Key</td>
+            <td>
+                {% if api_key is defined %}
+                <p class="to-show">{{api_key}}</p>
+                {% else %}
+                <p style="text-align:center" class="to-show">-</p>
+                {% endif %}
+
+                <div id = "api_key" class = "to-hide">
+                    <div class="input-group mb-3" style="margin-top:15px;">
+                        <input type="text" id="input_api_key" class="form-control" placeholder="API Key" aria-label="API Key" aria-describedby="basic-addon2" value="{{api_key}}">
+                    </div>
+                </div>
+
+
+
+
+            </td>
+
+        </tr>
+        <tr>
+
+            <td>API Key Secret</td>
+            <td>
+                {% if api_key_secret is defined %}
+                <p class="to-show">{{api_key_secret}}</p>
+                {% else %}
+                <p style="text-align:center"  class="to-show">-</p>
+                {% endif %}
+
+                <div id = "api_key_secret" class = "to-hide">
+                    <div class="input-group mb-3" style="margin-top:15px;">
+                        <input type="text" id="input_api_key_secret" class="form-control" placeholder="API Key Secret" aria-label="AAPI Key Secret" aria-describedby="basic-addon2" value="{{api_key_secret}}">
+                    </div>
+                </div>
+
+            </td>
+
+        </tr>
+        <tr>
+
+            <td>Access Token</td>
+            <td>
+                {% if access_token is defined %}
+                <p class="to-show">{{access_token}}</p>
+                {% else %}
+                <p style="text-align:center"  class="to-show">-</p>
+                {% endif %}
+
+                <div id = "access_token" class = "to-hide">
+                    <div class="input-group mb-3" style="margin-top:15px;">
+                        <input type="text" id="input_access_token" class="form-control" placeholder="Access Token" aria-label="Access Token" aria-describedby="basic-addon2" value="{{access_token}}">
+                    </div>
+                </div>
+
+            </td>
+
+        </tr>
+
+        <tr>
+
+            <td>Access Token Secret</td>
+            <td>
+                {% if access_token_secret is defined %}
+                <p class="to-show">{{access_token_secret}}</p>
+                {% else %}
+                <p style="text-align:center"  class="to-show">-</p>
+                {% endif %}
+
+                <div id = "access_token_secret" class = "to-hide">
+                    <div class="input-group mb-3" style="margin-top:15px;">
+                        <input type="text" id="input_access_token_secret" class="form-control" placeholder="Access Token Secret" aria-label="Access Token Secret" aria-describedby="basic-addon2" value="{{access_token_secret}}">
+                    </div>
+                </div>
+
+            </td>
+
+        </tr>
+
+        </tbody>
+    </table>
+
+</div>
+
+
+<script>
+
+
+
+        function setCookie(cname, value) {
+           document.cookie = cname + "=" + value;
+        }
+
+        function getCookie(cname) {
+              let name = cname + "=";
+              let decodedCookie = decodeURIComponent(document.cookie);
+              let ca = decodedCookie.split(';');
+              for(let i = 0; i <ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) == ' ') {
+                  c = c.substring(1);
+                }
+                if (c.indexOf(name) == 0) {
+                  return c.substring(name.length, c.length);
+                }
+              }
+              return "";
+        }
+
+        function showEditing(){
+            $('.to-hide').show();
+            $('.to-show').hide();
+            setCookie('Show-credentials', 'true');
+        };
+
+        function hideEditing(){
+            $('.to-hide').hide();
+            $('.to-show').show();
+            setCookie('Show-credentials', 'false');
+        };
+
+        function getOwnerValue(){
+            // Selecting the input element and get its value
+            var inputVal = document.getElementById("input-owner").value;
+
+            window.location.replace("{{app_url}}/access/add/owner/{{collection_id}}/"+ inputVal);
+        };
+
+        function getReadValue(){
+            // Selecting the input element and get its value
+            var inputVal = document.getElementById("input-read").value;
+
+            window.location.replace("{{app_url}}/access/add/read_permission/{{collection_id}}/"+ inputVal);
+        };
+
+        function getWriteValue(){
+            // Selecting the input element and get its value
+            var inputVal = document.getElementById("input-write").value;
+
+            window.location.replace("{{app_url}}/access/add/write_permission/{{collection_id}}/"+ inputVal);
+
+        };
+
+        function updateCredentials(){
+             // Selecting the input element and get its value
+
+            var access_token_secret = document.getElementById("input_access_token_secret").value;
+            var access_token = document.getElementById("input_access_token").value;
+            var api_key_secret = document.getElementById("input_api_key_secret").value;
+            var api_key = document.getElementById("input_api_key").value;
+
+            window.location.replace("{{app_url}}/profile/update/credentials?api_key=" + api_key + "&api_key_secret=" + api_key_secret + "&access_token=" + access_token + "&access_token_secret=" + access_token_secret);
+
+        };
+
+        $(function(){
+            if (getCookie('Show-credentials') == 'true' && getCookie('Show-credentials') != "" ){
+                showEditing();
+                } else {
+                    hideEditing()
+                }
+        });
+
+    </script>
+
+
 {% endblock %}

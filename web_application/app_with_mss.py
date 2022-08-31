@@ -93,10 +93,50 @@ def profile():
     email = info.get('email')
     user_id = info.get('sub')
 
+    col3 = db["API_Credentials"]
+
+    user = col3.find_one({"user_sub": info.get('sub')})
+
+    if user is not None:
+        if "credentials" in user:
+            access_token_secret = user["credentials"]["access_token_secret"]
+            access_token = user["credentials"]["access_token"]
+            api_key_secret = user["credentials"]["api_key_secret"]
+            api_key = user["credentials"]["api_key"]
+
+            return render_template("profile.html", app_url=os.environ['APP_URL'],
+                                   app_url_path=os.environ['APP_URL_PATH'][:-1],
+                                   example_db=os.environ['EXAMPLE_DB'], name=username, email=email, user_id=user_id,
+                                   user_name=username, access_token_secret=access_token_secret,
+                                   access_token=access_token,
+                                   api_key_secret=api_key_secret, api_key=api_key)
+
     return render_template("profile.html", app_url=os.environ['APP_URL'],
                            app_url_path=os.environ['APP_URL_PATH'][:-1],
                            example_db=os.environ['EXAMPLE_DB'], name=username, email=email, user_id=user_id,
                            user_name=username)
+
+
+@app.route(os.environ['APP_URL_PATH'] + 'profile/update/credentials', methods=['GET'])
+@oidc.require_login
+def profile_credentials():
+    info = oidc.user_getinfo(['sub'])
+    user_id = info.get('sub')
+
+    access_token_secret = request.args.get("access_token_secret")
+    access_token = request.args.get("access_token")
+    api_key_secret = request.args.get("api_key_secret")
+    api_key = request.args.get("api_key")
+
+    col3 = db["API_Credentials"]
+
+    col3.update_one({"user_sub": str(user_id)}, {'$set': {'credentials.access_token_secret': access_token_secret,
+                                                          'credentials.access_token': access_token,
+                                                          'credentials.api_key_secret': api_key_secret,
+                                                          'credentials.api_key': api_key,
+                                                          }}, upsert=True)
+
+    return redirect((os.environ['APP_URL']) + "/profile")
 
 
 @app.route(os.environ['APP_URL_PATH'] + 'logout', methods=['GET'])
@@ -429,15 +469,18 @@ def resultid(id):
                 info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
                 username = info.get('preferred_username')
 
-
                 if isinstance(parameters["owner"], dict):
                     col2.update_one({"collection": str(id)}, {'$set': {'owner': [parameters["owner"]["sub"]]}})
                     parameters = col2.find_one({"collection": str(id)})
 
-                if not ((info.get('sub') in parameters["owner"]) or (info.get('sub') in parameters["read_permission"]) or (info.get('sub') in parameters["write_permission"])):
+                if not ((info.get('sub') in parameters["owner"]) or (
+                        info.get('sub') in parameters["read_permission"]) or (
+                                info.get('sub') in parameters["write_permission"])):
                     return error403("403")
 
-                if not ((info.get('sub') in parameters["owner"]) or (info.get('sub') in parameters["write_permission"])) and  (info.get('sub') in parameters["read_permission"]):
+                if not ((info.get('sub') in parameters["owner"]) or (
+                        info.get('sub') in parameters["write_permission"])) and (
+                        info.get('sub') in parameters["read_permission"]):
                     isPublic = True
 
 
@@ -661,6 +704,7 @@ def dashboard_delete_request_owner(id):
 
     return redirect((os.environ['APP_URL']) + "/dashboard")
 
+
 @app.route(os.environ['APP_URL_PATH'] + 'dashboard/delete/read_permission/<id>')
 @oidc.require_login
 def dashboard_delete_request_read_permission(id):
@@ -690,6 +734,7 @@ def dashboard_delete_request_write_permission(id):
 
     return redirect((os.environ['APP_URL']) + "/dashboard")
 
+
 @app.route(os.environ['APP_URL_PATH'] + 'access/<id>')
 @oidc.require_login
 def access(id):
@@ -715,7 +760,8 @@ def access(id):
     return render_template('access.html', collection_id=id,
                            app_url=os.environ['APP_URL'],
                            app_url_path=os.environ['APP_URL_PATH'][:-1],
-                           example_db=os.environ['EXAMPLE_DB'], user_name=username, user_sub=info.get('sub'), owner=req["owner"],
+                           example_db=os.environ['EXAMPLE_DB'], user_name=username, user_sub=info.get('sub'),
+                           owner=req["owner"],
                            read_permission=req["read_permission"], write_permission=req["write_permission"])
 
 
@@ -733,7 +779,6 @@ def add_access_owner(id1, id2):
 
     col1 = db["Permissions"]
 
-
     col1.update_one({"user_id": str(id2)}, {'$addToSet': {'owner': str(id1)}})
     col2.update_one({"collection": str(id1)}, {'$addToSet': {'owner': str(id2)}})
 
@@ -741,6 +786,7 @@ def add_access_owner(id1, id2):
     req["_id"] = str(req["_id"].generation_time).replace("+00:00", "")
 
     return redirect((os.environ['APP_URL']) + "/access/" + id1)
+
 
 @app.route(os.environ['APP_URL_PATH'] + 'access/delete/owner/<id1>/<id2>')
 @oidc.require_login
@@ -758,7 +804,6 @@ def delete_access_owner(id1, id2):
         return error403("403")
 
     col1 = db["Permissions"]
-
 
     col1.update_one({"user_id": info.get('sub')}, {'$pullAll': {'owner': [str(id1)]}})
 
@@ -784,7 +829,6 @@ def add_access_read_permission(id1, id2):
 
     col1 = db["Permissions"]
 
-
     col1.update_one({"user_id": str(id2)}, {'$addToSet': {'read_permission': str(id1)}})
     col2.update_one({"collection": str(id1)}, {'$addToSet': {'read_permission': str(id2)}})
 
@@ -792,6 +836,7 @@ def add_access_read_permission(id1, id2):
     req["_id"] = str(req["_id"].generation_time).replace("+00:00", "")
 
     return redirect((os.environ['APP_URL']) + "/access/" + id1)
+
 
 @app.route(os.environ['APP_URL_PATH'] + 'access/delete/read_permission/<id1>/<id2>')
 @oidc.require_login
@@ -806,9 +851,7 @@ def delete_access_read_permission(id1, id2):
         if (str(info.get('sub')) != str(id2)):
             return error403("403")
 
-
     col1 = db["Permissions"]
-
 
     col1.update_one({"user_id": info.get('sub')}, {'$pullAll': {'read_permission': [str(id1)]}})
 
@@ -834,7 +877,6 @@ def add_access_write_permission(id1, id2):
 
     col1 = db["Permissions"]
 
-
     col1.update_one({"user_id": str(id2)}, {'$addToSet': {'write_permission': str(id1)}})
     col2.update_one({"collection": str(id1)}, {'$addToSet': {'write_permission': str(id2)}})
 
@@ -842,6 +884,7 @@ def add_access_write_permission(id1, id2):
     req["_id"] = str(req["_id"].generation_time).replace("+00:00", "")
 
     return redirect((os.environ['APP_URL']) + "/access/" + id1)
+
 
 @app.route(os.environ['APP_URL_PATH'] + 'access/delete/write_permission/<id1>/<id2>')
 @oidc.require_login
@@ -856,9 +899,7 @@ def delete_access_write_permission(id1, id2):
         if (str(info.get('sub')) != str(id2)):
             return error403("403")
 
-
     col1 = db["Permissions"]
-
 
     col1.update_one({"user_id": info.get('sub')}, {'$pullAll': {'write_permission': [str(id1)]}})
 
@@ -868,7 +909,6 @@ def delete_access_write_permission(id1, id2):
     req["_id"] = str(req["_id"].generation_time).replace("+00:00", "")
 
     return redirect((os.environ['APP_URL']) + "/access/" + id1)
-
 
 
 @app.route(os.environ['APP_URL_PATH'] + "table")
@@ -1119,8 +1159,9 @@ def agree_with_result(collection, decision, id):
 
         col1 = db[collection]
         col1.update_one({"_id": ObjectId(id)},
-                    {'$set': {'classification_result_'+decision: "agree"}})
+                        {'$set': {'classification_result_' + decision: "agree"}})
     return "Ok", 200
+
 
 @app.route(os.environ['APP_URL_PATH'] + '<collection>/disagree/<decision>/<id>', methods=["POST", "GET"])
 def disagree_with_result(collection, decision, id):
@@ -1154,10 +1195,8 @@ def disagree_with_result(collection, decision, id):
 
         col1 = db[collection]
         col1.update_one({"_id": ObjectId(id)},
-                        {'$set': {'classification_result_'+decision: "disagree"}})
+                        {'$set': {'classification_result_' + decision: "disagree"}})
     return "Ok", 200
-
-
 
 
 @app.route(os.environ['APP_URL_PATH'] + 'user-check/<screen_name>', methods=['post', 'get'])
