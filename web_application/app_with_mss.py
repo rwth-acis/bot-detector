@@ -1091,19 +1091,71 @@ def part_result():
 def agree_with_result(collection, decision, id):
     if request.method == "POST":
 
+        info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+        col2 = db["Requests"]
+
+        parameters = col2.find_one({"collection": str(collection)})
+
+        if parameters is not None:
+            if "owner" in parameters:
+                if parameters["owner"] is not None:
+                    if not (info.get('sub') in parameters["owner"]):
+                        if "write_permission" in parameters:
+                            if parameters["write_permission"] is not None:
+                                if not (info.get('sub') in parameters["write_permission"]):
+                                    return error403("403")
+                            else:
+                                return error403("403")
+                        else:
+                            return error403("403")
+
+                else:
+                    return error403("403")
+            else:
+                return error403("403")
+
+        else:
+            return page_not_found("404")
+
         col1 = db[collection]
         col1.update_one({"_id": ObjectId(id)},
                     {'$set': {'classification_result_'+decision: "agree"}})
-    return "Ok"
+    return "Ok", 200
 
 @app.route(os.environ['APP_URL_PATH'] + '<collection>/disagree/<decision>/<id>', methods=["POST", "GET"])
 def disagree_with_result(collection, decision, id):
     if request.method == "POST":
 
+        info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+        col2 = db["Requests"]
+
+        parameters = col2.find_one({"collection": str(collection)})
+
+        if parameters is not None:
+            if "owner" in parameters:
+                if parameters["owner"] is not None:
+                    if not (info.get('sub') in parameters["owner"]):
+                        if "write_permission" in parameters:
+                            if parameters["write_permission"] is not None:
+                                if not (info.get('sub') in parameters["write_permission"]):
+                                    return error403("403")
+                            else:
+                                return error403("403")
+                        else:
+                            return error403("403")
+
+                else:
+                    return error403("403")
+            else:
+                return error403("403")
+
+        else:
+            return page_not_found("404")
+
         col1 = db[collection]
         col1.update_one({"_id": ObjectId(id)},
                         {'$set': {'classification_result_'+decision: "disagree"}})
-    return "Ok"
+    return "Ok", 200
 
 
 

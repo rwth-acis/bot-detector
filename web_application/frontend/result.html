@@ -165,6 +165,7 @@
                 {% if user["signals"]["is_bot_probability"] >= 50 %}
                 <td class="red">
                     <div class="progress-bar position" data-percent='{{user["signals"]["is_bot_probability"]}}' data-duration="800" data-color="white,red,red"></div>
+                    {% if not isPublic%}
                     {% if "classification_result_botness" in user %}
 
                     {% if user["classification_result_botness"] == "agree" %}
@@ -180,12 +181,14 @@
                     {% else %}
                     <a  class="badge badge-success agree-disagree-btn" onclick="agree('{{user['_id']}}', 'botness', this);">Agree</a>
                     <a  class="badge badge-danger agree-disagree-btn" onclick="disagree('{{user['_id']}}', 'botness', this);">Disagree</a>
+                    {% endif %}
                     {% endif %}
                 </td>
                 {% else %}
                 {% if user["signals"]["is_bot_probability"] >= 30 %}
                 <td class="orange">
                     <div class="progress-bar position" data-percent='{{user["signals"]["is_bot_probability"]}}' data-duration="800" data-color="white,orange,orange"></div>
+                    {% if not isPublic%}
                     {% if "classification_result_botness" in user %}
 
                     {% if user["classification_result_botness"] == "agree" %}
@@ -201,12 +204,14 @@
                     {% else %}
                     <a  class="badge badge-success agree-disagree-btn" onclick="agree('{{user['_id']}}', 'botness', this);">Agree</a>
                     <a  class="badge badge-danger agree-disagree-btn" onclick="disagree('{{user['_id']}}', 'botness', this);">Disagree</a>
+                    {% endif %}
                     {% endif %}
                 </td>
                 {% else %}
                 <td class="green">
 
                     <div class="progress-bar position" data-percent='{{user["signals"]["is_bot_probability"]}}' data-duration="800" data-color="white,green,green"></div>
+                    {% if not isPublic%}
                     {% if "classification_result_botness" in user %}
 
                     {% if user["classification_result_botness"] == "agree" %}
@@ -222,6 +227,7 @@
                     {% else %}
                     <a  class="badge badge-success agree-disagree-btn" onclick="agree('{{user['_id']}}', 'botness', this);">Agree</a>
                     <a  class="badge badge-danger agree-disagree-btn" onclick="disagree('{{user['_id']}}', 'botness', this);">Disagree</a>
+                    {% endif %}
                     {% endif %}
                 </td>
                 {% endif %}
@@ -230,6 +236,7 @@
                 {% if user["signals"]["intentions_are_bad_probability"] >= 50 %}
                 <td class="red">
                     <div class="progress-bar position" data-percent='{{user["signals"]["intentions_are_bad_probability"]}}' data-duration="800" data-color="white,red,red"></div>
+                    {% if not isPublic%}
                     {% if "classification_result_bad_intentions" in user %}
 
                     {% if user["classification_result_bad_intentions"] == "agree" %}
@@ -245,12 +252,14 @@
                     {% else %}
                     <a  class="badge badge-success agree-disagree-btn" onclick="agree('{{user['_id']}}', 'bad_intentions', this);">Agree</a>
                     <a  class="badge badge-danger agree-disagree-btn" onclick="disagree('{{user['_id']}}', 'bad_intentions', this);">Disagree</a>
+                    {% endif %}
                     {% endif %}
                 </td>
                 {% else %}
                 {% if user["signals"]["intentions_are_bad_probability"] >= 30 %}
                 <td class="orange">
                     <div class="progress-bar position" data-percent='{{user["signals"]["intentions_are_bad_probability"]}}' data-duration="800" data-color="white,orange,orange"></div>
+                    {% if not isPublic%}
                     {% if "classification_result_bad_intentions" in user %}
 
                     {% if user["classification_result_bad_intentions"] == "agree" %}
@@ -266,11 +275,13 @@
                     {% else %}
                     <a  class="badge badge-success agree-disagree-btn" onclick="agree('{{user['_id']}}', 'bad_intentions', this);">Agree</a>
                     <a  class="badge badge-danger agree-disagree-btn" onclick="disagree('{{user['_id']}}', 'bad_intentions', this);">Disagree</a>
+                    {% endif %}
                     {% endif %}
                 </td>
                 {% else %}
                 <td class="green">
                     <div class="progress-bar position" data-percent='{{user["signals"]["intentions_are_bad_probability"]}}' data-duration="800" data-color="white,green,green"></div>
+                    {% if not isPublic%}
                     {% if "classification_result_bad_intentions" in user %}
 
                     {% if user["classification_result_bad_intentions"] == "agree" %}
@@ -286,6 +297,7 @@
                     {% else %}
                     <a  class="badge badge-success agree-disagree-btn" onclick="agree('{{user['_id']}}', 'bad_intentions', this);">Agree</a>
                     <a  class="badge badge-danger agree-disagree-btn" onclick="disagree('{{user['_id']}}', 'bad_intentions', this);">Disagree</a>
+                    {% endif %}
                     {% endif %}
                 </td>
                 {% endif %}
@@ -370,13 +382,20 @@
                       "user_id": user_id,
                       "decision": "agree"
                     },
+                    success: function(response)
+                      {
+                        console.log(element);
+                        element.innerHTML = "Agreed";
+                        element.classList.add("decision-made-btn");
+                        console.log(element.nextElementSibling);
+                        element.nextElementSibling.innerHTML = "Disagree";
+                        element.nextElementSibling.classList.remove("decision-made-btn");
+                      },
+                      error: function(response)
+                      {
+                        alert(response.status);
+                      }
                 });
-                console.log(element);
-                element.innerHTML = "Agreed";
-                element.classList.add("decision-made-btn");
-                console.log(element.nextElementSibling);
-                element.nextElementSibling.innerHTML = "Disagree";
-                element.nextElementSibling.classList.remove("decision-made-btn");
 
             };
 
@@ -389,13 +408,21 @@
                       "user_id": user_id,
                       "decision": "disagree"
                     },
+                    success: function(response)
+                      {
+                        console.log(element);
+                        element.innerHTML = "Disagreed";
+                        element.classList.add("decision-made-btn");
+                        element.previousElementSibling.innerHTML = "Agree";
+                        element.previousElementSibling.classList.remove("decision-made-btn");
+                        console.log(element.previousElementSibling);
+                      },
+                      error: function(response)
+                      {
+                        alert(response.status);
+                      }
                 });
-                console.log(element);
-                element.innerHTML = "Disagreed";
-                element.classList.add("decision-made-btn");
-                element.previousElementSibling.innerHTML = "Agree";
-                element.previousElementSibling.classList.remove("decision-made-btn");
-                console.log(element.previousElementSibling);
+
             };
 
 
