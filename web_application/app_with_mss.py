@@ -457,7 +457,10 @@ def api_user_check(screen_name):
     access_token = os.environ['ACCESS_TOKEN']
     access_token_secret = os.environ['ACCESS_TOKEN_SECRET']
     bearer = os.environ['BEARER']
+
     use_bearer = int(os.environ['USE_BEARER'])
+    if bearer is None:
+        use_bearer = False
 
     if use_bearer:
         auth = tweepy.OAuth2BearerHandler(bearer)
@@ -1135,7 +1138,6 @@ def part_result():
         # ______________________END_PARAMETERS_______________________
         # ___________________________________________________________
 
-
         consumer_key = os.environ['CONSUMER_KEY']
         consumer_secret = os.environ['CONSUMER_SECRET']
         access_token = os.environ['ACCESS_TOKEN']
@@ -1154,7 +1156,6 @@ def part_result():
                     consumer_secret = current_user["credentials"]["api_key_secret"]
                     consumer_key = current_user["credentials"]["api_key"]
                     bearer = None
-
 
         kafka_url = os.environ['KAFKA_URL']
 
@@ -1316,6 +1317,22 @@ def user_check(screen_name):
     bearer = os.environ['BEARER']
     use_bearer = int(os.environ['USE_BEARER'])
 
+    if oidc.user_loggedin:
+        info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+        col3 = db["API_Credentials"]
+        current_user = col3.find_one({"user_sub": info.get('sub')})
+
+        if "in_use" in current_user:
+            if current_user["in_use"]:
+                access_token_secret = current_user["credentials"]["access_token_secret"]
+                access_token = current_user["credentials"]["access_token"]
+                consumer_secret = current_user["credentials"]["api_key_secret"]
+                consumer_key = current_user["credentials"]["api_key"]
+                bearer = None
+
+    if bearer is None:
+        use_bearer = False
+
     if use_bearer:
         auth = tweepy.OAuth2BearerHandler(bearer)
     else:
@@ -1454,6 +1471,8 @@ def recalc(collection, id):
     access_token_secret = os.environ['ACCESS_TOKEN_SECRET']
     bearer = os.environ['BEARER']
     use_bearer = int(os.environ['USE_BEARER'])
+    if bearer is None:
+        use_bearer = False
 
     if use_bearer:
         auth = tweepy.OAuth2BearerHandler(bearer)

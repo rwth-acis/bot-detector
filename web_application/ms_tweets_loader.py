@@ -102,6 +102,8 @@ def load_tweets():
         bearer = request.form.get("bearer")
 
         use_bearer = int(os.environ['USE_BEARER'])
+        if bearer is None:
+            use_bearer = False
 
         if parameters["SearchParameters1"] == "real-time":
             p1 = multiprocessing.Process(name='p1', target=startTweetsLoader,
