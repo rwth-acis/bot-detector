@@ -48,6 +48,7 @@ div.progress-bar.bg-primary.progress-bar-striped{
     margin-bottom: 3px;
     opacity: 0.4;
     filter: alpha(opacity=40);
+    cursor: pointer;
 }
 
 .agree-disagree-btn:hover{

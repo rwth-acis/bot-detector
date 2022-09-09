@@ -72,7 +72,7 @@ def generate_signals():
         bearer = request.form.get("bearer")
 
         use_bearer = int(os.environ['USE_BEARER'])
-        
+
         if bearer is None:
             use_bearer = False
 
