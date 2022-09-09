@@ -6,6 +6,7 @@ import urllib
 from json import dumps
 import logging
 import uuid
+from json2html import *
 
 import requests
 import tweepy
@@ -249,6 +250,90 @@ def home():
         return render_template("base.html", app_url=os.environ['APP_URL'],
                                app_url_path=os.environ['APP_URL_PATH'][:-1],
                                example_db=os.environ['EXAMPLE_DB'])
+
+
+@app.route(os.environ['APP_URL_PATH'] + "/rate-limit-status-all")
+def rate_limit_status_all():
+    consumer_key = os.environ['CONSUMER_KEY']
+    consumer_secret = os.environ['CONSUMER_SECRET']
+    access_token = os.environ['ACCESS_TOKEN']
+    access_token_secret = os.environ['ACCESS_TOKEN_SECRET']
+    bearer = os.environ['BEARER']
+    use_bearer = int(os.environ['USE_BEARER'])
+
+    if bearer is not None and use_bearer:
+        auth = tweepy.OAuth2BearerHandler(bearer)
+    else:
+        auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+        auth.set_access_token(access_token, access_token_secret)
+
+    api = tweepy.API(auth, retry_count=3, timeout=100000, wait_on_rate_limit=True)
+
+    data = api.rate_limit_status()
+
+    for attr, value in data["resources"].items():
+        for attr1, value1 in data["resources"][attr].items():
+            data["resources"][attr][attr1]["reset"] = datetime.datetime.fromtimestamp(
+                data["resources"][attr][attr1]["reset"]).strftime("%I:%M:%S %B %d, %Y ")
+
+    table = Markup(json2html.convert(json=data["resources"],
+                                     table_attributes="id=\"rate-limit-status-table\" class=\"table table-bordered table-hover\""))
+
+    if oidc.user_loggedin:
+        info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+
+        username = info.get('preferred_username')
+        return render_template("rate_limit_status.html", app_url=os.environ['APP_URL'],
+                               app_url_path=os.environ['APP_URL_PATH'][:-1],
+                               example_db=os.environ['EXAMPLE_DB'], user_name=username, table=table)
+    else:
+        return render_template("rate_limit_status.html", app_url=os.environ['APP_URL'],
+                               app_url_path=os.environ['APP_URL_PATH'][:-1],
+                               example_db=os.environ['EXAMPLE_DB'], table=table)
+
+
+@app.route(os.environ['APP_URL_PATH'] + "/rate-limit-status")
+def rate_limit_status():
+    consumer_key = os.environ['CONSUMER_KEY']
+    consumer_secret = os.environ['CONSUMER_SECRET']
+    access_token = os.environ['ACCESS_TOKEN']
+    access_token_secret = os.environ['ACCESS_TOKEN_SECRET']
+    bearer = os.environ['BEARER']
+    use_bearer = int(os.environ['USE_BEARER'])
+
+    if bearer is not None and use_bearer:
+        auth = tweepy.OAuth2BearerHandler(bearer)
+    else:
+        auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+        auth.set_access_token(access_token, access_token_secret)
+
+    api = tweepy.API(auth, retry_count=3, timeout=100000, wait_on_rate_limit=True)
+
+    data = api.rate_limit_status()
+
+    for attr in list(data["resources"].keys()):
+        if attr != "users" and attr != "statuses":
+            del data["resources"][attr]
+
+    for attr in data["resources"].keys():
+        for attr1 in data["resources"][attr].keys():
+            data["resources"][attr][attr1]["reset"] = datetime.datetime.fromtimestamp(
+                data["resources"][attr][attr1]["reset"]).strftime("%I:%M:%S %B %d, %Y ")
+
+    table = Markup(json2html.convert(json=data["resources"],
+                                     table_attributes="id=\"rate-limit-status-table\" class=\"table table-bordered table-hover\""))
+
+    if oidc.user_loggedin:
+        info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+
+        username = info.get('preferred_username')
+        return render_template("rate_limit_status.html", app_url=os.environ['APP_URL'],
+                               app_url_path=os.environ['APP_URL_PATH'][:-1],
+                               example_db=os.environ['EXAMPLE_DB'], user_name=username, table=table)
+    else:
+        return render_template("rate_limit_status.html", app_url=os.environ['APP_URL'],
+                               app_url_path=os.environ['APP_URL_PATH'][:-1],
+                               example_db=os.environ['EXAMPLE_DB'], table=table)
 
 
 ###############################################################################
