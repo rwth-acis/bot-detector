@@ -507,6 +507,12 @@ a.dropdown-item:hover{
   text-decoration: none;
 }
 
+#save-as-favourite-div{
+      float:right;
+      margin-top: 10px;
+      margin-bottom: 10px;
+}
+
 
 @media only screen and (max-width: 700px) {
   body{
@@ -669,6 +675,16 @@ a.dropdown-item:hover{
     	margin-bottom: 30px;
     }
 
+    .form-style-10 input[type="submit"] {
+
+        margin: auto;
+        width: 100%;
+    }
+    #save-as-favourite-div{
+            margin: auto;
+            width: 170px;
+            margin-bottom: 10px;
+    }
 
 }
 
