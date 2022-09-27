@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{% block title %}Result{% endblock %}
+
+{% block html_head %}
+<!--<meta http-equiv="refresh" content="10">-->
+<script src="https://d3js.org/d3.v7.min.js"></script>
+
+<!---->
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.css" />
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.13/css/dataTables.jqueryui.css" />
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.2.4/css/buttons.jqueryui.css" />
+
+<script type="text/javascript" src="https://code.jquery.com/jquery-2.2.4.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.js"></script>
+<script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.js"></script>
+<script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.13/js/dataTables.jqueryui.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.4/js/dataTables.buttons.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.4/js/buttons.jqueryui.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.4/js/buttons.colVis.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.4/js/buttons.flash.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.4/js/buttons.html5.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.4/js/buttons.print.js"></script>
+<!--   -->
+
+<script src="https://cdn.anychart.com/releases/8.10.0/js/anychart-core.min.js"></script>
+<script src="https://cdn.anychart.com/releases/8.10.0/js/anychart-pie.min.js"></script>
+<link rel="stylesheet" href="{{ app_url_path }}{{ url_for('static', filename='table_page.css') }}">
+
+
+
+<link rel="stylesheet" href="{{ app_url_path }}{{ url_for('static', filename='jQuery-plugin-progressbar.css') }}">
+<script src="{{ app_url_path }}{{ url_for('static', filename='jQuery-plugin-progressbar.js') }}"></script>
+
+{% endblock %}
+
+
+{% block content %}
+
+
+<div class="title-section" style="text-align:center; padding:10px;">
+    Saved favourite requests:
+</div>
+<div id="scroll1" style="overflow-x:scroll; padding-left:0; padding-right:0px;">
+    <div></div>
+</div>
+<div id="div-main-table" class="display nowrap" style="margin-bottom: 30px;">
+
+
+    <table id="main-table">
+        <thead>
+        <tr>
+            <th>Keywords</th>
+            <th>Limit of users for checking</th>
+            <th>Search type</th>
+            <th>Additional parameters for tweets</th>
+            <th>Actions</th>
+
+
+        </tr>
+        </thead>
+
+        <tbody>
+        {% for request in saved_requests %}
+        <tr>
+
+            <td>
+                {{request["keywords"]}}
+            </td>
+
+            <td>
+                <p style="text-align: center;"> {{request["limit"]}} </p>
+            </td>
+
+            <td>
+                {% if request["SearchParameters1"] == "real-time" %}
+                Check the real-time stream of public tweets
+                {% endif %}
+                {% if request["SearchParameters1"] == "time-period" %}
+                Check tweets from {{request["start_date"]}} - {{request["end_date"]}}
+                {% endif %}
+                {% if request["SearchParameters1"] == "seven-days" %}
+                Check tweets from the last 7 days
+                {% endif %}
+                {% if request["SearchParameters1"] == "recent" %}
+                Check the most recent tweets
+                {% endif %}
+                {% if request["SearchParameters1"] == "popular" %}
+                Check the most popular tweets
+                {% endif %}
+                {% if request["SearchParameters1"] == "mixed" %}
+                Check both popular and most recent tweets
+                {% endif %}
+            </td>
+
+            <td>
+                {% if request["areaParameters1"] == "do-not" %}
+                <p>&bull; Do not check retweets</p>
+                {% endif %}
+                {% if request["areaParameters1"] == "only" %}
+                <p>&bull; Only check retweets</p>
+                {% endif %}
+
+                {% if request["areaParameters2"] == "do-not" %}
+                <p>&bull; Do not check tweets that contain URLs</p>
+                {% endif %}
+                {% if request["areaParameters2"] == "only" %}
+                <p>&bull; Only check tweets that contain a URL</p>
+                {% endif %}
+
+                {% if request["areaParameters3"] == "do-not" %}
+                <p>&bull; Do not check tweets that contain media (e.g. photos or videos)</p>
+                {% endif %}
+                {% if request["areaParameters3"] == "only" %}
+                <p>&bull; Only check tweets that contain media (e.g. photos or videos)</p>
+                {% endif %}
+
+                {% if request["areaParameters1"] == "all" and request["areaParameters2"] == "all" and request["areaParameters3"] == "all"%}
+                <p style="text-align: center;"> - </p>
+                {% endif %}
+
+            </td>
+
+
+
+            <td style="text-align: center;">
+                <a href="{{app_url}}/index?preset_values=True&collection={{ request['collection'] }}" class="btn btn-info" target="_blank" style="margin:auto; margin-bottom:5px; padding:0.2rem 0.75rem;">Repeat request</a>
+
+
+                <button type="button" data-collection-id="{{request['collection']}}"  class="btn btn-outline-danger open-deleteModal" style="padding:3px; background-color:red; border: white; margin:auto;" data-toggle="modal" data-target="#deleteModal">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"></path>
+                        <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"></path>
+                    </svg>
+                </button>
+            </td>
+
+        </tr>
+        {% endfor %}
+        </tbody>
+        <tfoot>
+        </tfoot>
+
+    </table>
+</div>
+
+
+
+
+
+<!-- Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Confirm deletion</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true" style="font-size:16px;">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this request?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+                <button type="button" class="btn btn-primary" id="confirmDeletionBtn">Yes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+            $(document).on("click", ".open-deleteModal", function () {
+                 var collectionId = $(this).data('collection-id');
+                 var permissionType = $(this).data('permission-type');
+                 $('.modal-footer #confirmDeletionBtn').click(function(){location.href = "{{app_url}}/saved_favourite_requests/delete/" + collectionId;});
+
+            });
+
+            $(document).ready(function(){
+
+                $('#main-table').DataTable({
+                    stateSave: true,
+                    dom: 'lfrtip',
+                    "lengthMenu": [10,25,50,100]
+                 });
+
+
+
+                $("#scroll1 div").width($("#main-table").width());
+                $("#scroll1").on("scroll", function(){
+                    $("#div-main-table").scrollLeft($(this).scrollLeft());
+                });
+                $("#div-main-table").on("scroll", function(){
+                    $("#scroll1").scrollLeft($(this).scrollLeft());
+                 });
+
+            });
+
+
+    </script>
+
+{% endblock %}

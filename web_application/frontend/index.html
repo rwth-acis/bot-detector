@@ -2,6 +2,8 @@
 {% block title %}Form{% endblock %}
 {% block html_head %}
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
 <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/themes/smoothness/jquery-ui.css" crossorigin="anonymous" referrerpolicy="no-referrer"/>
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js" crossorigin="anonymous" referrerpolicy="no-referrer" ></script>
 
@@ -28,11 +30,11 @@
 
             <form action='{{app_url}}/part-result' method="POST">
                 <div class="btn-group btn-group-toggle" id="buttons-search-parameters" data-toggle="buttons">
-                    <label class="btn btn-outline-info form-check-label active" onclick="hideBasic()">
-                        <input class="form-check-input" type="radio" name="requestOptions" value="basic" id="basic" autocomplete="off" checked>
+                    <label class="btn btn-outline-info form-check-label" id="btn-basic" onclick="hideBasic()">
+                        <input class="form-check-input" type="radio" name="requestOptions" value="basic" id="basic" autocomplete="off">
                         Basic request
                     </label>
-                    <label class="btn btn-outline-dark form-check-label" onclick="hideAdvanced()">
+                    <label class="btn btn-outline-dark form-check-label" id="btn-advanced" onclick="hideAdvanced()">
                         <input class="form-check-input" type="radio" name="requestOptions" value="advanced" id="advanced" autocomplete="off">
                         Advanced request
                     </label>
@@ -71,7 +73,7 @@
 
                     </div>
                     <div class="areaParameters">
-                        <label>Maximum number of users to be checked:<input type="text" name="limit" value="50" /></label>
+                        <label>Maximum number of users to be checked:<input type="text" name="limit" value="50" id="input-limit" /></label>
                     </div>
                 </div>
                 <div class="section hide-advanced"><span>1</span>Tweets Parameters</div>
@@ -87,7 +89,7 @@
                             <i class="fa fa-info-circle" aria-hidden="true"></i>
                         </span>
 
-                        <input type="text" name="keywords" /></label>
+                        <input type="text" name="keywords" id="input-keywords" /></label>
                     <div class="areaParameters hide-basic hide-real-time">
             
                         <label><input type="radio"
@@ -159,15 +161,145 @@
                 </div>
                 -->
                 <div class="button-section">
+
+                    {% if not isPublic %}
                     <div class="form-check form-check-inline" id="save-as-favourite-div">
-                        <input class="form-check-input" type="checkbox" id="save-as-favourite" value="save">
+                        <input class="form-check-input" type="checkbox" name="save-as-favourite" id="save-as-favourite" value="save">
                         <label class="form-check-label" for="save-as-favourite" style="margin: auto;">Save to favourite requests</label>
                     </div>
+                    {% endif %}
 
                     <input type="submit" name="submit" value="Submit" />
+
 
 
                 </div>
             </form>
         </div>
+
+<script>
+
+    $(document).ready(function(){
+        {% if preset_values %}
+
+         $('#input-keywords').val('{{parameters["keywords"]}}');
+
+
+         if ('{{parameters["SearchParameters1"]}}' === 'mixed' && '{{parameters["limit"]}}' === '20'
+         && '{{parameters["areaParameters1"]}}' === 'all' && '{{parameters["areaParameters2"]}}' === 'all'
+         && '{{parameters["areaParameters3"]}}' === 'all'){
+            hideBasic();
+            document.getElementById('basic').checked = true;
+            document.getElementById('advanced').checked = false;
+
+
+         } else {
+
+
+            document.getElementById('btn-advanced').click();
+
+            document.getElementById('btn-advanced').classList.add("active");
+            document.getElementById('btn-advanced').classList.add("focus");
+
+            document.getElementById('basic').checked = false;
+            document.getElementById('advanced').checked = true;
+
+
+
+
+            $('#input-limit').val('{{parameters["limit"]}}');
+
+
+            {% if parameters["SearchParameters1"] == "real-time" %}
+
+             document.getElementById('real-time').click();
+
+            {% endif %}
+            {% if parameters["SearchParameters1"] == "time-period" %}
+
+            document.getElementById('time-period').click();
+
+            var min = document.getElementById("start-date").getAttribute("min");
+            var max = document.getElementById("end-date").getAttribute("max");
+
+
+            if ("{{parameters['start_date']}}" >= min && "{{parameters['end_date']}}" <= max){
+
+                $('#start-date').val("{{parameters['start_date']}}");
+                $('#end-date').val("{{parameters['end_date']}}");
+            }
+
+
+            {% endif %}
+            {% if parameters["SearchParameters1"] == "seven-days" %}
+
+            document.getElementById('seven-days').click();
+
+            {% endif %}
+            {% if parameters["SearchParameters1"] == "recent" %}
+
+            document.getElementById('recent').click();
+
+            {% endif %}
+            {% if parameters["SearchParameters1"] == "popular" %}
+
+            document.getElementById('popular').click();
+
+            {% endif %}
+            {% if parameters["SearchParameters1"] == "mixed" %}
+
+            document.getElementById('mixed').click();
+
+            {% endif %}
+
+
+
+            {% if parameters["areaParameters1"] == "do-not" %}
+
+             $('input[name=areaParameters1][value="do-not"]')[0].click();
+
+            {% endif %}
+            {% if parameters["areaParameters1"] == "only" %}
+
+             $('input[name=areaParameters1][value="only"]')[0].click();
+
+            {% endif %}
+
+            {% if parameters["areaParameters2"] == "do-not" %}
+
+             $('input[name=areaParameters2][value="do-not"]')[0].click();
+
+            {% endif %}
+            {% if parameters["areaParameters2"] == "only" %}
+
+             $('input[name=areaParameters2][value="only"]')[0].click();
+
+            {% endif %}
+
+            {% if parameters["areaParameters3"] == "do-not" %}
+
+             $('input[name=areaParameters3][value="do-not"]')[0].click();
+
+            {% endif %}
+            {% if parameters["areaParameters3"] == "only" %}
+
+             $('input[name=areaParameters3][value="only"]')[0].click();
+
+            {% endif %}
+
+
+         }
+         {% else %}
+
+         document.getElementById('basic').checked = true;
+         document.getElementById('advanced').checked = false;
+         hideBasic();
+
+
+        {% endif %}
+
+
+    });
+
+</script>
 {% endblock %}

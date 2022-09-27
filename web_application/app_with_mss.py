@@ -836,6 +836,37 @@ def dashboard():
                            example_db=os.environ['EXAMPLE_DB'], user_name=username, user_history=True)
 
 
+@app.route(os.environ['APP_URL_PATH'] + 'favourite-requests')
+@oidc.require_login
+def favourite_requests():
+    info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+    username = info.get('preferred_username')
+    col1 = db["SavedFavoriteRequests"]
+    user = col1.find_one({"user_id": info.get('sub')})
+
+    r = []
+    if user is not None:
+        if "requests" in user:
+            r = user["requests"]
+
+    return render_template('saved_favourite_requests.html', saved_requests=r,
+                           app_url=os.environ['APP_URL'],
+                           app_url_path=os.environ['APP_URL_PATH'][:-1],
+                           example_db=os.environ['EXAMPLE_DB'], user_name=username)
+
+
+@app.route(os.environ['APP_URL_PATH'] + 'saved_favourite_requests/delete/<collection>')
+@oidc.require_login
+def favourite_requests_delete_request(collection):
+    info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+
+    col1 = db["SavedFavoriteRequests"]
+    col1.update_one({"user_id": info.get('sub')}, {'$pull': {'requests': {"collection": collection}}})
+
+    return redirect((os.environ['APP_URL']) + "/favourite-requests")
+
+
+
 @app.route(os.environ['APP_URL_PATH'] + 'dashboard/delete/owner/<id>')
 @oidc.require_login
 def dashboard_delete_request_owner(id):
@@ -1091,19 +1122,32 @@ def table():
                                example_db=os.environ['EXAMPLE_DB'])
 
 
+
+
 @app.route(os.environ['APP_URL_PATH'] + "index")
 def about():
+    if "preset_values" in request.args:
+        preset_values = request.args["preset_values"]
+        col2 = db["Requests"]
+        parameters = col2.find_one({"collection": request.args["collection"]})
+    else:
+        preset_values = False
+        parameters = None
+
+
     if oidc.user_loggedin:
         info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
 
         username = info.get('preferred_username')
         return render_template("index.html", app_url=os.environ['APP_URL'],
                                app_url_path=os.environ['APP_URL_PATH'][:-1],
-                               example_db=os.environ['EXAMPLE_DB'], user_name=username)
+                               example_db=os.environ['EXAMPLE_DB'], user_name=username, isPublic=False,
+                               preset_values=preset_values, parameters=parameters)
     else:
         return render_template("index.html", app_url=os.environ['APP_URL'],
                                app_url_path=os.environ['APP_URL_PATH'][:-1],
-                               example_db=os.environ['EXAMPLE_DB'])
+                               example_db=os.environ['EXAMPLE_DB'], isPublic=True,
+                               preset_values=preset_values, parameters=parameters)
 
 
 @app.route(os.environ['APP_URL_PATH'] + "part-result", methods=['post', 'get'])
@@ -1198,7 +1242,20 @@ def part_result():
             }
 
             col3 = db["Permissions"]
-            col3.update_one({'user_id': info.get('sub')}, {"$push": {"owner": str(id)}}, upsert=True);
+            col3.update_one({'user_id': info.get('sub')}, {"$push": {"owner": str(id)}}, upsert=True)
+
+            if request.form.get('save-as-favourite'):
+                print("save as favourite!")
+                col4 = db["SavedFavoriteRequests"]
+                saved_parameters = parameters.copy()
+                saved_parameters.pop("owner")
+                saved_parameters.pop("read_permission")
+                saved_parameters.pop("write_permission")
+                col4.update_one({'user_id': info.get('sub')}, {"$addToSet": {"requests": saved_parameters}},
+                                upsert=True);
+
+            else:
+                print("do not save as favourite")
 
         else:
             parameters = {
