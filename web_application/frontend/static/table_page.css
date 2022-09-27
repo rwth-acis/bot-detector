@@ -51,6 +51,22 @@ div.progress-bar.bg-primary.progress-bar-striped{
     cursor: pointer;
 }
 
+.return-btn{
+    margin-bottom: 15px !important;
+}
+
+.div-parameters{
+    margin: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-width: 2px 0 2px 0;
+    border-style: solid;
+    border-image: linear-gradient(to left, #F8F8F8, #006699) 1 0;
+}
+.title-section p{
+ margin-bottom: 5px;
+}
+
 .agree-disagree-btn:hover{
     color: white !important;
     opacity: 1;

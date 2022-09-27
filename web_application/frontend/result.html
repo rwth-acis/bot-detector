@@ -43,7 +43,7 @@
 
     <div class="title-section">
         <p>Detection result for the following parameters:</p>
-        <div>
+        <div class="div-parameters">
         <p>&bull; Keywords: {{parameters["keywords"]}}</p>
         {% if parameters["areaParameters1"] == "do-not" %}
         <p>&bull; Do not check retweets</p>
@@ -88,6 +88,8 @@
         </div>
 
 
+        <button class="btn btn-info return-btn"  onclick="location.href = '{{app_url}}/index?preset_values=True&collection={{ parameters['collection'] }}'">Go back to setting request parameters</button>
+
     </div>
 
     {% if ready_count < 100 %}
@@ -109,10 +111,7 @@
     {% if parameters["SearchParameters1"] == "real-time" %}
     <p class="prog" style="font-size: 12px; text-align: center;">Checking the real-time stream of public tweets. Sometimes a query is too specific, and it can take several hours before the first results appear.</p>
     {% endif %}
-    {% else %}
-    <div class="progress progress-md prog" style="height: 30px;">
-        <div class="progress-bar bg-primary progress-bar-striped" role="progressbar"  style="width: {{ready_count}}%" aria-valuenow="{{ready_count}}" aria-valuemin="0" aria-valuemax="100" data-percent='{{ready_count}}' data-duration="1" >100%</div>
-    </div>
+
     {% endif %}
 
 
