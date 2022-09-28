@@ -712,6 +712,17 @@ def resultid(id):
             info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
 
             username = info.get('preferred_username')
+
+            col4 = db["SavedFavoriteRequests"]
+            saved_by_user = col4.find_one({'user_id': info.get('sub'), "requests.collection": str(id)})
+            already_saved = False
+            if saved_by_user is not None:
+                if "requests" in saved_by_user:
+                    for x in saved_by_user["requests"]:
+                        if x["collection"] == str(id):
+                            already_saved = True
+                            break
+
             return render_template('result.html', users=col1.find(), folium_map=Markup(folium_map._repr_html_()),
                                    app_url=os.environ['APP_URL'],
                                    negative_count1=negative_count1, positive_count1=positive_count1,
@@ -719,7 +730,8 @@ def resultid(id):
                                    positive_count2=positive_count2, neutral_count2=neutral_count2,
                                    collection=str(id), parameters=parameters, ready_count=ready_count,
                                    app_url_path=os.environ['APP_URL_PATH'][:-1],
-                                   example_db=os.environ['EXAMPLE_DB'], user_name=username, isPublic=isPublic)
+                                   example_db=os.environ['EXAMPLE_DB'], user_name=username, isPublic=isPublic,
+                                   already_saved=already_saved)
         else:
             return render_template('result.html', users=col1.find(), folium_map=Markup(folium_map._repr_html_()),
                                    app_url=os.environ['APP_URL'],
@@ -855,6 +867,25 @@ def favourite_requests():
                            example_db=os.environ['EXAMPLE_DB'], user_name=username)
 
 
+@app.route(os.environ['APP_URL_PATH'] + 'result/favourite-requests/add/<collection>')
+@oidc.require_login
+def favourite_requests_add_request(collection):
+    info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+
+    col2 = db["Requests"]
+    parameters = col2.find_one({"collection": str(collection)})
+
+    col4 = db["SavedFavoriteRequests"]
+    saved_parameters = parameters.copy()
+    saved_parameters.pop("owner", None)
+    saved_parameters.pop("read_permission", None)
+    saved_parameters.pop("write_permission", None)
+    col4.update_one({'user_id': info.get('sub')}, {"$addToSet": {"requests": saved_parameters}},
+                    upsert=True)
+
+    return redirect((os.environ['APP_URL']) + "/result/" + collection)
+
+
 @app.route(os.environ['APP_URL_PATH'] + 'saved_favourite_requests/delete/<collection>')
 @oidc.require_login
 def favourite_requests_delete_request(collection):
@@ -864,7 +895,6 @@ def favourite_requests_delete_request(collection):
     col1.update_one({"user_id": info.get('sub')}, {'$pull': {'requests': {"collection": collection}}})
 
     return redirect((os.environ['APP_URL']) + "/favourite-requests")
-
 
 
 @app.route(os.environ['APP_URL_PATH'] + 'dashboard/delete/owner/<id>')
@@ -1122,8 +1152,6 @@ def table():
                                example_db=os.environ['EXAMPLE_DB'])
 
 
-
-
 @app.route(os.environ['APP_URL_PATH'] + "index")
 def about():
     if "preset_values" in request.args:
@@ -1133,7 +1161,6 @@ def about():
     else:
         preset_values = False
         parameters = None
-
 
     if oidc.user_loggedin:
         info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
@@ -1248,11 +1275,11 @@ def part_result():
                 print("save as favourite!")
                 col4 = db["SavedFavoriteRequests"]
                 saved_parameters = parameters.copy()
-                saved_parameters.pop("owner")
-                saved_parameters.pop("read_permission")
-                saved_parameters.pop("write_permission")
+                saved_parameters.pop("owner", None)
+                saved_parameters.pop("read_permission", None)
+                saved_parameters.pop("write_permission", None)
                 col4.update_one({'user_id': info.get('sub')}, {"$addToSet": {"requests": saved_parameters}},
-                                upsert=True);
+                                upsert=True)
 
             else:
                 print("do not save as favourite")

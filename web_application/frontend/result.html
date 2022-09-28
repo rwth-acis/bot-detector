@@ -42,7 +42,14 @@
 {% block content %}
 
     <div class="title-section">
-        <p>Detection result for the following parameters:</p>
+        <p class="position-relative">
+            Detection result for the following parameters:
+            {% if already_saved is defined %}
+            {% if already_saved%}
+            <span class="position-absolute badge badge-pill badge-success bdg-saved-as-favourite">saved as favourite</span>
+            {% endif %}
+            {% endif %}
+        </p>
         <div class="div-parameters">
         <p>&bull; Keywords: {{parameters["keywords"]}}</p>
         {% if parameters["areaParameters1"] == "do-not" %}
@@ -88,8 +95,12 @@
         </div>
 
 
-        <button class="btn btn-info return-btn"  onclick="location.href = '{{app_url}}/index?preset_values=True&collection={{ parameters['collection'] }}'">Go back to setting request parameters</button>
-
+        <button class="btn btn-info return-btn"  onclick="location.href = '{{app_url}}/index?preset_values=True&collection={{ parameters['collection'] }}'">Сhange request parameters</button>
+        {% if already_saved is defined %}
+        {% if not already_saved%}
+        <button class="btn btn-info return-btn"  onclick="location.href = '{{app_url}}/result/favourite-requests/add/{{ parameters['collection'] }}'">Save request as favourite</button>
+        {% endif %}
+        {% endif %}
     </div>
 
     {% if ready_count < 100 %}

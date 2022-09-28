@@ -200,6 +200,19 @@ span{
     margin-left: 4px;
 }
 
+.bdg-saved-as-favourite{
+    font-size: 10px;
+    font-weight: lighter;
+    left: 50px;
+    right: 0;
+    bottom: -18px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 92px;
+}
+
+
+
 
 input[type="radio"] {
   /* remove standard background appearance */
