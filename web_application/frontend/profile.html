@@ -37,7 +37,7 @@
 <div style="margin: auto; width: 80%; margin-top: 5%;">
 
 
-    <table class="table table-hover table-bordered" style="background-color:white;">
+    <table class="table table-hover table-bordered" style="background-color:white; word-break: break-all;">
         <thead>
         <tr>
 
@@ -73,7 +73,7 @@
 
 
 
-<div style="margin: auto; width: 80%; margin-top: 5%;">
+<div style="margin: auto; width: 80%; margin-top: 5%; padding-bottom: 25px;">
 
 
     <table class="table table-hover table-bordered" style="background-color:white;">
@@ -81,17 +81,37 @@
         <tr>
 
             <th scope="col" colspan="2">
+                <p class="d-inline position-relative">
                 Twitter API credentials
-                <div style="text-align: center; float:right;">
-                    <button type="button" class="btn btn-success to-show" onclick = "showEditing();">
+
+                {% if in_use is defined %}
+                {% if in_use%}
+                <span class="position-absolute top-0 start-100 translate-middle badge badge-pill badge-success bdg-credentials">in use</span>
+                {% endif %}
+                {% endif %}
+
+                {% if in_use is defined %}
+                {% if not in_use%}
+                {% if tried_to_use is defined %}
+                {% if tried_to_use %}
+                <span class="position-absolute top-0 start-100 translate-middle badge badge-pill badge-danger bdg-credentials">not valid</span>
+                {% endif %}
+                {% endif %}
+                {% endif %}
+                {% endif %}
+                </p>
+
+
+                <div style="text-align: center; float:right; margin-left: 50px;">
+                    <button type="button" class="btn btn-primary to-show" onclick = "showEditing();">
                         <i class="fa fa-edit"></i>
                         Edit
                     </button>
-                    <button type="button" class="btn btn-success to-hide" onclick = "hideEditing(); updateCredentials();">
+                    <button type="button" class="btn btn-primary to-hide" onclick = "hideEditing(); updateCredentials();">
                         <i class="fa fa-save"></i>
                         Save
                     </button>
-                    <i class="btn btn-success bi bi-eye-slash"
+                    <i class="btn btn-dark bi bi-eye-slash"
                        id="btn-hide-password"></i>
                 </div>
             </th>
@@ -251,6 +271,7 @@
             $('.to-hide').show();
             $('.to-show').hide();
             setCookie('Show-credentials', 'true');
+            $(".password-to-hide").removeClass("password_field");
         };
 
         function hideEditing(){

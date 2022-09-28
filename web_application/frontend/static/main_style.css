@@ -194,6 +194,12 @@ span{
     padding-top: 3px;
 }
 
+.bdg-credentials{
+    font-size: 10px;
+    font-weight: lighter;
+    margin-left: 4px;
+}
+
 
 input[type="radio"] {
   /* remove standard background appearance */
