@@ -182,7 +182,19 @@ span{
     padding-bottom: 10px;
     border-image: linear-gradient(to left, #F8F8F8, #006699) 1 0;
 
-} 
+}
+
+
+.password_field{
+ -webkit-text-security:disc;
+}
+
+#btn-hide-password {
+    font-size: 18px;
+    padding-top: 3px;
+}
+
+
 input[type="radio"] {
   /* remove standard background appearance */
   -webkit-appearance: none;

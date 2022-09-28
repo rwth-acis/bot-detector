@@ -2,6 +2,14 @@
 {% block title %}Form{% endblock %}
 {% block html_head %}
 
+<link rel="stylesheet" href=
+        "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css" />
+<link rel="stylesheet" href=
+        "https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity=
+              "sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous">
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/themes/smoothness/jquery-ui.css" crossorigin="anonymous" referrerpolicy="no-referrer"/>
@@ -83,6 +91,8 @@
                         <i class="fa fa-save"></i>
                         Save
                     </button>
+                    <i class="btn btn-success bi bi-eye-slash"
+                       id="btn-hide-password"></i>
                 </div>
             </th>
 
@@ -94,14 +104,14 @@
             <td>API Key</td>
             <td>
                 {% if api_key is defined %}
-                <p class="to-show">{{api_key}}</p>
+                <p class="to-show password-to-hide">{{api_key}}</p>
                 {% else %}
                 <p style="text-align:center" class="to-show">-</p>
                 {% endif %}
 
                 <div id = "api_key" class = "to-hide">
                     <div class="input-group mb-3" style="margin-top:15px;">
-                        <input type="text" id="input_api_key" class="form-control" placeholder="API Key" aria-label="API Key" aria-describedby="basic-addon2" value="{{api_key}}">
+                        <input type="text" id="input_api_key" class="form-control password-to-hide" placeholder="API Key" aria-label="API Key" aria-describedby="basic-addon2" value="{{api_key}}">
                     </div>
                 </div>
 
@@ -116,14 +126,14 @@
             <td>API Key Secret</td>
             <td>
                 {% if api_key_secret is defined %}
-                <p class="to-show">{{api_key_secret}}</p>
+                <p class="to-show password-to-hide">{{api_key_secret}}</p>
                 {% else %}
                 <p style="text-align:center"  class="to-show">-</p>
                 {% endif %}
 
                 <div id = "api_key_secret" class = "to-hide">
                     <div class="input-group mb-3" style="margin-top:15px;">
-                        <input type="text" id="input_api_key_secret" class="form-control" placeholder="API Key Secret" aria-label="AAPI Key Secret" aria-describedby="basic-addon2" value="{{api_key_secret}}">
+                        <input type="text" id="input_api_key_secret" class="form-control password-to-hide" placeholder="API Key Secret" aria-label="AAPI Key Secret" aria-describedby="basic-addon2" value="{{api_key_secret}}">
                     </div>
                 </div>
 
@@ -135,14 +145,14 @@
             <td>Access Token</td>
             <td>
                 {% if access_token is defined %}
-                <p class="to-show">{{access_token}}</p>
+                <p class="to-show password-to-hide">{{access_token}}</p>
                 {% else %}
                 <p style="text-align:center"  class="to-show">-</p>
                 {% endif %}
 
                 <div id = "access_token" class = "to-hide">
                     <div class="input-group mb-3" style="margin-top:15px;">
-                        <input type="text" id="input_access_token" class="form-control" placeholder="Access Token" aria-label="Access Token" aria-describedby="basic-addon2" value="{{access_token}}">
+                        <input type="text" id="input_access_token" class="form-control password-to-hide" placeholder="Access Token" aria-label="Access Token" aria-describedby="basic-addon2" value="{{access_token}}">
                     </div>
                 </div>
 
@@ -155,14 +165,14 @@
             <td>Access Token Secret</td>
             <td>
                 {% if access_token_secret is defined %}
-                <p class="to-show">{{access_token_secret}}</p>
+                <p class="to-show password-to-hide">{{access_token_secret}}</p>
                 {% else %}
                 <p style="text-align:center"  class="to-show">-</p>
                 {% endif %}
 
                 <div id = "access_token_secret" class = "to-hide">
                     <div class="input-group mb-3" style="margin-top:15px;">
-                        <input type="text" id="input_access_token_secret" class="form-control" placeholder="Access Token Secret" aria-label="Access Token Secret" aria-describedby="basic-addon2" value="{{access_token_secret}}">
+                        <input type="text" id="input_access_token_secret" class="form-control password-to-hide" placeholder="Access Token Secret" aria-label="Access Token Secret" aria-describedby="basic-addon2" value="{{access_token_secret}}">
                     </div>
                 </div>
 
@@ -289,6 +299,18 @@
                 } else {
                     hideEditing()
                 }
+        });
+
+        $(document).ready(function(){
+
+          $(".password-to-hide").toggleClass("password_field");
+
+          $("#btn-hide-password").on("click", function(){
+            $(".password-to-hide").toggleClass("password_field");
+            this.classList.toggle('bi-eye');
+          });
+
+
         });
 
     </script>
