@@ -44,11 +44,13 @@ div.progress-bar.bg-primary.progress-bar-striped{
 
 
 .agree-disagree-btn{
-    color:white !important;
-    margin-bottom: 3px;
-    opacity: 0.4;
-    filter: alpha(opacity=40);
+
+    margin: 0px;
+    margin-top: 15px;
+    opacity: 0.7;
+    filter: alpha(opacity=70);
     cursor: pointer;
+    display: inline-block;
 }
 
 .return-btn{
@@ -73,14 +75,69 @@ div.progress-bar.bg-primary.progress-bar-striped{
     filter: alpha(opacity=100);
 }
 
-
 .decision-made-btn{
-    -webkit-box-shadow: 0px 0px 1px 2px #000000;
-    box-shadow: 0px 0px 1px 2px #000000;
-    opacity: 1 !important;
-    filter: alpha(opacity=100) !important;
+    opacity: 1;
+    filter: alpha(opacity=100);
+        box-shadow: rgb(6 24 44 / 40%) 0px 0px 0px 1px, rgb(6 24 44 / 65%) 0px 2px 3px -1px, rgb(255 255 255 / 8%) 0px 1px 0px inset;
+}
+
+.decision-made-btn.agree-disagree-btn-disagree .agree-disagree-counter{
+    color: white !important;
+}
+
+.decision-made-btn.agree-disagree-btn-agree .agree-disagree-counter{
+    color: white !important;
+}
+
+.agree-disagree-counter{
+    color: black;
+}
+
+.decision-made-btn.agree-disagree-btn-disagree .agree-disagree-icon{
+    color: white !important;
+}
+
+.decision-made-btn.agree-disagree-btn-agree .agree-disagree-icon{
+    color: white !important;
+}
+
+.decision-not-made-btn.agree-disagree-btn-disagree .agree-disagree-icon{
+    color: red !important;
+}
+
+.decision-not-made-btn.agree-disagree-btn-agree .agree-disagree-icon{
+    color: green !important;
+}
+
+.decision-not-made-btn .agree-disagree-counter{
+    color: black !important;
+}
+
+
+.agree-disagree-icon{
+    font-size: 18px;
+    margin-bottom: 3px;
+}
+
+.agree-disagree-counter{
+    font-size: 9px;
+    margin-bottom: 3px;
+}
+
+.agree-disagree-text{
+    font-size: 7px;
+    margin-bottom: 3px;
+}
+
+.agree-disagree-btn-agree{
+    margin-left: -8px;
 
 }
+
+.agree-disagree-btn-disagree{
+    margin-right: -8px;
+}
+
 
 .title-section{
  text-align: center;
@@ -102,11 +159,26 @@ div.progress-bar.bg-primary.progress-bar-striped{
  border: 1px solid rgba(0, 153, 203, 0.5);
 
 }
-.btn.btn-info.reload-btn{
+.btn.btn-danger.reload-btn{
     margin: auto;
     text-align: center;
     display: flex;
     margin-top: 20px;
+}
+
+.btn.btn-success.reload-btn{
+    margin: auto;
+    text-align: center;
+    display: flex;
+    margin-top: 20px;
+}
+
+.btn.btn-danger.reload-btn i{
+    margin: 4px;
+}
+
+.btn.btn-success.reload-btn i{
+    margin: 4px;
 }
 
 .title-section div p{
@@ -209,6 +281,14 @@ label{
  font-size: 12px;
  border: 1px solid #257C9E;
 }
+
+.btn-danger, .btn-success{
+ margin: 0px;
+ font-size: 12px;
+
+}
+
+
 
 #div-main-table .btn:hover, #div-main-table2 .btn:hover, #div-main-table3 .btn:hover, .btn-info:hover{
  background: #fff;

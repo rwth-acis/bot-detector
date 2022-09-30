@@ -714,14 +714,23 @@ def resultid(id):
             username = info.get('preferred_username')
 
             col4 = db["SavedFavoriteRequests"]
-            saved_by_user = col4.find_one({'user_id': info.get('sub'), "requests.collection": str(id)})
-            already_saved = False
+            string_of_parameters = parameters["keywords"] + \
+                                                       parameters["areaParameters1"] + \
+                                                       parameters["areaParameters2"] + parameters[
+                                                           "areaParameters3"] + \
+                                                       parameters["SearchParameters1"] + parameters["start_date"] + \
+                                                       parameters["end_date"]
+
+            saved_by_user = col4.find_one({'user_id': info.get('sub'),
+                                           "requests.string_of_parameters": string_of_parameters})
+
             if saved_by_user is not None:
-                if "requests" in saved_by_user:
-                    for x in saved_by_user["requests"]:
-                        if x["collection"] == str(id):
-                            already_saved = True
-                            break
+                already_saved = True
+            else:
+                already_saved = False
+
+            print("!!!!!!!!!parameters")
+            print(parameters)
 
             return render_template('result.html', users=col1.find(), folium_map=Markup(folium_map._repr_html_()),
                                    app_url=os.environ['APP_URL'],
@@ -801,7 +810,6 @@ def history():
                                app_url_path=os.environ['APP_URL_PATH'][:-1],
                                example_db=os.environ['EXAMPLE_DB'])
 
-
 @app.route(os.environ['APP_URL_PATH'] + 'dashboard')
 @oidc.require_login
 def dashboard():
@@ -847,6 +855,35 @@ def dashboard():
                            app_url_path=os.environ['APP_URL_PATH'][:-1],
                            example_db=os.environ['EXAMPLE_DB'], user_name=username, user_history=True)
 
+@app.route(os.environ['APP_URL_PATH'] + 'saved-request-dashboard/<hash>')
+@oidc.require_login
+def saved_request_dashboard(hash):
+    info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+    username = info.get('preferred_username')
+    col1 = db["SavedFavoriteRequests"]
+    user = col1.find_one({"user_id": info.get('sub')})
+
+    r = []
+
+    col2 = db["Requests"]
+    if user is not None:
+        if "requests" in user:
+            for request1 in user["requests"]:
+                if request1["string_of_parameters"] == hash:
+                    for collection in request1["collection"]:
+                        req = col2.find_one({"collection": collection})
+                        if req is not None:
+                            r.append(req)
+                    break
+
+        for req in r:
+            req["_id"] = str(req["_id"].generation_time).replace("+00:00", "")
+
+    return render_template('saved_request_history.html', requests_owner=r,
+                           app_url=os.environ['APP_URL'],
+                           app_url_path=os.environ['APP_URL_PATH'][:-1],
+                           example_db=os.environ['EXAMPLE_DB'], user_name=username, user_history=True)
+
 
 @app.route(os.environ['APP_URL_PATH'] + 'favourite-requests')
 @oidc.require_login
@@ -874,14 +911,32 @@ def favourite_requests_add_request(collection):
 
     col2 = db["Requests"]
     parameters = col2.find_one({"collection": str(collection)})
+    parameters["string_of_parameters"] = parameters["keywords"] + \
+                                         parameters["areaParameters1"] + \
+                                         parameters["areaParameters2"] + parameters["areaParameters3"] + \
+                                         parameters["SearchParameters1"] + parameters["start_date"] + \
+                                         parameters["end_date"]
+
+
 
     col4 = db["SavedFavoriteRequests"]
     saved_parameters = parameters.copy()
+    saved_parameters["collection"] = [collection]
     saved_parameters.pop("owner", None)
     saved_parameters.pop("read_permission", None)
     saved_parameters.pop("write_permission", None)
-    col4.update_one({'user_id': info.get('sub')}, {"$addToSet": {"requests": saved_parameters}},
-                    upsert=True)
+
+    saved_by_user = col4.find_one({'user_id': info.get('sub'),
+                                   "requests.string_of_parameters": saved_parameters[
+                                       "string_of_parameters"]})
+
+    if saved_by_user is not None:
+        col4.update_one({'user_id': info.get('sub'),
+                         "requests.string_of_parameters": saved_parameters["string_of_parameters"]},
+                        {"$addToSet": {'requests.$.collection': str(id)}})
+    else:
+        col4.update_one({'user_id': info.get('sub')}, {"$addToSet": {"requests": saved_parameters}},
+                        upsert=True)
 
     return redirect((os.environ['APP_URL']) + "/result/" + collection)
 
@@ -892,7 +947,7 @@ def favourite_requests_delete_request(collection):
     info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
 
     col1 = db["SavedFavoriteRequests"]
-    col1.update_one({"user_id": info.get('sub')}, {'$pull': {'requests': {"collection": collection}}})
+    col1.update_one({"user_id": info.get('sub'),}, {'$pull': {'requests': {"collection": collection}}})
 
     return redirect((os.environ['APP_URL']) + "/favourite-requests")
 
@@ -1271,15 +1326,32 @@ def part_result():
             col3 = db["Permissions"]
             col3.update_one({'user_id': info.get('sub')}, {"$push": {"owner": str(id)}}, upsert=True)
 
-            if request.form.get('save-as-favourite'):
-                print("save as favourite!")
-                col4 = db["SavedFavoriteRequests"]
-                saved_parameters = parameters.copy()
-                saved_parameters.pop("owner", None)
-                saved_parameters.pop("read_permission", None)
-                saved_parameters.pop("write_permission", None)
+
+            print("save as favourite!")
+            col4 = db["SavedFavoriteRequests"]
+            saved_parameters = parameters.copy()
+            saved_parameters["string_of_parameters"] = parameters["keywords"] + \
+                                                       parameters["areaParameters1"] + \
+                                                       parameters["areaParameters2"] + parameters[
+                                                           "areaParameters3"] + \
+                                                       parameters["SearchParameters1"] + parameters["start_date"] + \
+                                                       parameters["end_date"]
+            saved_parameters["collection"] = [str(id)]
+            saved_parameters.pop("owner", None)
+            saved_parameters.pop("read_permission", None)
+            saved_parameters.pop("write_permission", None)
+
+            saved_by_user = col4.find_one({'user_id': info.get('sub'),
+                                           "requests.string_of_parameters": saved_parameters[
+                                               "string_of_parameters"]})
+            if saved_by_user is not None:
+                col4.update_one({'user_id': info.get('sub'),
+                                 "requests.string_of_parameters": saved_parameters["string_of_parameters"]},
+                                {"$addToSet": {'requests.$.collection': str(id)}})
+            elif request.form.get('save-as-favourite'):
+
                 col4.update_one({'user_id': info.get('sub')}, {"$addToSet": {"requests": saved_parameters}},
-                                upsert=True)
+                                    upsert=True)
 
             else:
                 print("do not save as favourite")

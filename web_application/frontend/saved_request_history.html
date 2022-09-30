@@ -42,7 +42,7 @@
 
 
 <div class="title-section" style="text-align:center; padding:10px;">
-    Saved favourite requests:
+    Request history:
 </div>
 <div id="scroll1" style="overflow-x:scroll; padding-left:0; padding-right:0px;">
     <div></div>
@@ -53,10 +53,13 @@
     <table id="main-table">
         <thead>
         <tr>
+            <th>Time of creation</th>
+            <th>ID</th>
             <th>Keywords</th>
-            <th>Default limit of users for checking</th>
+            <th>Limit of users for checking</th>
             <th>Search type</th>
             <th>Additional parameters for tweets</th>
+            <th>Search is complete</th>
             <th>Actions</th>
 
 
@@ -64,15 +67,23 @@
         </thead>
 
         <tbody>
-        {% for request in saved_requests %}
+        {% for request in requests_owner %}
         <tr>
+
+            <td>
+                {{request["_id"]}}
+            </td>
+
+            <td>
+                {{request["collection"]}}
+            </td>
 
             <td>
                 {{request["keywords"]}}
             </td>
 
             <td>
-                <p style="text-align: center;"> {{request["limit"]}} </p>
+                {{request["limit"]}}
             </td>
 
             <td>
@@ -118,21 +129,35 @@
                 <p>&bull; Only check tweets that contain media (e.g. photos or videos)</p>
                 {% endif %}
 
-                {% if request["areaParameters1"] == "all" and request["areaParameters2"] == "all" and request["areaParameters3"] == "all"%}
-                <p style="text-align: center;"> - </p>
-                {% endif %}
-
             </td>
 
+            {% if "completed" in request %}
+
+            {% if request["completed"] != True %}
+            <td class="red">
+                False
+            </td>
+            {% else %}
+            <td class="green">
+                True
+            </td>
+            {% endif %}
+
+            {% else %}
+            <td class="orange">
+                -
+            </td>
+            {% endif %}
 
 
             <td style="text-align: center;">
-                <a href="{{app_url}}/index?preset_values=True&collection={{ request['collection'][0] }}" class="btn btn-info" target="_blank" style="margin:auto; margin-bottom:5px; padding:0.2rem 0.75rem;">Repeat request</a>
-
-                <a href="{{app_url}}/saved-request-dashboard/{{ request['string_of_parameters'] }}" class="btn btn-info" target="_blank" style="margin:auto; margin-bottom:5px; padding:0.2rem 0.75rem;">View requests with this parameters</a>
-
-                <br>
-                <button type="button" data-collection-id="{{request['collection'][0]}}"  class="btn btn-outline-danger open-deleteModal" style="padding:3px; background-color:red; border: white; margin:auto;" data-toggle="modal" data-target="#deleteModal">
+                <a href="{{app_url}}/result/{{ request['collection'] }}" class="btn btn-info" target="_blank" style="margin:auto; margin-bottom:5px; padding:0.2rem 0.75rem;">Request results</a>
+                {% if user_history is defined %}
+                {% if user_history == True %}
+                <a href="{{app_url}}/access/{{request['collection']}}" class="btn btn-info" target="_blank" style="margin:auto; margin-bottom:5px; padding:0.2rem 0.75rem;">Access settings</a>
+                {% endif %}
+                {% endif %}
+                <button type="button" data-collection-id="{{request['collection']}}" data-permission-type="owner" class="btn btn-outline-danger open-deleteModal" style="padding:3px; background-color:red; border: white; margin:auto;" data-toggle="modal" data-target="#deleteModal">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
                         <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"></path>
                         <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"></path>
@@ -148,8 +173,6 @@
 
     </table>
 </div>
-
-
 
 
 
@@ -179,7 +202,7 @@
             $(document).on("click", ".open-deleteModal", function () {
                  var collectionId = $(this).data('collection-id');
                  var permissionType = $(this).data('permission-type');
-                 $('.modal-footer #confirmDeletionBtn').click(function(){location.href = "{{app_url}}/saved_favourite_requests/delete/" + collectionId;});
+                 $('.modal-footer #confirmDeletionBtn').click(function(){location.href = "{{app_url}}/dashboard/delete/"+ permissionType +"/"+ collectionId;});
 
             });
 
@@ -193,6 +216,7 @@
 
 
 
+
                 $("#scroll1 div").width($("#main-table").width());
                 $("#scroll1").on("scroll", function(){
                     $("#div-main-table").scrollLeft($(this).scrollLeft());
@@ -200,6 +224,7 @@
                 $("#div-main-table").on("scroll", function(){
                     $("#scroll1").scrollLeft($(this).scrollLeft());
                  });
+
 
             });
 
