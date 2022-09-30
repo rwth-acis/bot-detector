@@ -623,6 +623,7 @@ def resultid(id):
     col2 = db["Requests"]
     parameters = col2.find_one({"collection": str(id)})
     print(parameters)
+
     if parameters is not None:
         if "owner" in parameters:
             if parameters["owner"] is not None:
@@ -713,13 +714,67 @@ def resultid(id):
 
             username = info.get('preferred_username')
 
+            col5 = db[str(id)]
+            users2 = list(col5.find({}))
+
+            for user2 in users2:
+
+                # print("user2 before")
+                # print(user2)
+
+                user2.pop('classification_result_botness', None)
+                user2.pop('classification_result_bad_intentions', None)
+
+                if 'classification_result_botness_agreed' in user2:
+
+                    if info["sub"] in user2["classification_result_botness_agreed"]:
+                        user2["classification_result_botness"] = "agree"
+
+                    user2["classification_result_botness_agreed_count"] = len(
+                        user2["classification_result_botness_agreed"])
+                else:
+                    user2["classification_result_botness_agreed_count"] = 0
+
+                if "classification_result_botness_disagreed" in user2:
+                    if info["sub"] in user2["classification_result_botness_disagreed"]:
+                        user2["classification_result_botness"] = "disagree"
+
+                    user2["classification_result_botness_disagreed_count"] = len(
+                        user2["classification_result_botness_disagreed"])
+                else:
+                    user2["classification_result_botness_disagreed_count"] = 0
+
+                if "classification_result_bad_intentions_agreed" in user2:
+
+                    if info["sub"] in user2["classification_result_bad_intentions_agreed"]:
+                        user2["classification_result_bad_intentions"] = "agree"
+
+                    user2["classification_result_bad_intentions_agreed_count"] = len(
+                        user2["classification_result_bad_intentions_agreed"])
+                else:
+                    user2["classification_result_bad_intentions_agreed_count"] = 0
+
+                if "classification_result_bad_intentions_disagreed" in user2:
+
+                    if info["sub"] in user2["classification_result_bad_intentions_disagreed"]:
+                        user2["classification_result_bad_intentions"] = "disagree"
+
+                    user2["classification_result_bad_intentions_disagreed_count"] = len(
+                        user2["classification_result_bad_intentions_disagreed"])
+
+                else:
+                    user2["classification_result_bad_intentions_disagreed_count"] = 0
+
+                # print("user2 after")
+                # print(user2)
+
             col4 = db["SavedFavoriteRequests"]
             string_of_parameters = parameters["keywords"] + \
-                                                       parameters["areaParameters1"] + \
-                                                       parameters["areaParameters2"] + parameters[
-                                                           "areaParameters3"] + \
-                                                       parameters["SearchParameters1"] + parameters["start_date"] + \
-                                                       parameters["end_date"]
+                                   parameters["areaParameters1"] + \
+                                   parameters["areaParameters2"] + parameters[
+                                       "areaParameters3"] + \
+                                   parameters["SearchParameters1"] + parameters["start_date"] + \
+                                   parameters["end_date"]
 
             saved_by_user = col4.find_one({'user_id': info.get('sub'),
                                            "requests.string_of_parameters": string_of_parameters})
@@ -729,10 +784,7 @@ def resultid(id):
             else:
                 already_saved = False
 
-            print("!!!!!!!!!parameters")
-            print(parameters)
-
-            return render_template('result.html', users=col1.find(), folium_map=Markup(folium_map._repr_html_()),
+            return render_template('result.html', users=users2, folium_map=Markup(folium_map._repr_html_()),
                                    app_url=os.environ['APP_URL'],
                                    negative_count1=negative_count1, positive_count1=positive_count1,
                                    neutral_count1=neutral_count1, negative_count2=negative_count2,
@@ -810,6 +862,7 @@ def history():
                                app_url_path=os.environ['APP_URL_PATH'][:-1],
                                example_db=os.environ['EXAMPLE_DB'])
 
+
 @app.route(os.environ['APP_URL_PATH'] + 'dashboard')
 @oidc.require_login
 def dashboard():
@@ -854,6 +907,7 @@ def dashboard():
                            app_url=os.environ['APP_URL'],
                            app_url_path=os.environ['APP_URL_PATH'][:-1],
                            example_db=os.environ['EXAMPLE_DB'], user_name=username, user_history=True)
+
 
 @app.route(os.environ['APP_URL_PATH'] + 'saved-request-dashboard/<hash>')
 @oidc.require_login
@@ -917,8 +971,6 @@ def favourite_requests_add_request(collection):
                                          parameters["SearchParameters1"] + parameters["start_date"] + \
                                          parameters["end_date"]
 
-
-
     col4 = db["SavedFavoriteRequests"]
     saved_parameters = parameters.copy()
     saved_parameters["collection"] = [collection]
@@ -947,7 +999,7 @@ def favourite_requests_delete_request(collection):
     info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
 
     col1 = db["SavedFavoriteRequests"]
-    col1.update_one({"user_id": info.get('sub'),}, {'$pull': {'requests': {"collection": collection}}})
+    col1.update_one({"user_id": info.get('sub'), }, {'$pull': {'requests': {"collection": collection}}})
 
     return redirect((os.environ['APP_URL']) + "/favourite-requests")
 
@@ -1326,7 +1378,6 @@ def part_result():
             col3 = db["Permissions"]
             col3.update_one({'user_id': info.get('sub')}, {"$push": {"owner": str(id)}}, upsert=True)
 
-
             print("save as favourite!")
             col4 = db["SavedFavoriteRequests"]
             saved_parameters = parameters.copy()
@@ -1351,7 +1402,7 @@ def part_result():
             elif request.form.get('save-as-favourite'):
 
                 col4.update_one({'user_id': info.get('sub')}, {"$addToSet": {"requests": saved_parameters}},
-                                    upsert=True)
+                                upsert=True)
 
             else:
                 print("do not save as favourite")
@@ -1462,6 +1513,7 @@ def part_result():
 
 
 @app.route(os.environ['APP_URL_PATH'] + '<collection>/agree/<decision>/<id>', methods=["POST", "GET"])
+@oidc.require_login
 def agree_with_result(collection, decision, id):
     if request.method == "POST":
 
@@ -1492,12 +1544,17 @@ def agree_with_result(collection, decision, id):
             return page_not_found("404")
 
         col1 = db[collection]
+
         col1.update_one({"_id": ObjectId(id)},
-                        {'$set': {'classification_result_' + decision: "agree"}})
-    return "Ok", 200
+                        {'$addToSet': {'classification_result_' + decision + "_agreed": info.get('sub')}}, upsert=True)
+
+        col1.update_one({"_id": ObjectId(id)},
+                        {'$pullAll': {'classification_result_' + decision + "_disagreed": [info.get('sub')]}})
+        return "Ok", 200
 
 
 @app.route(os.environ['APP_URL_PATH'] + '<collection>/disagree/<decision>/<id>', methods=["POST", "GET"])
+@oidc.require_login
 def disagree_with_result(collection, decision, id):
     if request.method == "POST":
 
@@ -1529,8 +1586,12 @@ def disagree_with_result(collection, decision, id):
 
         col1 = db[collection]
         col1.update_one({"_id": ObjectId(id)},
-                        {'$set': {'classification_result_' + decision: "disagree"}})
-    return "Ok", 200
+                        {'$addToSet': {'classification_result_' + decision + "_disagreed": info.get('sub')}},
+                        upsert=True)
+
+        col1.update_one({"_id": ObjectId(id)},
+                        {'$pullAll': {'classification_result_' + decision + "_agreed": [info.get('sub')]}})
+        return "Ok", 200
 
 
 @app.route(os.environ['APP_URL_PATH'] + 'user-check/<screen_name>', methods=['post', 'get'])

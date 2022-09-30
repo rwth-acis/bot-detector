@@ -234,20 +234,20 @@
 
                 <a class="badge badge-success agree-disagree-btn agree-disagree-btn-agree decision-made-btn" onclick="agree('{{user['_id']}}', 'bad_intentions', this);">
                     <i class="fa fa-thumbs-up agree-disagree-icon"></i>
-                    <p class="agree-disagree-counter"> 100 </p>
+                    <p class="agree-disagree-counter"> {{user["classification_result_botness_agreed_count"]}} </p>
                 </a>
                 <a  class="badge badge-light agree-disagree-btn agree-disagree-btn-disagree decision-not-made-btn" onclick="disagree('{{user['_id']}}', 'botness', this);">
                     <i class="fa fa-thumbs-down agree-disagree-icon"></i>
-                    <p class="agree-disagree-counter"> 100 </p>
+                    <p class="agree-disagree-counter"> {{user["classification_result_botness_disagreed_count"]}} </p>
                 </a>
                 {% else %}
                 <a  class="badge badge-light agree-disagree-btn agree-disagree-btn-agree decision-not-made-btn" onclick="agree('{{user['_id']}}', 'botness', this);">
                     <i class="fa fa-thumbs-up agree-disagree-icon"></i>
-                    <p class="agree-disagree-counter"> 100 </p>
+                    <p class="agree-disagree-counter"> {{user["classification_result_botness_agreed_count"]}} </p>
                 </a>
                 <a  class="badge badge-danger agree-disagree-btn agree-disagree-btn-disagree decision-made-btn" onclick="disagree('{{user['_id']}}', 'bad_intentions', this);">
                     <i class="fa fa-thumbs-down agree-disagree-icon"></i>
-                    <p class="agree-disagree-counter"> 100 </p>
+                    <p class="agree-disagree-counter"> {{user["classification_result_botness_disagreed_count"]}} </p>
                 </a>
 
                 {% endif %}
@@ -255,11 +255,11 @@
                 {% else %}
                 <a  class="badge badge-light agree-disagree-btn agree-disagree-btn-agree decision-not-made-btn" onclick="agree('{{user['_id']}}', 'botness', this);">
                     <i class="fa fa-thumbs-up agree-disagree-icon"></i>
-                    <p class="agree-disagree-counter"> 100 </p>
+                    <p class="agree-disagree-counter"> {{user["classification_result_botness_agreed_count"]}} </p>
                 </a>
                 <a  class="badge badge-light agree-disagree-btn agree-disagree-btn-disagree decision-not-made-btn" onclick="disagree('{{user['_id']}}', 'botness', this);">
                     <i class="fa fa-thumbs-down agree-disagree-icon"></i>
-                    <p class="agree-disagree-counter"> 100 </p>
+                    <p class="agree-disagree-counter"> {{user["classification_result_botness_disagreed_count"]}} </p>
                 </a>
                 {% endif %}
 
@@ -277,20 +277,20 @@
 
                 <a class="badge badge-success agree-disagree-btn agree-disagree-btn-agree decision-made-btn" onclick="agree('{{user['_id']}}', 'bad_intentions', this);">
                     <i class="fa fa-thumbs-up agree-disagree-icon"></i>
-                    <p class="agree-disagree-counter"> 100 </p>
+                    <p class="agree-disagree-counter"> {{user["classification_result_bad_intentions_agreed_count"]}} </p>
                 </a>
                 <a  class="badge badge-light agree-disagree-btn agree-disagree-btn-disagree decision-not-made-btn" onclick="disagree('{{user['_id']}}', 'bad_intentions', this);">
                     <i class="fa fa-thumbs-down agree-disagree-icon"></i>
-                    <p class="agree-disagree-counter"> 100 </p>
+                    <p class="agree-disagree-counter"> {{user["classification_result_bad_intentions_disagreed_count"]}} </p>
                 </a>
                 {% else %}
                 <a  class="badge badge-light agree-disagree-btn agree-disagree-btn-agree decision-not-made-btn" onclick="agree('{{user['_id']}}', 'bad_intentions', this);">
                     <i class="fa fa-thumbs-up agree-disagree-icon"></i>
-                    <p class="agree-disagree-counter"> 100 </p>
+                    <p class="agree-disagree-counter"> {{user["classification_result_bad_intentions_agreed_count"]}} </p>
                 </a>
                 <a  class="badge badge-danger agree-disagree-btn agree-disagree-btn-disagree decision-made-btn" onclick="disagree('{{user['_id']}}', 'bad_intentions', this);">
                     <i class="fa fa-thumbs-down agree-disagree-icon"></i>
-                    <p class="agree-disagree-counter"> 100 </p>
+                    <p class="agree-disagree-counter"> {{user["classification_result_bad_intentions_disagreed_count"]}} </p>
                 </a>
 
                 {% endif %}
@@ -298,11 +298,11 @@
                 {% else %}
                 <a  class="badge badge-light agree-disagree-btn agree-disagree-btn-agree decision-not-made-btn" onclick="agree('{{user['_id']}}', 'bad_intentions', this);">
                     <i class="fa fa-thumbs-up agree-disagree-icon"></i>
-                    <p class="agree-disagree-counter"> 100 </p>
+                    <p class="agree-disagree-counter"> {{user["classification_result_bad_intentions_agreed_count"]}} </p>
                 </a>
                 <a  class="badge badge-light agree-disagree-btn  agree-disagree-btn-disagree decision-not-made-btn" onclick="disagree('{{user['_id']}}', 'bad_intentions', this);">
                     <i class="fa fa-thumbs-down agree-disagree-icon"></i>
-                    <p class="agree-disagree-counter"> 100 </p>
+                    <p class="agree-disagree-counter"> {{user["classification_result_bad_intentions_disagreed_count"]}} </p>
                 </a>
                 {% endif %}
                 {% endif %}
@@ -389,7 +389,7 @@
                     },
                     success: function(response)
                       {
-                        //console.log(element);
+                        console.log(response);
                         //element.innerHTML = "Agreed";
                         if (element.classList.contains("decision-not-made-btn")){
                             element.classList.remove("decision-not-made-btn");
@@ -403,13 +403,20 @@
                             var disagreeCounter = disagreeNode.lastChild;
 
                             if (disagreeNode.classList.contains("decision-made-btn")){
-                                console.log(disagreeNode);
-                                disagreeNode.classList.remove("decision-made-btn");
-                                disagreeNode.classList.add("decision-not-made-btn");
-                                disagreeNode.classList.remove("badge-danger");
-                                disagreeNode.classList.add("badge-light");
-                                disagreeCounter.innerHTML = parseInt(disagreeCounter.innerHTML) - 1;
+                                console.log("!!!!!!!!!rec!!!!!!!!!!!");
+                                var old_counter = parseInt($(element).siblings(".agree-disagree-btn-disagree").children("p").html());
+                                $(element).siblings(".agree-disagree-btn-disagree").children("p").html(old_counter -1);
+
                             }
+
+
+                            //console.log(disagreeNode);
+                            disagreeNode.classList.remove("decision-made-btn");
+                            disagreeNode.classList.add("decision-not-made-btn");
+                            disagreeNode.classList.remove("badge-danger");
+                            disagreeNode.classList.add("badge-light");
+                            disagreeCounter.innerHTML = parseInt(disagreeCounter.innerHTML) - 1;
+
                         }
                       },
                       error: function(response)
@@ -431,7 +438,8 @@
                     },
                     success: function(response)
                       {
-                        //console.log(element);
+                        console.log(response);
+
                         //element.innerHTML = "Disagreed";
                         if (element.classList.contains("decision-not-made-btn")){
                             element.classList.remove("decision-not-made-btn");
@@ -447,13 +455,19 @@
                             var agreeCounter = agreeNode.lastChild;
 
                             if (agreeNode.classList.contains("decision-made-btn")){
-                                console.log(element.previousElementSibling);
-                                agreeNode.classList.remove("decision-made-btn");
-                                agreeNode.classList.add("decision-not-made-btn");
-                                agreeNode.classList.remove("badge-success");
-                                agreeNode.classList.add("badge-light");
-                                agreeCounter.innerHTML = parseInt(agreeCounter.innerHTML) - 1;
+                                console.log("!!!!!!rec");
+                                var old_counter = parseInt($(element).siblings(".agree-disagree-btn-agree").children("p").html());
+                                $(element).siblings(".agree-disagree-btn-agree").children("p").html(old_counter -1);
                             }
+
+
+
+                            //console.log(element.previousElementSibling);
+                            agreeNode.classList.remove("decision-made-btn");
+                            agreeNode.classList.add("decision-not-made-btn");
+                            agreeNode.classList.remove("badge-success");
+                            agreeNode.classList.add("badge-light");
+
                         }
                       },
                       error: function(response)
