@@ -115,6 +115,37 @@ def profile():
             else:
                 exception = None
 
+
+            table = None
+
+            if "in_use" in user:
+                if user["in_use"]:
+                    auth = tweepy.OAuthHandler(api_key, api_key_secret)
+                    auth.set_access_token(access_token, access_token_secret)
+
+                    api = tweepy.API(auth, retry_count=3, timeout=100000, wait_on_rate_limit=True)
+
+                    data = api.rate_limit_status()
+
+                    #print(data["resources"])
+
+                    for attr in list(data["resources"].keys()):
+                        if attr != "users" and attr != "statuses" and attr != "search":
+                            del data["resources"][attr]
+                        else:
+                            for attr1 in list(data["resources"][attr].keys()):
+                                if attr1 != "/users/:id" and attr1 != "/statuses/user_timeline" and attr1 != "/search/tweets":
+                                    del data["resources"][attr][attr1]
+
+                    for attr in data["resources"].keys():
+                        for attr1 in data["resources"][attr].keys():
+                            data["resources"][attr][attr1]["reset"] = datetime.datetime.fromtimestamp(
+                                data["resources"][attr][attr1]["reset"]).strftime("%I:%M:%S %B %d, %Y ")
+
+                    table = Markup(json2html.convert(json=data["resources"],
+                                                     table_attributes="id=\"rate-limit-status-table\" class=\"table table-bordered table-hover\""))
+
+
             return render_template("profile.html", app_url=os.environ['APP_URL'],
                                    app_url_path=os.environ['APP_URL_PATH'][:-1],
                                    example_db=os.environ['EXAMPLE_DB'], name=username, email=email, user_id=user_id,
@@ -122,7 +153,7 @@ def profile():
                                    access_token=access_token,
                                    api_key_secret=api_key_secret, api_key=api_key, in_use=in_use,
                                    tried_to_use=tried_to_use,
-                                   exception=exception)
+                                   exception=exception, table=table)
 
     return render_template("profile.html", app_url=os.environ['APP_URL'],
                            app_url_path=os.environ['APP_URL_PATH'][:-1],
@@ -311,9 +342,15 @@ def rate_limit_status():
 
     data = api.rate_limit_status()
 
+    #print(data["resources"])
+
     for attr in list(data["resources"].keys()):
-        if attr != "users" and attr != "statuses":
+        if attr != "users" and attr != "statuses" and attr != "search":
             del data["resources"][attr]
+        else:
+            for attr1 in list(data["resources"][attr].keys()):
+                if attr1 != "/users/:id" and attr1 != "/statuses/user_timeline" and attr1 != "/search/tweets":
+                    del data["resources"][attr][attr1]
 
     for attr in data["resources"].keys():
         for attr1 in data["resources"][attr].keys():

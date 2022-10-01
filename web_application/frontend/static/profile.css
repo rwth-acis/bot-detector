@@ -1,0 +1,64 @@
+
+.limit-table{
+    word-break: break-all;
+    margin:auto;
+    width: 80%;
+    margin-top: 25px;
+    margin-bottom: 25px;
+    background-color: white;
+    font-size: 12px;
+}
+.limit-table .table td, .limit-table .table th {
+    padding: .4rem;
+}
+
+.table td, .table th {
+    font-size: 12px;
+}
+
+.profile-table-with-parameters{
+    margin: auto;
+    width: 80%;
+    margin-top: 5%;
+}
+
+.profile-table-with-credentials{
+    margin: auto;
+    width: 80%;
+    margin-top: 5%;
+    padding-bottom: 25px;
+}
+
+.profile-table-with-credentials input{
+    font-size: 12px;
+}
+
+.profile-table-with-credentials td p{
+    word-break: break-all;
+}
+
+.btn {
+    font-size: 12px;
+}
+
+@media only screen and (max-width: 820px) {
+
+    .limit-table{
+        width: 98%;
+        font-size: 11px;
+    }
+
+    .limit-table .table td, .limit-table .table th {
+        padding: .2rem;
+    }
+
+    .profile-table-with-parameters{
+        width: 98%;
+    }
+
+    .profile-table-with-credentials{
+
+        width: 98%;
+    }
+
+}

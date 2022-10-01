@@ -25,6 +25,7 @@
 
 <link rel="stylesheet" href="{{ app_url_path }}{{ url_for('static', filename='main_style.css') }}">
 <link rel="stylesheet" href="{{ app_url_path }}{{ url_for('static', filename='table_page.css') }}">
+<link rel="stylesheet" href="{{ app_url_path }}{{ url_for('static', filename='profile.css') }}">
 
 
 {% endblock %}
@@ -34,7 +35,7 @@
 
 
 
-<div style="margin: auto; width: 80%; margin-top: 5%;">
+<div class="profile-table-with-parameters">
 
 
     <table class="table table-hover table-bordered" style="background-color:white; word-break: break-all;">
@@ -73,7 +74,7 @@
 
 
 
-<div style="margin: auto; width: 80%; margin-top: 5%; padding-bottom: 25px;">
+<div class="profile-table-with-credentials">
 
 
     <table class="table table-hover table-bordered" style="background-color:white;">
@@ -238,6 +239,23 @@
 
 </div>
 
+{% if in_use is defined %}
+{% if in_use%}
+<div class="limit-table">
+    <table class="table table-hover table-bordered" style="background-color:white; text-align:center;">
+
+        <tr>
+            <th>
+                Twitter API rate limits at the moment
+            </th>
+        </tr>
+
+    </table>
+    {{table}}
+</div>
+{% endif %}
+{% endif %}
+
 
 <script>
 
@@ -330,6 +348,13 @@
             $(".password-to-hide").toggleClass("password_field");
             this.classList.toggle('bi-eye');
           });
+
+          $( "th:contains('Parameter')" ).css( "word-break", "normal" );
+
+          $( ".limit-table th:contains('remaining')" ).siblings().css( "color", "red" );
+          $( ".limit-table th:contains('remaining')" ).css( "word-break", "normal" );
+          $( ".limit-table th:contains('statuses')" ).css( "word-break", "normal" );
+          $( ".limit-table th:contains('/statuses')" ).css( "word-break", "break-all" );
 
 
         });

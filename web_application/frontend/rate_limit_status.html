@@ -3,9 +3,30 @@
 {% block title %}Rate limit status{% endblock %}
 {% block html_head %}
 
+<link rel="stylesheet" href="{{ app_url_path }}{{ url_for('static', filename='profile.css') }}">
 {% endblock %}
 
 
 {% block content %}
-<div style="margin:auto;width: 80%; margin-top: 25px; margin-bottom: 25px; background-color: white;">{{table}}</div>
+<div class="limit-table">
+    <table class="table table-hover table-bordered" style="background-color:white; text-align:center;">
+
+        <tr>
+            <th>
+                Twitter API rate limits at the moment
+            </th>
+        </tr>
+
+    </table>
+    {{table}}
+</div>
+
+<script>
+
+    $( ".limit-table th:contains('remaining')" ).siblings().css( "color", "red" );
+    $( ".limit-table th:contains('remaining')" ).css( "word-break", "normal" );
+    $( ".limit-table th:contains('statuses')" ).css( "word-break", "normal" );
+    $( ".limit-table th:contains('/statuses')" ).css( "word-break", "break-all" );
+
+</script>
 {% endblock %}
