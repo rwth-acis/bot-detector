@@ -894,7 +894,7 @@ def resultid(id):
                 # print(user2)
 
             col4 = db["SavedFavoriteRequests"]
-            string_of_parameters = parameters["keywords"] + \
+            string_of_parameters = parameters["keywords"].replace("#", "") + \
                                    parameters["areaParameters1"] + \
                                    parameters["areaParameters2"] + parameters[
                                        "areaParameters3"] + \
@@ -1090,7 +1090,7 @@ def favourite_requests_add_request(collection):
 
     col2 = db["Requests"]
     parameters = col2.find_one({"collection": str(collection)})
-    parameters["string_of_parameters"] = parameters["keywords"] + \
+    parameters["string_of_parameters"] = parameters["keywords"].replace("#", "") + \
                                          parameters["areaParameters1"] + \
                                          parameters["areaParameters2"] + parameters["areaParameters3"] + \
                                          parameters["SearchParameters1"] + parameters["start_date"] + \
@@ -1506,7 +1506,7 @@ def part_result():
             print("save as favourite!")
             col4 = db["SavedFavoriteRequests"]
             saved_parameters = parameters.copy()
-            saved_parameters["string_of_parameters"] = parameters["keywords"] + \
+            saved_parameters["string_of_parameters"] = parameters["keywords"].replace("#", "") + \
                                                        parameters["areaParameters1"] + \
                                                        parameters["areaParameters2"] + parameters[
                                                            "areaParameters3"] + \
