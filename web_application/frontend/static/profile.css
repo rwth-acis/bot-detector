@@ -4,10 +4,29 @@
     margin:auto;
     width: 80%;
     margin-top: 25px;
-    margin-bottom: 25px;
+    margin-bottom: 3px;
+    padding-bottom: 0px;
     background-color: white;
     font-size: 12px;
 }
+
+.limit-table button p{
+    margin-top: 0;
+    margin-bottom: 0;
+    display: inline-block;
+    margin-left: 3px;block
+}
+
+.show-less-more-btn {
+    margin: auto;
+    display: block;
+    margin-bottom: 5%;
+}
+
+.show-less-more-btn i {
+    margin-right: 5px;
+}
+
 .limit-table .table td, .limit-table .table th {
     padding: .4rem;
 }
@@ -26,7 +45,7 @@
     margin: auto;
     width: 80%;
     margin-top: 5%;
-    padding-bottom: 25px;
+    padding-bottom: 1px;
 }
 
 .profile-table-with-credentials input{
@@ -39,6 +58,18 @@
 
 .btn {
     font-size: 12px;
+}
+
+#dca-coefficients-table th{
+    word-break: normal;
+}
+
+.limit-table button{
+    float: right;
+}
+
+#dca-coefficients-table td{
+    word-break: break-all;
 }
 
 @media only screen and (max-width: 820px) {

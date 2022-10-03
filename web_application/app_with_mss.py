@@ -22,6 +22,7 @@ import pymongo
 
 from flask import Markup
 from bson.objectid import ObjectId
+from pykafka import KafkaClient
 from werkzeug.utils import redirect
 from dotenv import load_dotenv
 
@@ -115,7 +116,6 @@ def profile():
             else:
                 exception = None
 
-
             table = None
 
             if "in_use" in user:
@@ -127,7 +127,7 @@ def profile():
 
                     data = api.rate_limit_status()
 
-                    #print(data["resources"])
+                    # print(data["resources"])
 
                     for attr in list(data["resources"].keys()):
                         if attr != "users" and attr != "statuses" and attr != "search":
@@ -144,7 +144,6 @@ def profile():
 
                     table = Markup(json2html.convert(json=data["resources"],
                                                      table_attributes="id=\"rate-limit-status-table\" class=\"table table-bordered table-hover\""))
-
 
             return render_template("profile.html", app_url=os.environ['APP_URL'],
                                    app_url_path=os.environ['APP_URL_PATH'][:-1],
@@ -316,11 +315,13 @@ def rate_limit_status_all():
         username = info.get('preferred_username')
         return render_template("rate_limit_status.html", app_url=os.environ['APP_URL'],
                                app_url_path=os.environ['APP_URL_PATH'][:-1],
-                               example_db=os.environ['EXAMPLE_DB'], user_name=username, table=table)
+                               example_db=os.environ['EXAMPLE_DB'], user_name=username,
+                               table=table, show_only_part=False)
     else:
         return render_template("rate_limit_status.html", app_url=os.environ['APP_URL'],
                                app_url_path=os.environ['APP_URL_PATH'][:-1],
-                               example_db=os.environ['EXAMPLE_DB'], table=table)
+                               example_db=os.environ['EXAMPLE_DB'],
+                               table=table, show_only_part=False)
 
 
 @app.route(os.environ['APP_URL_PATH'] + "/rate-limit-status")
@@ -342,7 +343,7 @@ def rate_limit_status():
 
     data = api.rate_limit_status()
 
-    #print(data["resources"])
+    # print(data["resources"])
 
     for attr in list(data["resources"].keys()):
         if attr != "users" and attr != "statuses" and attr != "search":
@@ -366,11 +367,93 @@ def rate_limit_status():
         username = info.get('preferred_username')
         return render_template("rate_limit_status.html", app_url=os.environ['APP_URL'],
                                app_url_path=os.environ['APP_URL_PATH'][:-1],
-                               example_db=os.environ['EXAMPLE_DB'], user_name=username, table=table)
+                               example_db=os.environ['EXAMPLE_DB'], user_name=username,
+                               table=table, show_only_part=True)
     else:
         return render_template("rate_limit_status.html", app_url=os.environ['APP_URL'],
                                app_url_path=os.environ['APP_URL_PATH'][:-1],
-                               example_db=os.environ['EXAMPLE_DB'], table=table)
+                               example_db=os.environ['EXAMPLE_DB'],
+                               table=table, show_only_part=True)
+
+
+@app.route(os.environ['APP_URL_PATH'] + "/admin-page")
+@oidc.require_login
+def admin_page():
+    col1 = db["ApplicationStatus"]
+    main_parameters = col1.find_one({"name": "MainValues"})
+    info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+
+    if not info["sub"] in main_parameters["admins"]:
+        return error403("403")
+
+    username = info.get('preferred_username')
+
+    consumer_key = os.environ['CONSUMER_KEY']
+    consumer_secret = os.environ['CONSUMER_SECRET']
+    access_token = os.environ['ACCESS_TOKEN']
+    access_token_secret = os.environ['ACCESS_TOKEN_SECRET']
+    bearer = os.environ['BEARER']
+    use_bearer = int(os.environ['USE_BEARER'])
+
+    if bearer is not None and use_bearer:
+        auth = tweepy.OAuth2BearerHandler(bearer)
+    else:
+        auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+        auth.set_access_token(access_token, access_token_secret)
+
+    api = tweepy.API(auth, retry_count=3, timeout=100000, wait_on_rate_limit=True)
+
+    data = api.rate_limit_status()
+
+    # print(data["resources"])
+
+    for attr in list(data["resources"].keys()):
+        if attr != "users" and attr != "statuses" and attr != "search":
+            del data["resources"][attr]
+        else:
+            for attr1 in list(data["resources"][attr].keys()):
+                if attr1 != "/users/:id" and attr1 != "/statuses/user_timeline" and attr1 != "/search/tweets":
+                    del data["resources"][attr][attr1]
+
+    for attr in data["resources"].keys():
+        for attr1 in data["resources"][attr].keys():
+            data["resources"][attr][attr1]["reset"] = datetime.datetime.fromtimestamp(
+                data["resources"][attr][attr1]["reset"]).strftime("%I:%M:%S %B %d, %Y ")
+
+    table_twitter_api_rate_limits = Markup(json2html.convert(json=data["resources"],
+                                                             table_attributes="id=\"rate-limit-status-table\" class=\"table table-bordered table-hover\""))
+
+    del main_parameters["_id"]
+    del main_parameters["name"]
+
+    table_main_parameters = Markup(json2html.convert(json=main_parameters,
+                                                     table_attributes="id=\"main-parameters-table\" class=\"table table-bordered table-hover\""))
+
+    dca_coefficients = col1.find_one(
+        {"name": "DCACoefficients", "version": main_parameters["coefficients_collection_id"]})
+    del dca_coefficients["_id"]
+    del dca_coefficients["name"]
+
+    table_dca_coefficients = Markup(json2html.convert(json=dca_coefficients,
+                                                      table_attributes="id=\"dca-coefficients-table\" class=\"table table-bordered table-hover\""))
+
+    env_vars = os.environ
+
+    table_env_vars = Markup(json2html.convert(json=env_vars,
+                                              table_attributes="id=\"dca-coefficients-table\" class=\"table table-bordered table-hover\""))
+
+    col2 = db["Requests"]
+    r = list(col2.find())
+    for req in r:
+        req["_id"] = str(req["_id"].generation_time).replace("+00:00", "")
+
+    return render_template("admin_page.html", app_url=os.environ['APP_URL'],
+                           app_url_path=os.environ['APP_URL_PATH'][:-1],
+                           example_db=os.environ['EXAMPLE_DB'], user_name=username,
+                           table_twitter_api_rate_limits=table_twitter_api_rate_limits,
+                           table_main_parameters=table_main_parameters,
+                           table_dca_coefficients=table_dca_coefficients,
+                           table_env_vars=table_env_vars, requests=r)
 
 
 ###############################################################################
@@ -676,10 +759,15 @@ def resultid(id):
                     col2.update_one({"collection": str(id)}, {'$set': {'owner': [parameters["owner"]["sub"]]}})
                     parameters = col2.find_one({"collection": str(id)})
 
-                if not ((info.get('sub') in parameters["owner"]) or (
-                        info.get('sub') in parameters["read_permission"]) or (
-                                info.get('sub') in parameters["write_permission"])):
-                    return error403("403")
+                col5 = db["ApplicationStatus"]
+                main_parameters = col5.find_one({"name": "MainValues"})
+
+                if not info["sub"] in main_parameters["admins"]:
+
+                    if not ((info.get('sub') in parameters["owner"]) or (
+                            info.get('sub') in parameters["read_permission"]) or (
+                                    info.get('sub') in parameters["write_permission"])):
+                        return error403("403")
 
                 if not ((info.get('sub') in parameters["owner"]) or (
                         info.get('sub') in parameters["write_permission"])) and (
@@ -1587,6 +1675,26 @@ def agree_with_result(collection, decision, id):
 
         col1.update_one({"_id": ObjectId(id)},
                         {'$pullAll': {'classification_result_' + decision + "_disagreed": [info.get('sub')]}})
+
+        client = KafkaClient(hosts=os.environ["KAFKA_URL"])
+        topic = client.topics["telegraf-to-influxdb-json"]
+        curr_dt = datetime.datetime.now()
+        timestamp = int(round(curr_dt.timestamp()) * 1000000000)
+
+        json_data1 = {
+            "name": "BotDetectorAgreeDisagreeData",
+            "string_collection": str(collection),
+            "string_type_of_classification_result": str(decision),
+            "string_decision": "agree",
+            "string_botdetector_user_id": info.get('sub'),
+            "string_user_id_in_collection": str(id),
+            "timestamp": str(timestamp)
+        }
+
+        with topic.get_sync_producer() as producer:
+            print((json.dumps(json_data1)).encode("utf-8"))
+            producer.produce((json.dumps(json_data1)).encode("utf-8"))
+
         return "Ok", 200
 
 
@@ -1628,6 +1736,25 @@ def disagree_with_result(collection, decision, id):
 
         col1.update_one({"_id": ObjectId(id)},
                         {'$pullAll': {'classification_result_' + decision + "_agreed": [info.get('sub')]}})
+
+        client = KafkaClient(hosts=os.environ["KAFKA_URL"])
+        topic = client.topics["telegraf-to-influxdb-json"]
+        curr_dt = datetime.datetime.now()
+        timestamp = int(round(curr_dt.timestamp()) * 1000000000)
+
+        json_data1 = {
+            "name": "BotDetectorAgreeDisagreeData",
+            "string_collection": str(collection),
+            "string_type_of_classification_result": str(decision),
+            "string_decision": "agree",
+            "string_botdetector_user_id": info.get('sub'),
+            "string_user_id_in_collection": str(id),
+            "timestamp": str(timestamp)
+        }
+
+        with topic.get_sync_producer() as producer:
+            print((json.dumps(json_data1)).encode("utf-8"))
+            producer.produce((json.dumps(json_data1)).encode("utf-8"))
         return "Ok", 200
 
 

@@ -21,6 +21,22 @@
     {{table}}
 </div>
 
+{% if show_only_part %}
+
+<button type="button" class="btn btn-light show-less-more-btn"  onclick = "location.href = '{{app_url}}/rate-limit-status-all';">
+    <i class="fa fa-caret-down"></i>
+    Show more
+</button>
+
+{% else %}
+
+<button type="button" class="btn btn-light show-less-more-btn" onclick = "location.href = '{{app_url}}/rate-limit-status';">
+    <i class="fa fa-caret-up"></i>
+    Show less
+</button>
+
+{% endif %}
+
 <script>
 
     $( ".limit-table th:contains('remaining')" ).siblings().css( "color", "red" );

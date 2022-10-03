@@ -102,11 +102,11 @@ div.progress-bar.bg-primary.progress-bar-striped{
 }
 
 .decision-not-made-btn.agree-disagree-btn-disagree .agree-disagree-icon{
-    color: red !important;
+    color: black !important;
 }
 
 .decision-not-made-btn.agree-disagree-btn-agree .agree-disagree-icon{
-    color: green !important;
+    color: black !important;
 }
 
 .decision-not-made-btn .agree-disagree-counter{

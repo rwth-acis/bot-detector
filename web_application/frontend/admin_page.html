@@ -1,0 +1,317 @@
+
+{% extends "base.html" %}
+{% block title %}Admin page{% endblock %}
+{% block html_head %}
+
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.css" />
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.13/css/dataTables.jqueryui.css" />
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.2.4/css/buttons.jqueryui.css" />
+
+<script type="text/javascript" src="https://code.jquery.com/jquery-2.2.4.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.js"></script>
+<script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.js"></script>
+<script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.13/js/dataTables.jqueryui.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.4/js/dataTables.buttons.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.4/js/buttons.jqueryui.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.4/js/buttons.colVis.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.4/js/buttons.flash.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.4/js/buttons.html5.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.2.4/js/buttons.print.js"></script>
+<!--   -->
+
+<script src="https://cdn.anychart.com/releases/8.10.0/js/anychart-core.min.js"></script>
+<script src="https://cdn.anychart.com/releases/8.10.0/js/anychart-pie.min.js"></script>
+<link rel="stylesheet" href="{{ app_url_path }}{{ url_for('static', filename='table_page.css') }}">
+
+
+
+<link rel="stylesheet" href="{{ app_url_path }}{{ url_for('static', filename='jQuery-plugin-progressbar.css') }}">
+<script src="{{ app_url_path }}{{ url_for('static', filename='jQuery-plugin-progressbar.js') }}"></script>
+
+<link rel="stylesheet" href=
+        "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css" />
+<link rel="stylesheet" href="{{ app_url_path }}{{ url_for('static', filename='profile.css') }}">
+{% endblock %}
+
+
+{% block content %}
+
+
+<div class="limit-table">
+    <table class="table table-hover table-bordered" style="background-color:white; text-align:center;">
+
+        <tr>
+            <th>
+                Main parameters
+
+                <button class="btn btn-light" type="button" onClick="changeBtn(this);" data-toggle="collapse" data-target="#collapse1" aria-expanded="false" aria-controls="collapse1">
+                    <i class="fa fa-caret-down"></i>
+                    <p>Show</p>
+                </button>
+            </th>
+        </tr>
+
+    </table>
+    <div class="collapse" id="collapse1">
+        {{table_main_parameters}}
+    </div>
+</div>
+
+
+<div class="limit-table">
+    <table class="table table-hover table-bordered" style="background-color:white; text-align:center;">
+
+        <tr>
+            <th>
+                Twitter API rate limits at the moment
+
+                <button class="btn btn-light" type="button" onClick="changeBtn(this);" data-toggle="collapse" data-target=".collapse2" aria-expanded="false" aria-controls="collapse2">
+                    <i class="fa fa-caret-down"></i>
+                    <p>Show</p>
+                </button>
+            </th>
+        </tr>
+
+    </table>
+    <div class="collapse collapse2" id="collapse2">
+        {{table_twitter_api_rate_limits}}
+    </div>
+</div>
+
+<button type="button" class="btn btn-light show-less-more-btn collapse collapse2"  onclick = "window.open('{{app_url}}/rate-limit-status-all','_blank');">
+    <i class="fa fa-caret-down"></i>
+    Show more
+</button>
+
+
+
+
+<div class="limit-table">
+    <table class="table table-hover table-bordered" style="background-color:white; text-align:center;">
+
+        <tr>
+            <th>
+                History of requests
+
+                <button class="btn btn-light" type="button" onClick="changeBtn(this);" data-toggle="collapse" data-target="#collapse5" aria-expanded="false" aria-controls="collapse5">
+                    <i class="fa fa-caret-down"></i>
+                    <p>Show</p>
+                </button>
+            </th>
+        </tr>
+
+    </table>
+    <div class="collapse collapse5 " id="collapse5" style="padding: 10px; overflow-x: scroll;">
+
+
+        <table id="main-table">
+            <thead>
+            <tr>
+                <th>Time of creation</th>
+                <th>ID</th>
+                <th>Owner</th>
+                <th>Keywords</th>
+                <th>Limit of users for checking</th>
+                <th>Search type</th>
+                <th>Additional parameters for tweets</th>
+                <th>Search is complete</th>
+                <th>Actions</th>
+
+
+            </tr>
+            </thead>
+
+            <tbody>
+            {% for request in requests %}
+            <tr>
+
+                <td>
+                    {{request["_id"]}}
+                </td>
+
+                <td>
+                    {{request["collection"]}}
+                </td>
+
+                <td>
+                    {% if request["owner"] is defined %}
+                    {% if request["owner"] is not none %}
+                    {{request["owner"]|join(', ')}}
+                    {% else %}
+                    -
+                    {% endif %}
+                    {% else %}
+                    -
+                    {% endif %}
+                </td>
+
+                <td>
+                    {{request["keywords"]}}
+                </td>
+
+                <td>
+                    {{request["limit"]}}
+                </td>
+
+                <td>
+                    {% if request["SearchParameters1"] == "real-time" %}
+                    Check the real-time stream of public tweets
+                    {% endif %}
+                    {% if request["SearchParameters1"] == "time-period" %}
+                    Check tweets from {{request["start_date"]}} - {{request["end_date"]}}
+                    {% endif %}
+                    {% if request["SearchParameters1"] == "seven-days" %}
+                    Check tweets from the last 7 days
+                    {% endif %}
+                    {% if request["SearchParameters1"] == "recent" %}
+                    Check the most recent tweets
+                    {% endif %}
+                    {% if request["SearchParameters1"] == "popular" %}
+                    Check the most popular tweets
+                    {% endif %}
+                    {% if request["SearchParameters1"] == "mixed" %}
+                    Check both popular and most recent tweets
+                    {% endif %}
+                </td>
+
+                <td>
+                    {% if request["areaParameters1"] == "do-not" %}
+                    <p>&bull; Do not check retweets</p>
+                    {% endif %}
+                    {% if request["areaParameters1"] == "only" %}
+                    <p>&bull; Only check retweets</p>
+                    {% endif %}
+
+                    {% if request["areaParameters2"] == "do-not" %}
+                    <p>&bull; Do not check tweets that contain URLs</p>
+                    {% endif %}
+                    {% if request["areaParameters2"] == "only" %}
+                    <p>&bull; Only check tweets that contain a URL</p>
+                    {% endif %}
+
+                    {% if request["areaParameters3"] == "do-not" %}
+                    <p>&bull; Do not check tweets that contain media (e.g. photos or videos)</p>
+                    {% endif %}
+                    {% if request["areaParameters3"] == "only" %}
+                    <p>&bull; Only check tweets that contain media (e.g. photos or videos)</p>
+                    {% endif %}
+
+                </td>
+
+                {% if "completed" in request %}
+
+                {% if request["completed"] != True %}
+                <td class="red">
+                    False
+                </td>
+                {% else %}
+                <td class="green">
+                    True
+                </td>
+                {% endif %}
+
+                {% else %}
+                <td class="orange">
+                    -
+                </td>
+                {% endif %}
+
+
+                <td style="text-align: center;">
+                    <a href="{{app_url}}/result/{{ request['collection'] }}" class="btn btn-info" target="_blank" style="margin:auto; margin-bottom:5px; padding:0.2rem 0.75rem;">Request results</a>
+                </td>
+
+            </tr>
+            {% endfor %}
+            </tbody>
+            <tfoot>
+            </tfoot>
+
+        </table>
+    </div>
+</div>
+
+
+<div class="limit-table">
+    <table class="table table-hover table-bordered" style="background-color:white; text-align:center;">
+
+        <tr>
+            <th>
+                DCA coefficients
+
+                <button class="btn btn-light" type="button" onClick="changeBtn(this);" data-toggle="collapse" data-target="#collapse3" aria-expanded="false" aria-controls="collapse3">
+                    <i class="fa fa-caret-down"></i>
+                    <p>Show</p>
+                </button>
+            </th>
+        </tr>
+
+    </table>
+    <div class="collapse" id="collapse3">
+        {{table_dca_coefficients}}
+    </div>
+</div>
+
+
+<div class="limit-table">
+    <table class="table table-hover table-bordered" style="background-color:white; text-align:center;">
+
+        <tr>
+            <th>
+                Environment variables
+
+                <button class="btn btn-light" type="button" onClick="changeBtn(this);" data-toggle="collapse" data-target="#collapse4" aria-expanded="false" aria-controls="collapse4">
+                    <i class="fa fa-caret-down"></i>
+                    <p>Show</p>
+                </button>
+            </th>
+        </tr>
+
+    </table>
+    <div class="collapse" id="collapse4">
+        {{table_env_vars}}
+    </div>
+</div>
+
+
+
+
+
+<script>
+
+    $( ".limit-table th:contains('remaining')" ).siblings().css( "color", "red" );
+    $( ".limit-table th:contains('remaining')" ).css( "word-break", "normal" );
+    $( ".limit-table th:contains('statuses')" ).css( "word-break", "normal" );
+    $( ".limit-table th:contains('/statuses')" ).css( "word-break", "break-all" );
+
+    function changeBtn(element){
+        $(element).find('i').toggleClass('gfa fa-caret-down gfa fa-caret-up');
+        var innerHTMLp =  $(element).find('p').html();
+        if (innerHTMLp == "Show"){
+            $(element).find('p').html("Hide");
+        }
+        if (innerHTMLp == "Hide"){
+            $(element).find('p').html("Show");
+        }
+    }
+
+    $(document).ready(function(){
+
+                $('#main-table').DataTable({
+                    stateSave: true,
+                    dom: 'lfrtip',
+                    "lengthMenu": [10,25,50,100]
+                 });
+
+                 $( "#main-table" ).css( "word-break", "normal" )
+
+
+
+
+            });
+
+</script>
+{% endblock %}
