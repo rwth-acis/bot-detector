@@ -72,6 +72,15 @@
     word-break: break-all;
 }
 
+.use-coeff-btn{
+    display:block;
+    margin: auto;
+    width: 80%;
+    float: none !important;
+    margin-bottom: 4px;
+    margin-top: 4px;
+}
+
 @media only screen and (max-width: 820px) {
 
     .limit-table{

@@ -43,7 +43,7 @@
 
     <div class="title-section">
         <p class="position-relative">
-            Detection result for the following parameters:
+            Result for the following request parameters:
             {% if already_saved is defined %}
             {% if already_saved%}
             <span class="position-absolute badge badge-pill badge-success bdg-saved-as-favourite">saved as favourite</span>
@@ -51,6 +51,7 @@
             {% endif %}
         </p>
         <div class="div-parameters">
+        <p>&bull; Time of creation: {{data_time}}</p>
         <p>&bull; Keywords: {{parameters["keywords"]}}</p>
         {% if parameters["areaParameters1"] == "do-not" %}
         <p>&bull; Do not check retweets</p>
@@ -97,7 +98,7 @@
 
         <button class="btn btn-info return-btn"  onclick="location.href = '{{app_url}}/index?preset_values=True&collection={{ parameters['collection'] }}'">
             <i class="fa fa-edit"></i>
-            Сhange request parameters
+            Use these request parameters again
         </button>
         {% if already_saved is defined %}
         {% if not already_saved%}

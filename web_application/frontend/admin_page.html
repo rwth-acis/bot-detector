@@ -34,6 +34,7 @@
 <link rel="stylesheet" href=
         "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css" />
 <link rel="stylesheet" href="{{ app_url_path }}{{ url_for('static', filename='profile.css') }}">
+
 {% endblock %}
 
 
@@ -242,15 +243,28 @@
             <th>
                 DCA coefficients
 
-                <button class="btn btn-light" type="button" onClick="changeBtn(this);" data-toggle="collapse" data-target="#collapse3" aria-expanded="false" aria-controls="collapse3">
+                <button class="btn btn-light" type="button" onClick="changeBtn(this);" data-toggle="collapse" data-target=".collapse3" aria-expanded="false" aria-controls="collapse3">
                     <i class="fa fa-caret-down"></i>
                     <p>Show</p>
                 </button>
             </th>
         </tr>
+        <tr class="collapse collapse3">
+            <td>
+                <button class="btn btn-info use-coeff-btn" type="button" onClick="useCoeffAsEnvVars('');">
+                    Use this coefficients as environment variables
+                </button>
+                <button class="btn btn-info use-coeff-btn" type="button" onClick="useCoeffAsEnvVars('/signal-generator');">
+                    Make SignalGenerator use this coefficients as environment variables
+                </button>
+                <button class="btn btn-info use-coeff-btn" type="button" onClick="useCoeffAsEnvVars('/bot-detector');">
+                    Make BotDetector use this coefficients as environment variables
+                </button>
+            </td>
+        </>
 
     </table>
-    <div class="collapse" id="collapse3">
+    <div class="collapse collapse3" id="collapse3">
         {{table_dca_coefficients}}
     </div>
 </div>
@@ -298,6 +312,24 @@
         }
     }
 
+    function useCoeffAsEnvVars(app){
+        $.ajax({
+                    type:'GET',
+                    url:'{{app_url}}/admin-page/use-new-env-vars' + app,
+                    data:{},
+                    success: function(response)
+                      {
+                        alert(response);
+
+
+                      },
+                      error: function(response)
+                      {
+                        alert(response);
+                      }
+                });
+    }
+
     $(document).ready(function(){
 
                 $('#main-table').DataTable({
@@ -306,9 +338,7 @@
                     "lengthMenu": [10,25,50,100]
                  });
 
-                 $( "#main-table" ).css( "word-break", "normal" )
-
-
+                $( "#main-table" ).css( "word-break", "normal" );
 
 
             });

@@ -76,6 +76,18 @@
 
 <div class="profile-table-with-credentials">
 
+    <div class="alert alert-warning alert-dismissible fade show" role="alert" style="font-size: 10px; padding-top: 5px; padding-bottom: 5px; padding-left: 15px; padding-right: 40px;">
+        If you do not enter your own Twitter API credentials, the default credentials will be used.
+        
+        In this case, waiting time for the request results may be longer, as these credentials can also be used by other users.
+
+        If the Twitter API rate limit for the default credentials is reached, it will not be possible to retrieve new data from the Twitter API for some time (up to 15 minutes).
+
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="font-size: 14px; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-left: 5px;">
+            <span aria-hidden="true" style="font-size: 14px;">&times;</span>
+        </button>
+    </div>
+
 
     <table class="table table-hover table-bordered" style="background-color:white;">
         <thead>

@@ -456,6 +456,65 @@ def admin_page():
                            table_env_vars=table_env_vars, requests=r)
 
 
+@app.route(os.environ['APP_URL_PATH'] + "/admin-page/use-new-env-vars")
+@oidc.require_login
+def admin_page_set_new_env_vars():
+    col1 = db["ApplicationStatus"]
+    main_parameters = col1.find_one({"name": "MainValues"})
+    info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+
+    if not info["sub"] in main_parameters["admins"]:
+        return error403("403")
+
+    dca_coefficients = col1.find_one(
+        {"name": "DCACoefficients", "version": main_parameters["coefficients_collection_id"]})
+
+    for attr in list(dca_coefficients["coefficients"].keys()):
+        os.environ[attr] = str(dca_coefficients["coefficients"][attr])
+
+    return "Ok, DCACoefficients version " + main_parameters["coefficients_collection_id"]
+
+
+@app.route(os.environ['APP_URL_PATH'] + "/admin-page/use-new-env-vars/signal-generator")
+@oidc.require_login
+def sg_set_new_env_vars():
+    col1 = db["ApplicationStatus"]
+    main_parameters = col1.find_one({"name": "MainValues"})
+    info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+
+    if not info["sub"] in main_parameters["admins"]:
+        return error403("403")
+
+    sg_data = {
+        "coefficients_collection_id": main_parameters["coefficients_collection_id"]
+    }
+
+    ms_sg_addr = os.environ['MS_SG_ADDRESS']
+    sg_result = requests.post((ms_sg_addr + os.environ['MS_SG_URL_PATH'] + "use-new-env-vars"), data=sg_data)
+
+    return sg_result.text
+
+
+@app.route(os.environ['APP_URL_PATH'] + "/admin-page/use-new-env-vars/bot-detector")
+@oidc.require_login
+def bd_set_new_env_vars():
+    col1 = db["ApplicationStatus"]
+    main_parameters = col1.find_one({"name": "MainValues"})
+    info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+
+    if not info["sub"] in main_parameters["admins"]:
+        return error403("403")
+
+    bd_data = {
+        "coefficients_collection_id": main_parameters["coefficients_collection_id"]
+    }
+
+    ms_bd_addr = os.environ['MS_BD_ADDRESS']
+    bd_result = requests.post((ms_bd_addr + os.environ['MS_BD_URL_PATH'] + "use-new-env-vars"), data=bd_data)
+
+    return bd_result.text
+
+
 ###############################################################################
 # ============================      API       ==================================
 ###############################################################################
@@ -834,6 +893,8 @@ def resultid(id):
         else:
             ready_count = 100
         print(ready_count)
+        data_time = str(parameters["_id"].generation_time).replace("+00:00", "")
+
         if oidc.user_loggedin:
             info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
 
@@ -917,7 +978,7 @@ def resultid(id):
                                    collection=str(id), parameters=parameters, ready_count=ready_count,
                                    app_url_path=os.environ['APP_URL_PATH'][:-1],
                                    example_db=os.environ['EXAMPLE_DB'], user_name=username, isPublic=isPublic,
-                                   already_saved=already_saved)
+                                   already_saved=already_saved, data_time=data_time)
         else:
             return render_template('result.html', users=col1.find(), folium_map=Markup(folium_map._repr_html_()),
                                    app_url=os.environ['APP_URL'],
@@ -926,7 +987,7 @@ def resultid(id):
                                    positive_count2=positive_count2, neutral_count2=neutral_count2,
                                    collection=str(id), parameters=parameters, ready_count=ready_count,
                                    app_url_path=os.environ['APP_URL_PATH'][:-1],
-                                   example_db=os.environ['EXAMPLE_DB'], isPublic=isPublic)
+                                   example_db=os.environ['EXAMPLE_DB'], isPublic=isPublic, data_time=data_time)
 
     except Exception as e:
         # return dumps({'error': str(e)})
@@ -1637,6 +1698,14 @@ def part_result():
     return redirect((os.environ['APP_URL']) + "/result/" + str(id))
 
 
+def send_data_to_kafka(json_data1, topic_name):
+    client = KafkaClient(hosts=os.environ["KAFKA_URL"])
+    topic = client.topics[topic_name]
+    with topic.get_sync_producer() as producer:
+        print((json.dumps(json_data1)).encode("utf-8"))
+        producer.produce((json.dumps(json_data1)).encode("utf-8"))
+
+
 @app.route(os.environ['APP_URL_PATH'] + '<collection>/agree/<decision>/<id>', methods=["POST", "GET"])
 @oidc.require_login
 def agree_with_result(collection, decision, id):
@@ -1676,8 +1745,6 @@ def agree_with_result(collection, decision, id):
         col1.update_one({"_id": ObjectId(id)},
                         {'$pullAll': {'classification_result_' + decision + "_disagreed": [info.get('sub')]}})
 
-        client = KafkaClient(hosts=os.environ["KAFKA_URL"])
-        topic = client.topics["telegraf-to-influxdb-json"]
         curr_dt = datetime.datetime.now()
         timestamp = int(round(curr_dt.timestamp()) * 1000000000)
 
@@ -1691,9 +1758,9 @@ def agree_with_result(collection, decision, id):
             "timestamp": str(timestamp)
         }
 
-        with topic.get_sync_producer() as producer:
-            print((json.dumps(json_data1)).encode("utf-8"))
-            producer.produce((json.dumps(json_data1)).encode("utf-8"))
+        p1 = multiprocessing.Process(name='p2', target=startSignalGenerator,
+                                     args=(json_data1, "telegraf-to-influxdb-json",))
+        p1.start()
 
         return "Ok", 200
 
@@ -1737,8 +1804,6 @@ def disagree_with_result(collection, decision, id):
         col1.update_one({"_id": ObjectId(id)},
                         {'$pullAll': {'classification_result_' + decision + "_agreed": [info.get('sub')]}})
 
-        client = KafkaClient(hosts=os.environ["KAFKA_URL"])
-        topic = client.topics["telegraf-to-influxdb-json"]
         curr_dt = datetime.datetime.now()
         timestamp = int(round(curr_dt.timestamp()) * 1000000000)
 
@@ -1752,9 +1817,10 @@ def disagree_with_result(collection, decision, id):
             "timestamp": str(timestamp)
         }
 
-        with topic.get_sync_producer() as producer:
-            print((json.dumps(json_data1)).encode("utf-8"))
-            producer.produce((json.dumps(json_data1)).encode("utf-8"))
+        p1 = multiprocessing.Process(name='p2', target=startSignalGenerator,
+                                     args=(json_data1, "telegraf-to-influxdb-json",))
+        p1.start()
+
         return "Ok", 200
 
 

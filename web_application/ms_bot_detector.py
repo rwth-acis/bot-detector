@@ -72,6 +72,25 @@ def detect_bots():
     return "OK"
 
 
+@app.route(os.environ['MS_BD_URL_PATH'] + "use-new-env-vars", methods=['post', 'get'])
+def use_new_env_vars():
+    if request.method == 'POST':
+
+        col1 = db["ApplicationStatus"]
+        main_parameters = col1.find_one({"name": "MainValues"})
+
+        dca_coefficients = col1.find_one(
+            {"name": "DCACoefficients", "version": main_parameters["coefficients_collection_id"]})
+
+        for attr in list(dca_coefficients["coefficients"].keys()):
+            os.environ[attr] = str(dca_coefficients["coefficients"][attr])
+
+        return "BotDetector: Ok, DCACoefficients version " + main_parameters["coefficients_collection_id"]
+
+    else:
+        return 404
+
+
 if __name__ == "__main__":
     # app.run()
     app.run(host='0.0.0.0')
