@@ -1,0 +1,831 @@
+{% extends "base.html" %}
+{% block title %}User{% endblock %}
+{% block html_head %}
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script src=
+                "https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js">
+</script>
+
+<script src="https://cdn.anychart.com/releases/8.10.0/js/anychart-core.min.js"></script>
+<script src="https://cdn.anychart.com/releases/8.10.0/js/anychart-pie.min.js"></script>
+
+<link href="https://fonts.googleapis.com/css?family=Asap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+<link href="https://www.jqueryscript.net/css/jquerysctipttop.css" rel="stylesheet" type="text/css">
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+
+<link rel="stylesheet" href="{{ app_url_path }}{{ url_for('static', filename='jQuery-plugin-progressbar.css') }}">
+
+<script src="{{ app_url_path }}{{ url_for('static', filename='jQuery-plugin-progressbar.js') }}"></script>
+
+
+<link rel="stylesheet" href="{{ app_url_path }}{{ url_for('static', filename='tweets.css') }}">
+
+
+<script src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
+
+
+<script src="{{ app_url_path }}{{ url_for('static', filename='tweet_to_html.js') }}"></script>
+<script src="{{ app_url_path }}{{ url_for('static', filename='user.js') }}"></script>
+
+
+{% endblock %}
+
+
+{% block content %}
+
+
+<div id="main-table-div">
+<div id="div-main-table">
+    <table id="main-table">
+        <thead>
+        <tr>
+            <th>User</th>
+            <td class="user"><span id="screen-name-raw" style="display: none;">{{user["user"]["screen_name"]}}</span> <span id="screen-name"><a href='https://twitter.com/{{user["user"]["screen_name"]}}' target="_blank">@{{user["user"]["screen_name"]}}</a></span> <br>  (<span id="name">{{user["user"]["name"]}}</span>)</td>
+
+        </tr>
+        </thead>
+        <tr>
+            <th>Created at</th>
+            <td id="created-at">{{user["user"]["created_at"]}}</td>
+        </tr>
+        <tr>
+            <th>User description</th>
+            <td class="text">{{user["user"]["description"]}}</td>
+        </tr>
+        <tr>
+            <th>Tweet</th>
+            <td class="text found-tweet">{{tweet}}</td>
+        </tr>
+        <tr>
+            <th>Statuses count</th>
+            <td>{{user["user"]["statuses_count"]}}</td>
+        </tr>
+        {% if not(user["user"]["location"] is none)%}
+        <tr>
+            <th>Location</th>
+            <td>{{user["user"]["location"]}}</td>
+        </tr>
+        {% endif %}
+
+    </table>
+</div>
+</div>
+<div class="signals-table-div">
+    <table class="signals-table">
+        <thead>
+        <tr>
+
+            {% if user["signals"]["is_bot_probability"] >= 50 %}
+            <th class="red">Is a bot (probability)</th>
+            <td class="red">
+                <div class="progress-bar position" data-percent='{{user["signals"]["is_bot_probability"]}}' data-duration="800" data-color="white,red,red"></div>
+            </td>
+            {% else %}
+            {% if user["signals"]["is_bot_probability"] >= 30 %}
+            <th class="orange">Is a bot (probability)</th>
+            <td class="orange">
+                    <div class="progress-bar position" data-percent='{{user["signals"]["is_bot_probability"]}}' data-duration="800" data-color="white,orange,orange"></div>
+            </td>
+            {% else %}
+            <th class="green">Is a bot (probability)</th>
+            <td class="green">
+                <div class="progress-bar position" data-percent='{{user["signals"]["is_bot_probability"]}}' data-duration="800" data-color="white,green,green"></div>
+            </td>
+            {% endif %}
+            {% endif %}
+        </tr>
+        </thead>
+        <tr>
+            <th>Default profile
+                <span data-toggle="tooltip" data-placement="top" data-html="true" title='<p style="font-size: 12px;">When true, indicates that the user has not altered the theme or background of their user profile.</p>' style="font-size: 12px;">
+                            <i class="fa fa-info-circle" aria-hidden="true"></i>
+                </span>
+            </th>
+            {% if user["user"]["default_profile"] == True %}
+            <td class="orange">{{user["user"]["default_profile"]}}</td>
+            {% else %}
+            <td class="green">{{user["user"]["default_profile"]}}</td>
+            {% endif %}
+
+        </tr>
+        <tr>
+            <th>Default profile image</th>
+            {% if user["user"]["default_profile_image"] == True %}
+            <td class="red">{{user["user"]["default_profile_image"]}}</td>
+            {% else %}
+            <td class="green">{{user["user"]["default_profile_image"]}}</td>
+            {% endif %}
+        </tr>
+
+        <tr>
+            <th>Followers-to-friends ratio</th>
+            {% if not(user["signals"]["followers_friends_ratio"] is none) %}
+            <td>{{"{:.2f}".format(user["signals"]["followers_friends_ratio"])}}</td>
+            {% else %}
+            <td>-</td>
+            {% endif %}
+        </tr>
+
+        <tr>
+            <th>Number of time intervals between tweets that are < 10 sec</th>
+            {% if not(user["signals"]["small_interval_between_tweets_count"] is none) %}
+            {% if user["signals"]["small_interval_between_tweets_count"] >= scale_parameters['small_interval_between_tweets_count']['pamp_threshold'] %}
+            <td class="red">
+                {{user["signals"]["small_interval_between_tweets_count"]}}
+            </td>
+            {% else %}
+            {% if user["signals"]["small_interval_between_tweets_count"] >= scale_parameters['small_interval_between_tweets_count']['danger_threshold'] %}
+            <td class="orange">
+                {{user["signals"]["small_interval_between_tweets_count"]}}
+            </td>
+            {% else %}
+            <td class="green">
+                {{user["signals"]["small_interval_between_tweets_count"]}}
+            </td>
+            {% endif %}
+            {% endif %}
+            {% else %}
+            <td>-</td>
+            {% endif %}
+        </tr>
+
+        <tr>
+            {% if not(user["signals"]["time_entropy"] is none)%}
+            {% if user["signals"]["time_entropy"] <= scale_parameters['time_entropy']['pamp_threshold'] %}
+            <th colspan="2" class="red1">Tweeting time entropy
+                {% else %}
+                {% if user["signals"]["time_entropy"] <= scale_parameters['time_entropy']['danger_threshold'] %}
+            <th colspan="2" class="orange1">Tweeting time entropy
+                {% else %}
+            <th colspan="2" class="green1">Tweeting time entropy
+                {% endif %}
+                {% endif %}
+
+                <span data-toggle="tooltip" data-placement="top" data-html="true" title='<p style="font-size: 12px;">Time interval entropy is used to capture regularity of tweeting behavior which indicates automation.</p>' style="font-size: 12px;">
+                            <i class="fa fa-info-circle" aria-hidden="true"></i>
+                </span>:
+                <div class="progress prog" style="margin-top:5px; height: 5px; border-radius:0;">
+                    <div class="progress-bar bg-danger prog" role="progressbar" style="width: {{scale_parameters['time_entropy']['progressbar']['pamp']}}%" aria-valuenow="{{scale_parameters['time_entropy']['progressbar']['pamp']}}" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-warning prog" role="progressbar" style="width: {{scale_parameters['time_entropy']['progressbar']['danger']}}%" aria-valuenow="{{scale_parameters['time_entropy']['progressbar']['danger']}}" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-success prog" role="progressbar" style="width: {{scale_parameters['time_entropy']['progressbar']['safe']}}%" aria-valuenow="{{scale_parameters['time_entropy']['progressbar']['safe']}}" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="progress prog-with-text" style="height: 15px; border-radius:0;">
+                    {% if user["signals"]["time_entropy"] <= scale_parameters["time_entropy"]["borders"][1]/10 %}
+                    <div class="progress-bar bg-danger" role="progressbar" style='width: 10%;' aria-valuenow='10' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.2f}".format(user["signals"]["time_entropy"])}}</span></div>
+                    {% else %}
+                    {% if user["signals"]["time_entropy"] <= scale_parameters['time_entropy']['pamp_threshold'] %}
+
+                    <div class="progress-bar bg-danger" role="progressbar" style='width: {{"{:.0f}".format(100*user["signals"]["time_entropy"]/scale_parameters["time_entropy"]["borders"][1])}}%;' aria-valuenow='{{"{:.0f}".format(100*user["signals"]["time_entropy"]/scale_parameters["time_entropy"]["borders"][1])}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.2f}".format(user["signals"]["time_entropy"])}}</span></div>
+
+                    {% else %}
+                    {% if user["signals"]["time_entropy"] <= scale_parameters['time_entropy']['danger_threshold'] %}
+
+                    <div class="progress-bar bg-warning" role="progressbar" style='width: {{"{:.0f}".format(100*user["signals"]["time_entropy"]/scale_parameters["time_entropy"]["borders"][1])}}%;' aria-valuenow='{{"{:.0f}".format(100*user["signals"]["time_entropy"]/scale_parameters["time_entropy"]["borders"][1])}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.2f}".format(user["signals"]["time_entropy"])}}</span></div>
+
+                    {% else %}
+
+                    <div class="progress-bar bg-success" role="progressbar" style='width: {{"{:.0f}".format(100*user["signals"]["time_entropy"]/scale_parameters["time_entropy"]["borders"][1])}}%;' aria-valuenow='{{"{:.0f}".format(100*user["signals"]["time_entropy"]/scale_parameters["time_entropy"]["borders"][1])}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.2f}".format(user["signals"]["time_entropy"])}}</span></div>
+
+                    {% endif %}
+                    {% endif %}
+
+                    {% endif %}
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <div style="font-size: 8px; color: black;">Low</div>
+                    <div style="font-size: 8px; color: black;">High</div>
+                </div>
+            </th>
+            {% else %}
+            <th>Tweeting time entropy
+                <span data-toggle="tooltip" data-placement="top" data-html="true" title='<p style="font-size: 12px;">Time interval entropy is used to capture regularity of tweeting behavior which indicates automation.</p>' style="font-size: 12px;">
+                            <i class="fa fa-info-circle" aria-hidden="true"></i>
+                </span>
+            </th>
+            <td>-</td>
+            {% endif %}
+
+        </tr>
+
+
+        <tr>
+            {% if not(user["signals"]["avg_tweet_similarity"] is none) %}
+            {% if user["signals"]["avg_tweet_similarity"] >= scale_parameters['avg_tweet_similarity']['pamp_threshold'] %}
+            <th colspan="2" class="red1">Average tweet similarity:
+                {% else %}
+                {% if user["signals"]["avg_tweet_similarity"] >= scale_parameters['avg_tweet_similarity']['danger_threshold'] %}
+            <th colspan="2" class="orange1">Average tweet similarity:
+                {% else %}
+            <th colspan="2" class="green1">Average tweet similarity:
+                {% endif %}
+                {% endif %}
+
+                <div class="progress prog" style="margin-top:5px; height: 5px; border-radius:0;">
+                    <div class="progress-bar bg-success prog" role="progressbar" style="width: {{scale_parameters['avg_tweet_similarity']['progressbar']['safe']}}%" aria-valuenow="{{scale_parameters['avg_tweet_similarity']['progressbar']['safe']}}" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-warning prog" role="progressbar" style="width: {{scale_parameters['avg_tweet_similarity']['progressbar']['danger']}}%" aria-valuenow="{{scale_parameters['avg_tweet_similarity']['progressbar']['danger']}}" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-danger prog" role="progressbar" style="width: {{scale_parameters['avg_tweet_similarity']['progressbar']['pamp']}}%" aria-valuenow="{{scale_parameters['avg_tweet_similarity']['progressbar']['pamp']}}" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="progress prog-with-text" style="height: 15px; border-radius:0;">
+                    {% if user["signals"]["avg_tweet_similarity"] <= 0.1 %}
+                    <div class="progress-bar bg-success" role="progressbar" style='width: 10%;' aria-valuenow='10' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.0f}".format(100*user["signals"]["avg_tweet_similarity"])}}%</span></div>
+                    {% else %}
+                    {% if user["signals"]["avg_tweet_similarity"] < scale_parameters['avg_tweet_similarity']['danger_threshold'] %}
+
+                    <div class="progress-bar bg-success" role="progressbar" style='width: {{"{:.0f}".format(100*user["signals"]["avg_tweet_similarity"])}}%;' aria-valuenow='{{"{:.0f}".format(100*user["signals"]["avg_tweet_similarity"])}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.0f}".format(100*user["signals"]["avg_tweet_similarity"])}}%</span></div>
+
+                    {% else %}
+                    {% if user["signals"]["avg_tweet_similarity"] < scale_parameters['avg_tweet_similarity']['pamp_threshold'] %}
+
+                    <div class="progress-bar bg-warning" role="progressbar" style='width: {{"{:.0f}".format(100*user["signals"]["avg_tweet_similarity"])}}%;' aria-valuenow='{{"{:.0f}".format(100*user["signals"]["avg_tweet_similarity"])}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.0f}".format(100*user["signals"]["avg_tweet_similarity"])}}%</span></div>
+
+                    {% else %}
+
+                    <div class="progress-bar bg-danger" role="progressbar" style='width: {{"{:.0f}".format(100*user["signals"]["avg_tweet_similarity"])}}%;' aria-valuenow='{{"{:.0f}".format(100*user["signals"]["avg_tweet_similarity"])}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.0f}".format(100*user["signals"]["avg_tweet_similarity"])}}%</span></div>
+
+                    {% endif %}
+                    {% endif %}
+
+                    {% endif %}
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <div style="font-size: 8px; color: black;">0%</div>
+                    <div style="font-size: 8px; color: black;">100%</div>
+                </div>
+            </th>
+            {% else %}
+            <th>Average tweet similarity
+            </th>
+            <td>-</td>
+            {% endif %}
+
+        </tr>
+
+
+
+        <tr>
+            {% if not(user["signals"]["retweet_tweet_ratio"] is none) %}
+            {% if user["signals"]["retweet_tweet_ratio"] >= scale_parameters['basic']['danger_threshold'] %}
+
+            <th colspan="2" class="orange1">Retweet-to-tweet ratio:
+                {% else %}
+            <th colspan="2" class="green1">Retweet-to-tweet ratio:
+                {% endif %}
+
+
+                <div class="progress prog" style="margin-top:5px; height: 5px; border-radius:0;">
+                    <div class="progress-bar bg-success prog" role="progressbar" style="width: {{scale_parameters['basic']['progressbar']['safe_and_danger']}}%" aria-valuenow="{{scale_parameters['basic']['progressbar']['safe_and_danger']}}" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-warning prog" role="progressbar" style="width: {{scale_parameters['basic']['progressbar']['pamp']}}%" aria-valuenow="{{scale_parameters['basic']['progressbar']['pamp']}}" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="progress prog-with-text" style="height: 15px; border-radius:0;">
+                    {% if user["signals"]["retweet_tweet_ratio"] <= 0.1 %}
+                    <div class="progress-bar bg-success" role="progressbar" style='width: 10%;' aria-valuenow='10' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.2f}".format(user["signals"]["retweet_tweet_ratio"])}}</span></div>
+                    {% else %}
+                    {% if user["signals"]["retweet_tweet_ratio"] < scale_parameters['basic']['danger_threshold']%}
+
+                    <div class="progress-bar bg-success" role="progressbar" style='width: {{"{:.0f}".format(100*user["signals"]["retweet_tweet_ratio"])}}%;' aria-valuenow='{{"{:.0f}".format(100*user["signals"]["retweet_tweet_ratio"])}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.2f}".format(user["signals"]["retweet_tweet_ratio"])}}</span></div>
+
+                    {% else %}
+
+                    <div class="progress-bar bg-warning" role="progressbar" style='width: {{"{:.0f}".format(100*user["signals"]["retweet_tweet_ratio"])}}%;' aria-valuenow='{{"{:.0f}".format(100*user["signals"]["retweet_tweet_ratio"])}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.2f}".format(user["signals"]["retweet_tweet_ratio"])}}</span></div>
+
+                    {% endif %}
+
+                    {% endif %}
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <div style="font-size: 8px; color: black;">0</div>
+                    <div style="font-size: 8px; color: black;">1</div>
+                </div>
+            </th>
+            {% else %}
+            <th>Retweet-to-tweet ratio
+            </th>
+            <td>-</td>
+            {% endif %}
+
+        </tr>
+
+
+        <tr>
+            {% if not(user["signals"]["quote_tweet_ratio"] is none) %}
+            {% if user["signals"]["quote_tweet_ratio"] >= scale_parameters['basic']['danger_threshold'] %}
+
+            <th colspan="2" class="orange1">Quote-to-tweet ratio:
+                {% else %}
+            <th colspan="2" class="green1">Quote-to-tweet ratio:
+                {% endif %}
+
+
+                <div class="progress prog" style="margin-top:5px; height: 5px; border-radius:0;">
+                    <div class="progress-bar bg-success prog" role="progressbar" style="width: {{scale_parameters['basic']['progressbar']['safe_and_danger']}}%" aria-valuenow="{{scale_parameters['basic']['progressbar']['safe_and_danger']}}" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-warning prog" role="progressbar" style="width: {{scale_parameters['basic']['progressbar']['pamp']}}%" aria-valuenow="{{scale_parameters['basic']['progressbar']['pamp']}}" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="progress prog-with-text" style="height: 15px; border-radius:0;">
+                    {% if user["signals"]["quote_tweet_ratio"] <= 0.1 %}
+                    <div class="progress-bar bg-success" role="progressbar" style='width: 10%;' aria-valuenow='10' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.2f}".format(user["signals"]["quote_tweet_ratio"])}}</span></div>
+                    {% else %}
+                    {% if user["signals"]["quote_tweet_ratio"] < scale_parameters['basic']['danger_threshold'] %}
+
+                    <div class="progress-bar bg-success" role="progressbar" style='width: {{"{:.0f}".format(100*user["signals"]["quote_tweet_ratio"])}}%;' aria-valuenow='{{"{:.0f}".format(100*user["signals"]["quote_tweet_ratio"])}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.2f}".format(user["signals"]["quote_tweet_ratio"])}}</span></div>
+
+                    {% else %}
+
+                    <div class="progress-bar bg-warning" role="progressbar" style='width: {{"{:.0f}".format(100*user["signals"]["quote_tweet_ratio"])}}%;' aria-valuenow='{{"{:.0f}".format(100*user["signals"]["quote_tweet_ratio"])}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.2f}".format(user["signals"]["quote_tweet_ratio"])}}</span></div>
+
+                    {% endif %}
+
+                    {% endif %}
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <div style="font-size: 8px; color: black;">0</div>
+                    <div style="font-size: 8px; color: black;">1</div>
+                </div>
+            </th>
+            {% else %}
+            <th>Quote-to-tweet ratio
+            </th>
+            <td>-</td>
+            {% endif %}
+
+        </tr>
+
+        <tr>
+            {% if not(user["signals"]["friends_growth_rate"] is none) %}
+            {% if user["signals"]["friends_growth_rate"] >= scale_parameters['friends_growth_rate']['danger_threshold'] %}
+            <th colspan="2" class="red1">Friends growth rate (friends per day):
+                {% else %}
+                {% if user["signals"]["friends_growth_rate"] >= scale_parameters['friends_growth_rate']['safe_threshold'] %}
+            <th colspan="2" class="orange1">Friends growth rate (friends per day):
+                {% else %}
+            <th colspan="2" class="green1">Friends growth rate (friends per day):
+                {% endif %}
+                {% endif %}
+
+                <div class="progress prog" style="margin-top:5px; height: 5px; border-radius:0;">
+                    <div class="progress-bar bg-success prog" role="progressbar" style="width: {{scale_parameters['friends_growth_rate']['progressbar']['safe']}}%" aria-valuenow="{{scale_parameters['friends_growth_rate']['progressbar']['safe']}}" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-warning prog" role="progressbar" style="width: {{scale_parameters['friends_growth_rate']['progressbar']['danger']}}%" aria-valuenow="{{scale_parameters['friends_growth_rate']['progressbar']['danger']}}" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-danger prog" role="progressbar" style="width: {{scale_parameters['friends_growth_rate']['progressbar']['pamp']}}%" aria-valuenow="{{scale_parameters['friends_growth_rate']['progressbar']['pamp']}}" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="progress prog-with-text" style="height: 15px; border-radius:0;">
+                    {% if user["signals"]["friends_growth_rate"] <= scale_parameters['friends_growth_rate']['borders'][1]/10 %}
+                    <div class="progress-bar bg-success" role="progressbar" style='width: 10%;' aria-valuenow='10' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.1f}".format(user["signals"]["friends_growth_rate"])}}</span></div>
+                    {% else %}
+                    {% if user["signals"]["friends_growth_rate"] < scale_parameters['friends_growth_rate']['safe_threshold'] %}
+
+                    <div class="progress-bar bg-success" role="progressbar" style='width: {{"{:.0f}".format(100*user["signals"]["friends_growth_rate"]/20)}}%;' aria-valuenow='{{"{:.0f}".format(100*user["signals"]["friends_growth_rate"]/20)}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.1f}".format(user["signals"]["friends_growth_rate"])}}</span></div>
+
+                    {% else %}
+                    {% if user["signals"]["friends_growth_rate"] < scale_parameters['friends_growth_rate']['danger_threshold'] %}
+
+                    <div class="progress-bar bg-warning" role="progressbar" style='width: {{"{:.0f}".format(100*user["signals"]["friends_growth_rate"]/20)}}%;' aria-valuenow='{{"{:.0f}".format(100*user["signals"]["friends_growth_rate"]/20)}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.1f}".format(user["signals"]["friends_growth_rate"])}}</span></div>
+
+                    {% else %}
+
+                    <div class="progress-bar bg-danger" role="progressbar" style='width: {{"{:.0f}".format(100*user["signals"]["friends_growth_rate"]/20)}}%;' aria-valuenow='{{"{:.0f}".format(100*user["signals"]["friends_growth_rate"]/20)}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.1f}".format(user["signals"]["friends_growth_rate"])}}</span></div>
+
+                    {% endif %}
+                    {% endif %}
+
+                    {% endif %}
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <div style="font-size: 8px; color: black;">Low</div>
+                    <div style="font-size: 8px; color: black;">High</div>
+                </div>
+            </th>
+            {% else %}
+            <th>Friends growth rate <br>(friends per day)
+            </th>
+            <td>-</td>
+            {% endif %}
+
+        </tr>
+
+        <tr>
+            {% if not(user["signals"]["statuses_growth_rate"] is none) %}
+            {% if user["signals"]["statuses_growth_rate"] >= scale_parameters['statuses_growth_rate']['danger_threshold'] %}
+            <th colspan="2" class="red1">Tweets growth rate (tweets per day):
+                {% else %}
+                {% if user["signals"]["statuses_growth_rate"] >= scale_parameters['statuses_growth_rate']['safe_threshold'] %}
+            <th colspan="2" class="orange1">Tweets growth rate (tweets per day):
+                {% else %}
+            <th colspan="2" class="green1">Tweets growth rate (tweets per day):
+                {% endif %}
+                {% endif %}
+
+                <div class="progress prog" style="margin-top:5px; height: 5px; border-radius:0;">
+                    <div class="progress-bar bg-success prog" role="progressbar" style="width: {{scale_parameters['statuses_growth_rate']['progressbar']['safe']}}%" aria-valuenow="{{scale_parameters['statuses_growth_rate']['progressbar']['safe']}}" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-warning prog" role="progressbar" style="width: {{scale_parameters['statuses_growth_rate']['progressbar']['danger']}}%" aria-valuenow="{{scale_parameters['statuses_growth_rate']['progressbar']['danger']}}" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-danger prog" role="progressbar" style="width: {{scale_parameters['statuses_growth_rate']['progressbar']['pamp']}}%" aria-valuenow="{{scale_parameters['statuses_growth_rate']['progressbar']['pamp']}}" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="progress prog-with-text" style="height: 15px; border-radius:0;">
+                    {% if user["signals"]["statuses_growth_rate"] <= scale_parameters['statuses_growth_rate']['borders'][1]/10  %}
+                    <div class="progress-bar bg-success" role="progressbar" style='width: 12%;' aria-valuenow='12' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.1f}".format(user["signals"]["statuses_growth_rate"])}}</span></div>
+                    {% else %}
+                    {% if user["signals"]["statuses_growth_rate"] < scale_parameters['statuses_growth_rate']['safe_threshold'] %}
+
+                    <div class="progress-bar bg-success" role="progressbar" style='width: {{"{:.0f}".format(user["signals"]["statuses_growth_rate"])}}%;' aria-valuenow='{{"{:.0f}".format(user["signals"]["statuses_growth_rate"])}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.1f}".format(user["signals"]["statuses_growth_rate"])}}</span></div>
+
+                    {% else %}
+                    {% if user["signals"]["statuses_growth_rate"] < scale_parameters['statuses_growth_rate']['danger_threshold'] %}
+
+                    <div class="progress-bar bg-warning" role="progressbar" style='width: {{"{:.0f}".format(user["signals"]["statuses_growth_rate"])}}%;' aria-valuenow='{{"{:.0f}".format(user["signals"]["statuses_growth_rate"])}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.1f}".format(user["signals"]["statuses_growth_rate"])}}</span></div>
+
+                    {% else %}
+
+                    <div class="progress-bar bg-danger" role="progressbar" style='width: {{"{:.0f}".format(user["signals"]["statuses_growth_rate"])}}%;' aria-valuenow='{{"{:.0f}".format(user["signals"]["statuses_growth_rate"])}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.1f}".format(user["signals"]["statuses_growth_rate"])}}</span></div>
+
+                    {% endif %}
+                    {% endif %}
+
+                    {% endif %}
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <div style="font-size: 8px; color: black;">Low</div>
+                    <div style="font-size: 8px; color: black;">High</div>
+                </div>
+            </th>
+            {% else %}
+            <th>Tweets growth rate (tweets per day)
+            </th>
+            <td>-</td>
+            {% endif %}
+
+        </tr>
+
+
+    </table>
+</div>
+<div class="signals-table-div">
+    <table class="signals-table">
+        <thead>
+        <tr>
+
+            {% if user["signals"]["intentions_are_bad_probability"] >= 50 %}
+            <th class="red">Intentions are bad (probability)</th>
+            <td class="red">
+                <div class="progress-bar position" data-percent='{{user["signals"]["intentions_are_bad_probability"]}}' data-duration="800" data-color="white,red,red"></div>
+            </td>
+            {% else %}
+            {% if user["signals"]["intentions_are_bad_probability"] >= 30 %}
+            <th class="orange">Intentions are bad (probability)</th>
+            <td class="orange">
+                <div class="progress-bar position" data-percent='{{user["signals"]["intentions_are_bad_probability"]}}' data-duration="800" data-color="white,orange,orange"></div>
+            </td>
+            {% else %}
+            <th class="green">Intentions are bad (probability)</th>
+            <td class="green">
+                <div class="progress-bar position" data-percent='{{user["signals"]["intentions_are_bad_probability"]}}' data-duration="800" data-color="white,green,green"></div>
+            </td>
+            {% endif %}
+            {% endif %}
+        </tr>
+        </thead>
+        <tr>
+
+            <th>Verified</th>
+
+            {% if user["user"]["verified"] == False %}
+            <td class="orange">{{user["user"]["verified"]}}
+            </td>
+            {% else %}
+            <td class="green">{{user["user"]["verified"]}}
+            </td>
+            {% endif %}
+        </tr>
+        <tr>
+            <th>Identifies itself as bot</th>
+
+            {% if user["signals"]["identifies_itself_as_bot"] == False %}
+            <td style="text-align: center;">{{user["user"]["verified"]}}</td>
+            {% else %}
+            <td class="green">{{user["signals"]["identifies_itself_as_bot"]}}</td>
+            {% endif %}
+        </tr>
+
+        <tr>
+            <th>Average favorite count</th>
+            {% if not(user["signals"]["average_favorite_count"] is none) %}
+            {% if user["signals"]["average_favorite_count"] >= scale_parameters['average_favorite_count']['safe_threshold'] %}
+            <td class="green">
+                {{"{:.2f}".format(user["signals"]["average_favorite_count"])}}
+            </td>
+            {% else %}
+            <td>
+                {{"{:.2f}".format(user["signals"]["average_favorite_count"])}}
+            </td>
+            {% endif %}
+            {% else %}
+            <td>-</td>
+            {% endif %}
+        </tr>
+        <tr>
+            <th>Average retweet count</th>
+            {% if not(user["signals"]["average_retweet_count"] is none) %}
+            {% if user["signals"]["average_retweet_count"] > scale_parameters['average_retweet_count']['safe_threshold'] %}
+            <td class="green">
+                {{"{:.2f}".format(user["signals"]["average_retweet_count"])}}
+            </td>
+            {% else %}
+            <td>
+                {{"{:.2f}".format(user["signals"]["average_retweet_count"])}}
+            </td>
+            {% endif %}
+            {% else %}
+            <td>-</td>
+            {% endif %}
+        </tr>
+
+        <tr>
+            <th>Number of malicious URLs
+                <span data-toggle="tooltip" data-placement="top" data-html="true" title='<p style="font-size: 12px;">Number of URLs contained in tweets that may contain content or media identified as sensitive content.</p>' style="font-size: 12px;">
+                            <i class="fa fa-info-circle" aria-hidden="true"></i>
+                </span>
+            </th>
+            {% if not(user["signals"]["is_sensitive_count"] is none) %}
+            {% if user["signals"]["is_sensitive_count"] > 0 %}
+            <td class="red">{{user["signals"]["is_sensitive_count"]}}</td>
+            {% else %}
+            <td class="green">{{user["signals"]["is_sensitive_count"]}}</td>
+            {% endif %}
+            {% else %}
+            <td>-</td>
+            {% endif %}
+        </tr>
+
+
+        <tr>
+            {% if not(user["signals"]["url_tweet_ratio"] is none) %}
+            {% if user["signals"]["url_tweet_ratio"]   >= scale_parameters['basic']['danger_threshold'] %}
+            <th colspan="2" class="red1">URL-to-tweet ratio:
+                {% else %}
+                {% if user["signals"]["url_tweet_ratio"]   >= scale_parameters['basic']['safe_threshold'] %}
+            <th colspan="2" class="orange1">URL-to-tweet ratio:
+                {% else %}
+            <th colspan="2" class="green1">URL-to-tweet ratio:
+                {% endif %}
+                {% endif %}
+
+                <div class="progress prog" style="margin-top:5px; height: 5px; border-radius:0;">
+                    <div class="progress-bar bg-success prog" role="progressbar" style="width: {{scale_parameters['basic']['progressbar']['safe']}}%" aria-valuenow="{{scale_parameters['basic']['progressbar']['safe']}}" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-warning prog" role="progressbar" style="width: {{scale_parameters['basic']['progressbar']['danger']}}%" aria-valuenow="20" aria-valuemin="{{scale_parameters['basic']['progressbar']['danger']}}" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-danger prog" role="progressbar" style="width: {{scale_parameters['basic']['progressbar']['pamp']}}%" aria-valuenow="{{scale_parameters['basic']['progressbar']['pamp']}}" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="progress prog-with-text" style="height: 15px; border-radius:0;">
+                    {% if user["signals"]["url_tweet_ratio"]   <= 0.1 %}
+                    <div class="progress-bar bg-success" role="progressbar" style='width: 10%;' aria-valuenow='10' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.2f}".format(user["signals"]["url_tweet_ratio"] )}}</span></div>
+                    {% else %}
+                    {% if user["signals"]["url_tweet_ratio"]   < scale_parameters['basic']['safe_threshold'] %}
+
+                    <div class="progress-bar bg-success" role="progressbar" style='width: {{"{:.0f}".format(user["signals"]["url_tweet_ratio"] *100)}}%;' aria-valuenow='{{"{:.0f}".format(user["signals"]["url_tweet_ratio"] *100)}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.2f}".format(user["signals"]["url_tweet_ratio"] )}}</span></div>
+
+                    {% else %}
+                    {% if user["signals"]["url_tweet_ratio"]   < scale_parameters['basic']['danger_threshold'] %}
+
+                    <div class="progress-bar bg-warning" role="progressbar" style='width: {{"{:.0f}".format(user["signals"]["url_tweet_ratio"] *100)}}%;' aria-valuenow='{{"{:.0f}".format(user["signals"]["url_tweet_ratio"] *100)}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.2f}".format(user["signals"]["url_tweet_ratio"] )}}</span></div>
+
+                    {% else %}
+
+                    <div class="progress-bar bg-danger" role="progressbar" style='width: {{"{:.0f}".format(user["signals"]["url_tweet_ratio"] *100)}}%;' aria-valuenow='{{"{:.0f}".format(user["signals"]["url_tweet_ratio"] *100)}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.2f}".format(user["signals"]["url_tweet_ratio"] )}}</span></div>
+
+                    {% endif %}
+                    {% endif %}
+
+                    {% endif %}
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <div style="font-size: 8px; color: black;">Low</div>
+                    <div style="font-size: 8px; color: black;">High</div>
+                </div>
+            </th>
+            {% else %}
+            <th>URL-to-tweet ratio
+            </th>
+            <td>-</td>
+            {% endif %}
+
+        </tr>
+
+
+        <tr>
+            {% if not(user["signals"]["user_mentions_tweet_ratio"] is none) %}
+            {% if user["signals"]["user_mentions_tweet_ratio"]  >= scale_parameters['basic']['danger_threshold'] %}
+            <th colspan="2" class="red1">User mentions-to-tweet ratio:
+                {% else %}
+                {% if user["signals"]["user_mentions_tweet_ratio"]  >= scale_parameters['basic']['safe_threshold'] %}
+            <th colspan="2" class="orange1">User mentions-to-tweet ratio:
+                {% else %}
+            <th colspan="2" class="green1">User mentions-to-tweet ratio:
+                {% endif %}
+                {% endif %}
+
+                <div class="progress prog" style="margin-top:5px; height: 5px; border-radius:0;">
+                    <div class="progress-bar bg-success prog" role="progressbar" style="width: {{scale_parameters['basic']['progressbar']['safe']}}%" aria-valuenow="{{scale_parameters['basic']['progressbar']['safe']}}" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-warning prog" role="progressbar" style="width: {{scale_parameters['basic']['progressbar']['danger']}}%" aria-valuenow="{{scale_parameters['basic']['progressbar']['danger']}}" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-danger prog" role="progressbar" style="width: {{scale_parameters['basic']['progressbar']['pamp']}}%" aria-valuenow="{{scale_parameters['basic']['progressbar']['pamp']}}" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="progress prog-with-text" style="height: 15px; border-radius:0;">
+                    {% if user["signals"]["user_mentions_tweet_ratio"]  <= 0.1 %}
+                    <div class="progress-bar bg-success" role="progressbar" style='width: 10%;' aria-valuenow='10' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.1f}".format(user["signals"]["user_mentions_tweet_ratio"] )}}</span></div>
+                    {% else %}
+                    {% if user["signals"]["user_mentions_tweet_ratio"]  < scale_parameters['basic']['safe_threshold'] %}
+
+                    <div class="progress-bar bg-success" role="progressbar" style='width: {{"{:.0f}".format(user["signals"]["user_mentions_tweet_ratio"] *100)}}%;' aria-valuenow='{{"{:.0f}".format(user["signals"]["user_mentions_tweet_ratio"] *100)}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.1f}".format(user["signals"]["user_mentions_tweet_ratio"] )}}</span></div>
+
+                    {% else %}
+                    {% if user["signals"]["user_mentions_tweet_ratio"]  < scale_parameters['basic']['danger_threshold'] %}
+
+                    <div class="progress-bar bg-warning" role="progressbar" style='width: {{"{:.0f}".format(user["signals"]["user_mentions_tweet_ratio"] *100)}}%;' aria-valuenow='{{"{:.0f}".format(user["signals"]["user_mentions_tweet_ratio"] *100)}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.1f}".format(user["signals"]["user_mentions_tweet_ratio"] )}}</span></div>
+
+                    {% else %}
+
+                    <div class="progress-bar bg-danger" role="progressbar" style='width: {{"{:.0f}".format(user["signals"]["user_mentions_tweet_ratio"] *100)}}%;' aria-valuenow='{{"{:.0f}".format(user["signals"]["user_mentions_tweet_ratio"] *100)}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.1f}".format(user["signals"]["user_mentions_tweet_ratio"] )}}</span></div>
+
+                    {% endif %}
+                    {% endif %}
+
+                    {% endif %}
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <div style="font-size: 8px; color: black;">Low</div>
+                    <div style="font-size: 8px; color: black;">High</div>
+                </div>
+            </th>
+            {% else %}
+            <th>User mentions-to-tweet ratio
+            </th>
+            <td>-</td>
+            {% endif %}
+
+        </tr>
+
+
+        <tr>
+            {% if not(user["signals"]["hashtag_tweet_ratio"] is none) %}
+            {% if user["signals"]["hashtag_tweet_ratio"] >= scale_parameters['hashtag_tweet_ratio']['danger_threshold'] %}
+            <th colspan="2" class="red1">Hashtag-to-tweet ratio:
+                {% else %}
+                {% if user["signals"]["hashtag_tweet_ratio"] >= scale_parameters['hashtag_tweet_ratio']['safe_threshold'] %}
+            <th colspan="2" class="orange1">Hashtag-to-tweet ratio:
+                {% else %}
+            <th colspan="2" class="green1">Hashtag-to-tweet ratio:
+                {% endif %}
+                {% endif %}
+
+                <div class="progress prog" style="margin-top:5px; height: 5px; border-radius:0;">
+                    <div class="progress-bar bg-success prog" role="progressbar" style="width: {{scale_parameters['hashtag_tweet_ratio']['progressbar']['safe']}}%" aria-valuenow="{{scale_parameters['hashtag_tweet_ratio']['progressbar']['safe']}}" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-warning prog" role="progressbar" style="width: {{scale_parameters['hashtag_tweet_ratio']['progressbar']['danger']}}%" aria-valuenow="{{scale_parameters['hashtag_tweet_ratio']['progressbar']['danger']}}" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-danger prog" role="progressbar" style="width: {{scale_parameters['hashtag_tweet_ratio']['progressbar']['pamp']}}%" aria-valuenow="{{scale_parameters['hashtag_tweet_ratio']['progressbar']['pamp']}}" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="progress prog-with-text" style="height: 15px; border-radius:0;">
+                    {% if user["signals"]["hashtag_tweet_ratio"] <= scale_parameters['hashtag_tweet_ratio']['borders'][1]/10 %}
+                    <div class="progress-bar bg-success" role="progressbar" style='width: 10%;' aria-valuenow='10' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.1f}".format(user["signals"]["hashtag_tweet_ratio"])}}</span></div>
+                    {% else %}
+                    {% if user["signals"]["hashtag_tweet_ratio"] < scale_parameters['hashtag_tweet_ratio']['safe_threshold'] %}
+
+                    <div class="progress-bar bg-success" role="progressbar" style='width: {{"{:.0f}".format(user["signals"]["hashtag_tweet_ratio"]*10)}}%;' aria-valuenow='{{"{:.0f}".format(user["signals"]["hashtag_tweet_ratio"]*10)}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.1f}".format(user["signals"]["hashtag_tweet_ratio"])}}</span></div>
+
+                    {% else %}
+                    {% if user["signals"]["hashtag_tweet_ratio"] < scale_parameters['hashtag_tweet_ratio']['danger_threshold'] %}
+
+                    <div class="progress-bar bg-warning" role="progressbar" style='width: {{"{:.0f}".format(user["signals"]["hashtag_tweet_ratio"]*10)}}%;' aria-valuenow='{{"{:.0f}".format(user["signals"]["hashtag_tweet_ratio"]*10)}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.1f}".format(user["signals"]["hashtag_tweet_ratio"])}}</span></div>
+
+                    {% else %}
+
+                    <div class="progress-bar bg-danger" role="progressbar" style='width: {{"{:.0f}".format(user["signals"]["hashtag_tweet_ratio"]*10)}}%;' aria-valuenow='{{"{:.0f}".format(user["signals"]["hashtag_tweet_ratio"]*10)}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.1f}".format(user["signals"]["hashtag_tweet_ratio"])}}</span></div>
+
+                    {% endif %}
+                    {% endif %}
+
+                    {% endif %}
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <div style="font-size: 8px; color: black;">Low</div>
+                    <div style="font-size: 8px; color: black;">High</div>
+                </div>
+            </th>
+            {% else %}
+            <th>Hashtag-to-tweet ratio
+            </th>
+            <td>-</td>
+            {% endif %}
+
+        </tr>
+
+        {% if "negative_sentiment_rate" in user["signals"] %}
+        <tr>
+            {% if not(user["signals"]["negative_sentiment_rate"] is none) %}
+            {% if user["signals"]["negative_sentiment_rate"] >= scale_parameters['basic']['danger_threshold'] %}
+
+            <th colspan="2" class="orange1">Percent of negative tweets:
+                {% else %}
+            <th colspan="2" class="green1">Percent of negative tweets:
+                {% endif %}
+
+
+                <div class="progress prog" style="margin-top:5px; height: 5px; border-radius:0;">
+                    <div class="progress-bar bg-success prog" role="progressbar" style="width: {{scale_parameters['basic']['progressbar']['safe_and_danger']}}%" aria-valuenow="{{scale_parameters['basic']['progressbar']['safe_and_danger']}}" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-warning prog" role="progressbar" style="width: {{scale_parameters['basic']['progressbar']['pamp']}}%" aria-valuenow="{{scale_parameters['basic']['progressbar']['pamp']}}" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="progress prog-with-text" style="height: 15px; border-radius:0;">
+                    {% if user["signals"]["negative_sentiment_rate"] <= 0.1 %}
+                    <div class="progress-bar bg-success" role="progressbar" style='width: 10%;' aria-valuenow='10' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.0f}".format(100*user["signals"]["negative_sentiment_rate"])}}%</span></div>
+                    {% else %}
+                    {% if user["signals"]["negative_sentiment_rate"] < scale_parameters['basic']['danger_threshold'] %}
+
+                    <div class="progress-bar bg-success" role="progressbar" style='width: {{"{:.0f}".format(100*user["signals"]["negative_sentiment_rate"])}}%;' aria-valuenow='{{"{:.0f}".format(100*user["signals"]["negative_sentiment_rate"])}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.0f}".format(100*user["signals"]["negative_sentiment_rate"])}}%</span></div>
+
+                    {% else %}
+
+                    <div class="progress-bar bg-warning" role="progressbar" style='width: {{"{:.0f}".format(100*user["signals"]["negative_sentiment_rate"])}}%;' aria-valuenow='{{"{:.0f}".format(100*user["signals"]["negative_sentiment_rate"])}}' aria-valuemin="0" aria-valuemax="100"><span>{{"{:.0f}".format(100*user["signals"]["negative_sentiment_rate"])}}%</span></div>
+
+                    {% endif %}
+
+                    {% endif %}
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <div style="font-size: 8px; color: black;">0%</div>
+                    <div style="font-size: 8px; color: black;">100%</div>
+                </div>
+            </th>
+            {% else %}
+            <th>Percent of negative tweets
+            </th>
+            <td>-</td>
+            {% endif %}
+
+        </tr>
+        {% endif %}
+
+
+    </table>
+</div>
+
+
+{% if "sentiment_counts" in user["signals"] %}
+{% if not(user["signals"]["sentiment_counts"] is none) %}
+<div id="chart-container1">
+</div>
+{% endif %}
+{% endif %}
+
+<div class="recent-tweets">
+    <a href="{{app_url}}/recalculate/{{collection}}/{{user['_id']}}" class="btn btn-info">Update info</a>
+    <h1>Latest Tweets:</h1>
+    {% if tweetArr == "[]" %}
+    <p style="background: #f1f1f1; padding: 20px; font-size: 13px;">Failed to get the latest tweets</p>
+    {% endif %}
+</div>
+
+<div id="tweets">
+{{tweetArr}}
+</div>
+<div id="profile-image" style="display:none;">{{user["user"]["profile_image_url_https"]}}</div>
+
+{% if "sentiment_counts" in user["signals"] %}
+{% if not(user["signals"]["sentiment_counts"] is none) %}
+<script>
+    $(document).ready(function(){
+                var data = anychart.data.set([
+                  {x:'Positive', value:{{user["signals"]["sentiment_counts"][0]}}, normal:  {fill: "#689900"} },
+                  {x:'Negative', value:{{user["signals"]["sentiment_counts"][2]}} , normal:  {fill: "#d50102"}},
+                  {x:'Neutral', value:{{user["signals"]["sentiment_counts"][1]}} , normal:  {fill: "#A8A8A8"}}
+                ]);
+                // create a pie chart with the data
+                var chart = anychart.pie(data)
+                // set the chart radius making a donut chart
+                chart.innerRadius('55%');
+                var title = chart.title();
+                title.enabled(true);
+                title.fontSize(12);
+                title.text('Sentiment analysis of the latest tweets:');
+                chart.container('chart-container1');
+
+                chart.hovered().outline().width("10%");
+                chart.selected().outline().width("3");
+                chart.selected().outline().fill("#455a64");
+                chart.selected().outline().stroke(null);
+                chart.selected().outline().offset(2);
+                chart.legend().fontSize(10);
+                chart.draw();
+    });
+</script>
+{% endif %}
+{% endif %}
+{% endblock %}

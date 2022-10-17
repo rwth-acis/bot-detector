@@ -66,6 +66,19 @@
             <td>{{user_id}}</td>
 
         </tr>
+        <tr>
+
+            <td>
+                Token
+                </br>
+                <i class="btn btn-dark bi bi-eye-slash"
+                   id="btn-hide-token"></i>
+            </td>
+            <td>
+                <p class="token-to-hide">{{token}}</p>
+            </td>
+
+        </tr>
         </tbody>
     </table>
 
@@ -78,7 +91,7 @@
 
     <div class="alert alert-warning alert-dismissible fade show" role="alert" style="font-size: 10px; padding-top: 5px; padding-bottom: 5px; padding-left: 15px; padding-right: 40px;">
         If you do not enter your own Twitter API credentials, the default credentials will be used.
-        
+
         In this case, waiting time for the request results may be longer, as these credentials can also be used by other users.
 
         If the Twitter API rate limit for the default credentials is reached, it will not be possible to retrieve new data from the Twitter API for some time (up to 15 minutes).
@@ -358,6 +371,13 @@
 
           $("#btn-hide-password").on("click", function(){
             $(".password-to-hide").toggleClass("password_field");
+            this.classList.toggle('bi-eye');
+          });
+
+          $(".token-to-hide").toggleClass("password_field");
+
+          $("#btn-hide-token").on("click", function(){
+            $(".token-to-hide").toggleClass("password_field");
             this.classList.toggle('bi-eye');
           });
 

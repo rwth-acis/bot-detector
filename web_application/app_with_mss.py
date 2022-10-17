@@ -6,8 +6,11 @@ import urllib
 from json import dumps
 import logging
 import uuid
+from pprint import pprint
+
 from json2html import *
 
+from cryptography.fernet import Fernet
 import requests
 import tweepy
 from bson import json_util
@@ -95,6 +98,15 @@ def profile():
     email = info.get('email')
     user_id = info.get('sub')
 
+    encoding = 'utf-8'
+    col4 = db["ApplicationStatus"]
+    crypto = col4.find_one({"name": "CryptographyKEY"})
+    key = crypto["value"].encode(encoding)
+    f = Fernet(key)
+    decoded_token = (user_id + crypto["time_of_creation"]).encode(encoding)
+    token = f.encrypt(decoded_token)
+    token = token.decode(encoding)
+
     col3 = db["API_Credentials"]
 
     user = col3.find_one({"user_sub": info.get('sub')})
@@ -152,12 +164,12 @@ def profile():
                                    access_token=access_token,
                                    api_key_secret=api_key_secret, api_key=api_key, in_use=in_use,
                                    tried_to_use=tried_to_use,
-                                   exception=exception, table=table)
+                                   exception=exception, table=table, token=token)
 
     return render_template("profile.html", app_url=os.environ['APP_URL'],
                            app_url_path=os.environ['APP_URL_PATH'][:-1],
                            example_db=os.environ['EXAMPLE_DB'], name=username, email=email, user_id=user_id,
-                           user_name=username)
+                           user_name=username, token=token)
 
 
 @app.route(os.environ['APP_URL_PATH'] + 'profile/update/credentials', methods=['GET'])
@@ -201,9 +213,9 @@ def profile_use_credentials():
             api_key_secret = user["credentials"]["api_key_secret"]
             api_key = user["credentials"]["api_key"]
         else:
-            return 404
+            return "Not Found", 404
     else:
-        return 404
+        return "Not Found", 404
 
     # authorization of consumer key and consumer secret
     auth = tweepy.OAuthHandler(api_key, api_key_secret)
@@ -437,7 +449,10 @@ def admin_page():
     table_dca_coefficients = Markup(json2html.convert(json=dca_coefficients,
                                                       table_attributes="id=\"dca-coefficients-table\" class=\"table table-bordered table-hover\""))
 
-    env_vars = os.environ
+    env_vars = os.environ.copy()
+    for attr in list(env_vars.keys()):
+        if not ("PAMP_" in attr or "DS_" in attr or "SS_" in attr) or "ACCESS" in attr:
+            del env_vars[attr]
 
     table_env_vars = Markup(json2html.convert(json=env_vars,
                                               table_attributes="id=\"dca-coefficients-table\" class=\"table table-bordered table-hover\""))
@@ -492,7 +507,7 @@ def sg_set_new_env_vars():
     ms_sg_addr = os.environ['MS_SG_ADDRESS']
     sg_result = requests.post((ms_sg_addr + os.environ['MS_SG_URL_PATH'] + "use-new-env-vars"), data=sg_data)
 
-    return sg_result.text
+    return "OK" + sg_result.text
 
 
 @app.route(os.environ['APP_URL_PATH'] + "/admin-page/use-new-env-vars/bot-detector")
@@ -512,7 +527,7 @@ def bd_set_new_env_vars():
     ms_bd_addr = os.environ['MS_BD_ADDRESS']
     bd_result = requests.post((ms_bd_addr + os.environ['MS_BD_URL_PATH'] + "use-new-env-vars"), data=bd_data)
 
-    return bd_result.text
+    return "OK" + bd_result.text
 
 
 ###############################################################################
@@ -526,6 +541,51 @@ def api_resultid(id):
     col2 = db["Requests"]
     parameters = col2.find_one({"collection": str(id)})
     print(parameters)
+
+    token = request.args.get('token')
+
+    is_loggedin = False
+
+    try:
+
+        if token is not None:
+            encoding = 'utf-8'
+            col1 = db["ApplicationStatus"]
+            crypto = col1.find_one({"name": "CryptographyKEY"})
+            key = crypto["value"].encode(encoding)
+            # key = Fernet.generate_key()
+            f = Fernet(key)
+            token_decrypted = f.decrypt(token.encode(encoding)).decode(encoding)
+            print(token_decrypted)
+
+            if len(token_decrypted) > 10:
+                if token_decrypted[-10:] == crypto["time_of_creation"]:
+                    is_loggedin = True
+
+    except Exception as e:
+        return "Bad Request", 400
+
+    if parameters is not None:
+        if "owner" in parameters:
+            if parameters["owner"] is not None:
+                if not is_loggedin:
+                    return 403
+
+                sub = token_decrypted[:len(token_decrypted) - 10]
+
+                col5 = db["ApplicationStatus"]
+                main_parameters = col5.find_one({"name": "MainValues"})
+
+                if not sub in main_parameters["admins"]:
+
+                    if not ((sub in parameters["owner"]) or (
+                            sub in parameters["read_permission"]) or (
+                                    sub in parameters["write_permission"])):
+                        return 403
+
+    else:
+        return "Not Found", 404
+
     ready_count = 0
     try:
         for user in users:
@@ -545,9 +605,10 @@ def api_resultid(id):
     except Exception as e:
         # return dumps({'error': str(e)})
         logging.info(e)
+        return "Not Found", 404
 
 
-@app.route(os.environ['APP_URL_PATH'] + "api/create-request")
+@app.route(os.environ['APP_URL_PATH'] + "api/create-request", methods=['post', 'get'])
 def api_part_result():
     # print(request.json)
     id = str(uuid.uuid4())
@@ -574,6 +635,28 @@ def api_part_result():
         end_date = request.args.get('end-date')
         requestOptions = request.args.get('requestOptions')
         print(requestOptions)
+        token = request.args.get('token')
+
+        is_loggedin = False
+
+        try:
+
+            if token is not None:
+                encoding = 'utf-8'
+                col1 = db["ApplicationStatus"]
+                crypto = col1.find_one({"name": "CryptographyKEY"})
+                key = crypto["value"].encode(encoding)
+                # key = Fernet.generate_key()
+                f = Fernet(key)
+                token_decrypted = f.decrypt(token.encode(encoding)).decode(encoding)
+                print(token_decrypted)
+
+                if len(token_decrypted) > 10:
+                    if token_decrypted[-10:] == crypto["time_of_creation"]:
+                        is_loggedin = True
+
+        except Exception as e:
+            return "Bad Request", 400
 
         if SearchParameters1 == "time-period":
             if not start_date:
@@ -619,18 +702,44 @@ def api_part_result():
             areaParameters3 = "all"
             print(areaParameters3)
 
-        parameters = {
-            "collection": str(id),
-            "keywords": keywords,
-            "limit": limit,
-            "areaParameters1": areaParameters1,
-            "areaParameters2": areaParameters2,
-            "areaParameters3": areaParameters3,
-            "SearchParameters1": SearchParameters1,
-            "start_date": start_date,
-            "end_date": end_date,
-            "requestOptions": requestOptions
-        }
+        if is_loggedin:
+
+            sub = token_decrypted[:len(token_decrypted) - 10]
+
+            parameters = {
+                "collection": str(id),
+                "keywords": keywords,
+                "limit": limit,
+                "areaParameters1": areaParameters1,
+                "areaParameters2": areaParameters2,
+                "areaParameters3": areaParameters3,
+                "SearchParameters1": SearchParameters1,
+                "start_date": start_date,
+                "end_date": end_date,
+                "requestOptions": requestOptions,
+                "owner": [sub],
+                "read_permission": [],
+                "write_permission": [],
+            }
+
+            col3 = db["Permissions"]
+            col3.update_one({'user_id': sub}, {"$push": {"owner": str(id)}}, upsert=True)
+
+
+        else:
+            parameters = {
+                "collection": str(id),
+                "keywords": keywords,
+                "limit": limit,
+                "areaParameters1": areaParameters1,
+                "areaParameters2": areaParameters2,
+                "areaParameters3": areaParameters3,
+                "SearchParameters1": SearchParameters1,
+                "start_date": start_date,
+                "end_date": end_date,
+                "requestOptions": requestOptions,
+                "owner": None
+            }
 
         col1 = db[str(id)]
         col2 = db["Requests"]
@@ -645,6 +754,20 @@ def api_part_result():
         access_token = os.environ['ACCESS_TOKEN']
         access_token_secret = os.environ['ACCESS_TOKEN_SECRET']
         bearer = os.environ['BEARER']
+
+        if is_loggedin:
+            sub = token_decrypted[:len(token_decrypted) - 10]
+            col3 = db["API_Credentials"]
+            current_user = col3.find_one({"user_sub": sub})
+
+            if current_user is not None:
+                if "in_use" in current_user:
+                    if current_user["in_use"]:
+                        access_token_secret = current_user["credentials"]["access_token_secret"]
+                        access_token = current_user["credentials"]["access_token"]
+                        consumer_secret = current_user["credentials"]["api_key_secret"]
+                        consumer_key = current_user["credentials"]["api_key"]
+                        bearer = None
 
         kafka_url = os.environ['KAFKA_URL']
 
@@ -709,7 +832,7 @@ def api_part_result():
         return json_util.dumps(parameters), 201
 
     except Exception as e:
-        return jsonify(e), 404
+        return "Bad Request", 400
 
 
 @app.route(os.environ['APP_URL_PATH'] + 'api/user-check/<screen_name>')
@@ -773,7 +896,7 @@ def api_user_check(screen_name):
 
     except Exception as e:
         # return dumps({'error': str(e)})
-        return jsonify(e), 404
+        return "Not Found", 404
 
 
 @app.route(os.environ['APP_URL_PATH'] + 'api/<collection>/user/<id>')
@@ -784,9 +907,9 @@ def api_user(collection, id):
         if user_found:
             return json_util.dumps(user_found)
         else:
-            return 404
+            return "Not Found", 404
     except Exception as e:
-        return jsonify(e), 404
+        return "Not Found", 404
 
 
 ###############################################################################
@@ -832,7 +955,8 @@ def resultid(id):
                         info.get('sub') in parameters["write_permission"])) and (
                         info.get('sub') in parameters["read_permission"]):
                     isPublic = True
-
+            else:
+                isPublic = True
 
         else:
             isPublic = True
@@ -1993,6 +2117,252 @@ def user(collection, id):
             return render_template('404.html', app_url=os.environ['APP_URL'],
                                    app_url_path=os.environ['APP_URL_PATH'][:-1],
                                    example_db=os.environ['EXAMPLE_DB'])
+
+
+def get_scale_parameters():
+    scale_object = {}
+    scale_object["small_interval_between_tweets_count"] = {
+        "danger_threshold": float(os.environ["PAMP_THRESHOLD_SMALL_INTERVAL"]),
+        "pamp_threshold": float(os.environ["PAMP_THRESHOLD_SMALL_INTERVAL"]) + \
+                          float(os.environ["PAMP_MULTIPLIER_SMALL_INTERVAL"]) * \
+                          float(os.environ["PAMP_INTERVAL_SMALL_INTERVAL"]),
+
+    }
+
+    scale_object["average_favorite_count"] = {
+        "safe_threshold": float(os.environ["SS_THRESHOLD_AVERAGE_FAVORITE_COUNT"]),
+    }
+
+    scale_object["average_retweet_count"] = {
+        "safe_threshold": float(os.environ["SS_THRESHOLD_AVERAGE_RETWEET_COUNT"]),
+    }
+
+    # TIME ENTROPY
+
+    scale_object["time_entropy"] = {
+        "pamp_threshold": float(os.environ["PAMP_THRESHOLD_TIME_ENTROPY"]),
+        "danger_threshold": float(os.environ["SS_THRESHOLD_TIME_ENTROPY"]),
+        "borders": [0, 4.5],
+        "progressbar": {
+            "pamp": 0,
+            "danger": 0,
+            "safe": 0,
+        }
+    }
+
+    scale_object["time_entropy"]["progressbar"]["pamp"] = int(100 * scale_object["time_entropy"]["pamp_threshold"] / \
+                                                                 scale_object["time_entropy"]["borders"][1])
+
+
+    scale_object["time_entropy"]["progressbar"]["danger"] = int(100 * (
+            scale_object["time_entropy"]["danger_threshold"] - scale_object["time_entropy"]["pamp_threshold"]) / \
+                                                                   scale_object["time_entropy"]["borders"][1])
+
+
+    scale_object["time_entropy"]["progressbar"]["safe"] = int(100 - \
+                                                                 scale_object["time_entropy"]["progressbar"]["danger"] - \
+                                                                 scale_object["time_entropy"]["progressbar"]["pamp"])
+
+    # BASIC
+
+    scale_object["basic"] = {
+        "danger_threshold": float(os.environ["DS_THRESHOLD_BASIC_RATIO"]),
+        "safe_threshold": float(os.environ["SS_THRESHOLD_BASIC_RATIO"]),
+        "borders": [0, 1],
+        "progressbar": {
+            "pamp": 0,
+            "danger": 0,
+            "safe": 0,
+            "safe_and_danger": 0,
+        }
+    }
+
+    scale_object["basic"]["progressbar"]["safe"] = int(100 * scale_object["basic"]["safe_threshold"])
+
+
+    scale_object["basic"]["progressbar"]["danger"] = int(100 * (
+            scale_object["basic"]["danger_threshold"] - scale_object["basic"]["safe_threshold"]))
+
+
+    scale_object["basic"]["progressbar"]["pamp"] = int(100 - scale_object["basic"]["progressbar"]["danger"] - \
+                                                          scale_object["basic"]["progressbar"]["safe"])
+
+
+    scale_object["basic"]["progressbar"]["safe_and_danger"] = int(scale_object["basic"]["progressbar"]["safe"] + \
+                                                                     scale_object["basic"]["progressbar"]["danger"])
+
+
+    # HASHTAG
+
+    scale_object["hashtag_tweet_ratio"] = {
+        "danger_threshold": float(os.environ["DS_THRESHOLD_HASHTAG_TWEET_RATIO"]),
+        "safe_threshold": float(os.environ["SS_THRESHOLD_HASHTAG_TWEET_RATIO"]),
+        "borders": [0, float(os.environ["DS_THRESHOLD_HASHTAG_TWEET_RATIO"]) + 2],
+        "progressbar": {
+            "pamp": 0,
+            "danger": 0,
+            "safe": 0,
+        }
+    }
+
+
+    scale_object["hashtag_tweet_ratio"]["progressbar"]["safe"] = int(100 * scale_object["hashtag_tweet_ratio"][
+        "safe_threshold"] / scale_object["hashtag_tweet_ratio"]["borders"][1])
+
+
+    scale_object["hashtag_tweet_ratio"]["progressbar"]["danger"] = int(100 * (
+            scale_object["hashtag_tweet_ratio"]["danger_threshold"] - scale_object["hashtag_tweet_ratio"][
+        "safe_threshold"]) / scale_object["hashtag_tweet_ratio"]["borders"][1])
+
+
+    scale_object["hashtag_tweet_ratio"]["progressbar"]["pamp"] = int(100 -
+                                            scale_object["hashtag_tweet_ratio"]["progressbar"]["danger"] -
+                                            scale_object["hashtag_tweet_ratio"]["progressbar"]["safe"])
+
+    # FRIENDS GROWTH RATE
+
+    scale_object["friends_growth_rate"] = {
+        "danger_threshold": float(os.environ["DS_THRESHOLD_FRIENDS_GROWTH_RATE"]) + \
+                            float(os.environ["DS_MULTIPLIER_FRIENDS_GROWTH_RATE"]) * \
+                            float(os.environ["DS_INTERVAL_FRIENDS_GROWTH_RATE"]),
+        "safe_threshold": float(os.environ["DS_THRESHOLD_FRIENDS_GROWTH_RATE"]),
+        "borders": [0, 25],
+        "progressbar": {
+            "pamp": 0,
+            "danger": 0,
+            "safe": 0,
+        }
+    }
+
+    scale_object["friends_growth_rate"]["progressbar"]["safe"] = int(100 * scale_object["friends_growth_rate"][
+        "safe_threshold"] / scale_object["friends_growth_rate"]["borders"][1])
+
+
+    scale_object["friends_growth_rate"]["progressbar"]["danger"] = int(100 * (
+            scale_object["friends_growth_rate"]["danger_threshold"] - scale_object["friends_growth_rate"][
+        "safe_threshold"]) / scale_object["friends_growth_rate"]["borders"][1])
+
+
+    scale_object["friends_growth_rate"]["progressbar"]["pamp"] = int(100 -
+                                    scale_object["friends_growth_rate"]["progressbar"]["safe"] -
+                                    scale_object["friends_growth_rate"]["progressbar"]["danger"])
+
+
+    # STATUSES GROWTH RATE
+
+    scale_object["statuses_growth_rate"] = {
+        "danger_threshold": float(os.environ["DS_THRESHOLD_STATUSES_GROWTH_RATE"]) + \
+                            float(os.environ["DS_MULTIPLIER_STATUSES_GROWTH_RATE"]) * \
+                            float(os.environ["DS_INTERVAL_STATUSES_GROWTH_RATE"]),
+        "safe_threshold": float(os.environ["DS_THRESHOLD_STATUSES_GROWTH_RATE"]),
+        "borders": [0, 100],
+        "progressbar": {
+            "pamp": 0,
+            "danger": 0,
+            "safe": 0,
+        }
+    }
+
+    scale_object["statuses_growth_rate"]["progressbar"]["safe"] = int(100 * scale_object["statuses_growth_rate"][
+        "safe_threshold"] / scale_object["statuses_growth_rate"]["borders"][1])
+
+
+    scale_object["statuses_growth_rate"]["progressbar"]["danger"] = int(100 * (
+            scale_object["statuses_growth_rate"]["danger_threshold"] - scale_object["statuses_growth_rate"][
+        "safe_threshold"]) / scale_object["statuses_growth_rate"]["borders"][1])
+
+
+    scale_object["statuses_growth_rate"]["progressbar"]["pamp"] = int(100 -
+                                                scale_object["statuses_growth_rate"]["progressbar"]["safe"] -
+                                                scale_object["statuses_growth_rate"]["progressbar"]["danger"])
+
+
+    # AVG TWEET SIMILARITY
+
+    scale_object["avg_tweet_similarity"] = {
+        "danger_threshold": float(os.environ["SS_THRESHOLD_AVG_TWEET_SIMILARITY"]),
+        "pamp_threshold": float(os.environ["PAMP_THRESHOLD_AVG_TWEET_SIMILARITY"]),
+        "borders": [0, 1],
+        "progressbar": {
+            "pamp": 0,
+            "danger": 0,
+            "safe": 0,
+        }
+    }
+
+    scale_object["avg_tweet_similarity"]["progressbar"]["safe"] = int(100 * scale_object["avg_tweet_similarity"][
+        "danger_threshold"])
+
+
+    scale_object["avg_tweet_similarity"]["progressbar"]["danger"] = int(100 * (
+            scale_object["avg_tweet_similarity"]["pamp_threshold"] - scale_object["avg_tweet_similarity"][
+        "danger_threshold"]))
+
+
+    scale_object["avg_tweet_similarity"]["progressbar"]["pamp"] = int(100 - scale_object["avg_tweet_similarity"][
+        "progressbar"]["danger"] - scale_object["avg_tweet_similarity"]["progressbar"]["safe"])
+
+
+    return scale_object
+
+
+@app.route(os.environ['APP_URL_PATH'] + '<collection>/advanced/<id>')
+def user_advanced(collection, id):
+    #try:
+        scale_parameters = get_scale_parameters()
+        pprint(scale_parameters)
+
+        col = db[collection]
+        user_found = col.find_one(ObjectId(id))
+        if user_found:
+            if oidc.user_loggedin:
+                info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+                username = info.get('preferred_username')
+
+                return render_template('user_advanced.html', tweetArr=json.dumps(user_found["tweets"]), user=user_found,
+                                       tweet=json.dumps(user_found["found_tweet"]),
+                                       app_url=os.environ['APP_URL'],
+                                       app_url_path=os.environ['APP_URL_PATH'][:-1],
+                                       collection=collection,
+                                       example_db=os.environ['EXAMPLE_DB'], user_name=username,
+                                       scale_parameters=scale_parameters)
+            else:
+                return render_template('user_advanced.html', tweetArr=json.dumps(user_found["tweets"]), user=user_found,
+                                       tweet=json.dumps(user_found["found_tweet"]),
+                                       app_url=os.environ['APP_URL'],
+                                       app_url_path=os.environ['APP_URL_PATH'][:-1],
+                                       collection=collection,
+                                       example_db=os.environ['EXAMPLE_DB'],
+                                       scale_parameters=scale_parameters)
+
+        else:
+            if oidc.user_loggedin:
+                info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+                username = info.get('preferred_username')
+
+                return render_template('404.html', app_url=os.environ['APP_URL'],
+                                       app_url_path=os.environ['APP_URL_PATH'][:-1],
+                                       example_db=os.environ['EXAMPLE_DB'], user_name=username)
+            else:
+                return render_template('404.html', app_url=os.environ['APP_URL'],
+                                       app_url_path=os.environ['APP_URL_PATH'][:-1],
+                                       example_db=os.environ['EXAMPLE_DB'])
+
+
+"""
+    except Exception as e:
+        if oidc.user_loggedin:
+            info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
+            username = info.get('preferred_username')
+
+            return render_template('404.html', app_url=os.environ['APP_URL'],
+                                   app_url_path=os.environ['APP_URL_PATH'][:-1],
+                                   example_db=os.environ['EXAMPLE_DB'], user_name=username)
+        else:
+            return render_template('404.html', app_url=os.environ['APP_URL'],
+                                   app_url_path=os.environ['APP_URL_PATH'][:-1],
+                                   example_db=os.environ['EXAMPLE_DB'])
+"""
 
 
 @app.route(os.environ['APP_URL_PATH'] + 'recalculate/<collection>/<id>')
